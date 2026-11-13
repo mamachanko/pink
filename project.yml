@@ -43,3 +43,31 @@ targets:
         NSHumanReadableCopyright: 'MIT License; Copyright © 2026 Max Brauer'
         PinkCommit: '$(PINK_COMMIT)'
         CFBundleIconFile: Pink
+
+  PinkReadmeCapture:
+    type: application
+    platform: macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.mamachanko.pink.readme
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: PINK_README_CAPTURE
+    sources: [App]
+    dependencies:
+      - package: Pink
+        product: PinkCore
+      - package: Pink
+        product: PinkPlatform
+    info:
+      path: build/ReadmeInfo.plist
+      properties:
+        CFBundleIdentifier: io.github.mamachanko.pink.readme
+        CFBundleName: Pink
+        CFBundleDisplayName: Pink
+        CFBundleShortVersionString: '$(MARKETING_VERSION)'
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
+        LSUIElement: true
+        LSMinimumSystemVersion: '15.0'
+        NSHighResolutionCapable: true
+        NSHumanReadableCopyright: 'MIT License; Copyright © 2026 Max Brauer'
+        PinkCommit: '$(PINK_COMMIT)'
+        CFBundleIconFile: Pink
