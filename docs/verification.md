@@ -30,3 +30,7 @@ Final local execution:
 Remote delivery: git push succeeded using the configured transport. CLI API access was forbidden; the connected GitHub app created draft PR https://github.com/mamachanko/pink/pull/1. CI https://github.com/mamachanko/pink/actions/runs/43385865765 started both macos-15 arm64 and macos-15-intel jobs; title check passed. Native results are recorded below when available.
 
 Additional review: post-write ownership nonce check and external-copy regression test added; portable suite now has 9 tests. Icon rasterization uses an explicit bitmap context so output dimensions don't depend on runner display scale.
+
+Native CI finding (initial run): XcodeGen source built successfully on Darwin arm64, Xcode 26.2/Swift 6.2.3, but doctor failed because case-insensitive macOS volumes conflated `.tools/XcodeGen` and `.tools/xcodegen`. Source checkout moved to `.tools/xcodegen-source`; fresh CI run validates the fix. This was an implementation failure, not an access blocker.
+
+Dependency review: npm audit reported a YAML stack-exhaustion advisory; direct YAML tooling dependency updated to verified 2.9.1. It also reports a minimatch advisory propagated through semantic-release's installed but unused @semantic-release/npm/npm dependency tree. The configured plugin list never invokes npm publication. No untested major override or semantic-release downgrade was applied. This residual build-tool advisory requires upstream maintenance review; no Node dependencies ship in the app.

@@ -71,6 +71,7 @@ public enum MonitorState: String, Sendable {
         onChange?()
     }
     public func enable() {
+        scheduler.stop()
         baseline()
         state = permission.canRead ? .active : .permissionNeeded
         if state == .active { scheduler.start { [weak self] in self?.tick() } }
@@ -138,8 +139,9 @@ public enum MonitorState: String, Sendable {
         if board.write(output) {
             let ownCount = board.changeCount
             // Don't mistake an external copy immediately after write for our generation.
-            guard board.advertisedTypes.count == 1,
-                board.advertisedTypes[0].contains(Types.own),
+            let writtenTypes = board.advertisedTypes
+            guard writtenTypes.count == 1,
+                writtenTypes[0].contains(Types.own),
                 board.read()?.values[Types.own] == token,
                 board.changeCount == ownCount
             else {
