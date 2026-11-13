@@ -112,8 +112,18 @@ public struct Parser: Sendable {
                     || (0x2066...0x2069).contains($0.value) || [0x200E, 0x200F, 0x061C].contains($0.value)
             })
         else { return nil }
-        let path = url.percentEncodedPath
-        guard !path.contains("%"), !path.contains("//"),
+        let encodedPath = url.percentEncodedPath
+        // Decode only RFC 3986 unreserved escapes. Separators and reserved bytes
+        // remain rejected rather than changing route boundaries.
+        let encodedBytes = Array(encodedPath.utf8)
+        for i in encodedBytes.indices where encodedBytes[i] == 37 {
+            let value = UInt8(String(bytes: encodedBytes[(i + 1)...(i + 2)], encoding: .utf8)!, radix: 16)!
+            guard
+                (48...57).contains(value) || (65...90).contains(value) || (97...122).contains(value)
+                    || [45, 46, 95, 126].contains(value)
+            else { return nil }
+        }
+        guard let path = encodedPath.removingPercentEncoding, !path.contains("//"),
             let r = rules.first(where: {
                 $0.enabled && $0.host.lowercased() == host.lowercased() && $0.port == url.port
                     && (scheme == "https" || $0.allowHTTP) && (path.hasPrefix($0.basePath + "/"))
