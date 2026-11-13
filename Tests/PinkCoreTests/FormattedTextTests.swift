@@ -31,6 +31,12 @@ final class FormattedTextTests: XCTestCase {
         XCTAssertEqual(parser.parseText(github)?.singleReference?.original, github)
         XCTAssertNil(parser.parseText(" \(github)")?.singleReference)
         XCTAssertNil(parser.parseText("\(github) \(gitlab)")?.singleReference)
+        let query = github + "?x=a&y=b#review"
+        let nested = try XCTUnwrap(parser.parseText("Review ((\(query))), then next."))
+        XCTAssertEqual(nested.displayText, "Review ((Acme/Widget#123)), then next.")
+        XCTAssertEqual(parser.parseText("Review '\(query)'.")?.displayText, "Review 'Acme/Widget#123'.")
+        XCTAssertEqual(
+            nested.parts.compactMap { if case .reference(let value) = $0 { value.original } else { nil } }, [query])
     }
 
     func testExactQueriesFragmentsCaseAndEnterpriseRules() throws {
@@ -87,7 +93,7 @@ final class FormattedTextTests: XCTestCase {
         let boundary = String(repeating: "x", count: 8192 - github.utf8.count - 1) + " " + github
         XCTAssertNotNil(parser.parseText(boundary))
         XCTAssertNil(parser.parseText(boundary + "x"))
-        let pathological = "Review " + github + String(repeating: ")", count: 1000)
+        let pathological = "Review " + github + String(repeating: ".", count: 1000)
         XCTAssertNil(parser.parseText(pathological))
         XCTAssertEqual(parser.parseText(pathological + " " + gitlab)?.displayText, pathological + " Group/Sub/Repo!45")
         let disabled = try Parser(rules: [.init(service: .github, host: "github.com", enabled: false)])

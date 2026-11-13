@@ -62,20 +62,31 @@ extension Parser {
             let prefix = String(input[..<range.lowerBound])
             guard prefix.range(of: #"\]\(\s*<?$"#, options: .regularExpression) == nil else { continue }
             var candidate = String(input[range])
+            // A closing prose delimiter ends the token even when followed by a
+            // comma or period, which would otherwise be valid fragment bytes.
+            var openings: [Character] = []
+            for index in candidate.indices {
+                let character = candidate[index]
+                if "([{".contains(character) { openings.append(character) }
+                if let opening = [")": "(", "]": "[", "}": "{"][String(character)] {
+                    guard openings.last.map(String.init) == opening else {
+                        candidate = String(candidate[..<index])
+                        break
+                    }
+                    openings.removeLast()
+                }
+            }
             // Single quotes wrap prose too, but may also occur inside a URL query.
-            if prefix.last == "'", candidate.last == "'" { candidate.removeLast() }
+            if prefix.last == "'", let closing = candidate.lastIndex(of: "'"),
+                candidate[candidate.index(after: closing)...].allSatisfy({ ".,;:!?".contains($0) })
+            {
+                candidate = String(candidate[..<closing])
+            }
             var reference: Reference?
             // Bound punctuation work as well as input bytes; never repeatedly parse
-            // thousands of nested closing delimiters on the main actor.
+            // thousands of trailing punctuation characters on the main actor.
             for _ in 0..<32 {
                 guard !candidate.isEmpty else { break }
-                if let last = candidate.last, let opening = [")": "(", "]": "[", "}": "{"][String(last)],
-                    candidate.filter({ String($0) == String(last) }).count
-                        > candidate.filter({ String($0) == opening }).count
-                {
-                    candidate.removeLast()
-                    continue
-                }
                 if let parsed = parse(candidate) {
                     reference = parsed
                     break

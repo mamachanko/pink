@@ -85,8 +85,9 @@ extension ClipboardProofTests {
         let adapter = NativeBoard(board)
         let first = "https://github.com/Acme/Widget/pull/123?q=a&b=c#review"
         let second = "https://gitlab.com/Group/Sub/Repo/-/merge_requests/45/diffs"
-        let input = "💕 Équipe e\u{301}: ((\(first))),\nthen \(second) and \(first). Done."
-        let expected = "💕 Équipe e\u{301}: ((Acme/Widget#123)),\nthen Group/Sub/Repo!45 and Acme/Widget#123. Done."
+        let input = "💕 Équipe e\u{301}: ((\(first))),\nthen \(second) and \(first) again. Done."
+        let expected =
+            "💕 Équipe e\u{301}: ((Acme/Widget#123)),\nthen Group/Sub/Repo!45 and Acme/Widget#123 again. Done."
         let original = Payload([Types.text: Data(input.utf8)])
         let monitor = ClipboardMonitor(
             board: adapter, builder: NativeRepresentations(), permission: AllowedPermission(),
