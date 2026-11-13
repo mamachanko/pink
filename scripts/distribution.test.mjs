@@ -46,11 +46,31 @@ test('Homebrew update proposes a PR without writing main and cleans up after API
    if(args[0]==='pr'&&args[1]==='create'){assert.equal(args[args.indexOf('--base')+1],'main');return 'created';}
    if(args[1].includes('git/ref/heads/main'))return JSON.stringify({object:{sha:'main-head'}});
    if(args[1].includes('matching-refs'))return '[]';
-   return JSON.stringify({sha:'cask-sha',content:Buffer.from('old cask').toString('base64')});
+   return JSON.stringify({sha:'cask-sha',content:Buffer.from(readFileSync('Casks/pink.rb','utf8')).toString('base64')});
   };
   const result=proposeCaskUpdate({directory:root,repository:'mamachanko/pink',runGh});assert.equal(result.created,true);assert.equal(result.branch,'homebrew/v1.2.3');
   assert.equal(inputs[0].data.ref,'refs/heads/homebrew/v1.2.3');assert.equal(inputs[0].data.sha,'main-head');assert.equal(inputs[1].data.branch,'homebrew/v1.2.3');assert.equal(existsSync(temp),false);
   assert.throws(()=>proposeCaskUpdate({directory:root,repository:'mamachanko/pink',runGh:args=>{if(args.includes('--input')){temp=dirname(args[args.indexOf('--input')+1]);throw new Error('API denied');}return runGh(args);}}),/API denied/);
   assert.equal(existsSync(temp),false);
+ } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+test('Homebrew retries reuse an existing PR and never downgrade newer reviewed releases',()=>{
+ const root=mkdtempSync(join(tmpdir(),'pink-tap-retry-'));
+ try {
+  writeFileSync(join(root,'build-info.json'),JSON.stringify({version:'1.2.3',signingMode:'adhoc',notarization:'none'}));writeFileSync(join(root,'Pink-1.2.3-adhoc.dmg'),'dmg');
+  const desired=caskForDistribution(root), current=readFileSync('Casks/pink.rb','utf8');
+  let writes=0;
+  const runGh=args=>{
+   if(args.includes('--method') || (args[0]==='pr'&&args[1]==='create')) {writes++;throw new Error('Unexpected mutation');}
+   if(args[0]==='pr') return '[{"number":10}]';
+   if(args[1].includes('git/ref/heads/main'))return '{"object":{"sha":"main-head"}}';
+   if(args[1].includes('matching-refs'))return '[{"ref":"refs/heads/homebrew/v1.2.3"}]';
+   return JSON.stringify({sha:'cask-sha',content:Buffer.from(args[1].includes('ref=main-head')?current:desired).toString('base64')});
+  };
+  assert.equal(proposeCaskUpdate({directory:root,repository:'mamachanko/pink',runGh}).created,false);assert.equal(writes,0);
+  const newer=renderCask({version:'2.0.0',sha256:'a'.repeat(64),signingMode:'adhoc'});
+  const result=proposeCaskUpdate({directory:root,repository:'mamachanko/pink',runGh:args=>args[1].includes('contents/')?JSON.stringify({content:Buffer.from(newer).toString('base64')}):runGh(args)});
+  assert.equal(result.reason,'newer-cask-already-reviewed');assert.equal(writes,0);
  } finally {rmSync(root,{recursive:true,force:true});}
 });
