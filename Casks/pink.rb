@@ -7,7 +7,7 @@ cask "pink" do
   desc "Local menu-bar formatter for short GitHub and GitLab hyperlinks"
   homepage "https://github.com/mamachanko/pink"
 
-  depends_on macos: ">= :sequoia"
+  depends_on macos: :sequoia
 
   app "Pink.app"
 
