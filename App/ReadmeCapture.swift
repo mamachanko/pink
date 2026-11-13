@@ -11,6 +11,8 @@
         private let output: URL
         private var backdrop: NSWindow?
         private var timer: Timer?
+        private var statusItem: NSStatusItem?
+        private var openSettings: (@MainActor () -> NSWindow?)?
         private var stage = 0
         private var stopped = false
         private let deadline = Date().addingTimeInterval(60)
@@ -25,9 +27,11 @@
         }
 
         func start(statusItem: NSStatusItem, openSettings: @escaping @MainActor () -> NSWindow?) {
+            self.statusItem = statusItem
+            self.openSettings = openSettings
             let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated {
-                    self?.tick(statusItem: statusItem, openSettings: openSettings)
+                    self?.tick()
                 }
             }
             self.timer = timer
@@ -45,7 +49,8 @@
             DispatchQueue.main.async { statusItem.button?.performClick(nil) }
         }
 
-        private func tick(statusItem: NSStatusItem, openSettings: @escaping @MainActor () -> NSWindow?) {
+        private func tick() {
+            guard let statusItem, let openSettings else { return }
             guard Date() < deadline else {
                 fail("capture-timeout")
                 return
@@ -135,6 +140,8 @@
             stopped = true
             timer?.invalidate()
             timer = nil
+            statusItem = nil
+            openSettings = nil
             board.releaseGlobally()
         }
     }
