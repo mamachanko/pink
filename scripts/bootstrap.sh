@@ -10,6 +10,7 @@ mkdir -p .tools
 # Build pinned source commit; no mutable binary download or unverified archive.
 if [[ ! -x .tools/xcodegen ]]; then
   git clone --filter=blob:none https://github.com/yonaskolb/XcodeGen.git .tools/xcodegen-source
+  # renovate: depName=yonaskolb/XcodeGen version=2.44.1
   git -C .tools/xcodegen-source checkout --detach 21ac9944b0ab546a07422dbed86f33dd2ebd76f8
   cp tools/XcodeGen.Package.resolved .tools/xcodegen-source/Package.resolved
   (cd .tools/xcodegen-source && swift build --force-resolved-versions -c release --product xcodegen)
