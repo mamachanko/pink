@@ -10,9 +10,12 @@ zip=(dist/RefPaste-*.zip)
 dmg=(dist/RefPaste-*.dmg)
 ditto -x -k "${zip[0]}" "$work/zip"
 hdiutil attach "${dmg[0]}" -mountpoint "$mount" -nobrowse -readonly >/dev/null
+test -L "$mount/Applications"
+test "$(readlink "$mount/Applications")" = /Applications
 for app in "$work/zip/RefPaste.app" "$mount/RefPaste.app"; do
   test -x "$app/Contents/MacOS/RefPaste"
   test -f "$app/Contents/Resources/LICENSE"
+  test -s "$app/Contents/Resources/RefPaste.icns"
   lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/RefPaste"
   for arch in arm64 x86_64; do
     minos=$(xcrun vtool -arch "$arch" -show-build "$app/Contents/MacOS/RefPaste" | awk '/minos/{print $2}')
