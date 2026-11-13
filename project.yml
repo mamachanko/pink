@@ -1,0 +1,44 @@
+name: RefPaste
+options:
+  deploymentTarget:
+    macOS: '15.0'
+packages:
+  RefPaste:
+    path: .
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    MACOSX_DEPLOYMENT_TARGET: '15.0'
+    ARCHS: 'arm64 x86_64'
+    ONLY_ACTIVE_ARCH: NO
+    CODE_SIGN_IDENTITY: '-'
+    CODE_SIGN_STYLE: Manual
+    ENABLE_HARDENED_RUNTIME: YES
+    MARKETING_VERSION: '$(REFPASTE_VERSION)'
+    CURRENT_PROJECT_VERSION: '$(REFPASTE_BUILD)'
+    REFPASTE_VERSION: '0.0.0'
+    REFPASTE_BUILD: '1'
+targets:
+  RefPaste:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - package: RefPaste
+        product: RefPasteCore
+      - package: RefPaste
+        product: RefPastePlatform
+    info:
+      path: build/Info.plist
+      properties:
+        CFBundleIdentifier: io.refpaste.app
+        CFBundleName: RefPaste
+        CFBundleDisplayName: RefPaste
+        CFBundleShortVersionString: '$(MARKETING_VERSION)'
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
+        LSUIElement: true
+        LSMinimumSystemVersion: '15.0'
+        NSHighResolutionCapable: true
+        NSHumanReadableCopyright: 'MIT License; Copyright © 2026 Max Brauer'
+        RefPasteCommit: '$(REFPASTE_COMMIT)'
+        CFBundleIconFile: RefPaste
