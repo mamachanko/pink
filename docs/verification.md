@@ -40,3 +40,16 @@ Native evidence update: run 43386214786, macos-15 arm64, Xcode 26.2 (17C52), Swi
 Intel evidence: run 43386214786 job 131755213986 printed Darwin x86_64 / x86_64-apple-macosx15.0 and passed the same 12 native Swift tests (including 3 named AppKit tests). App build hit the same Settings ambiguity, now fixed. Thus native representation proof and core execution have real coverage on both architectures; universal app/package success is still separate.
 
 Corrected app-build evidence: run 43386950833 Apple Silicon job completed universal Xcode application compilation (BUILD SUCCEEDED), generated icon, ad-hoc signed app, ZIP, DMG and checksums. Artifact verification then failed because lipo treated a trailing input filename as an architecture. The input is now placed before `-verify_arch`. No failed package is presented as verified. A pinned actions/cache cache stores only tool builds by OS/architecture/Xcode/tool-lock digest to shorten reruns.
+
+## Completed native verification
+
+PASS on both macos-15 arm64 and macos-15-intel x86_64 in https://github.com/mamachanko/pink/actions/runs/43388584128 (source 6b2117f77ddb772d2b59b610c9e9b54f8df4fd6b), required aggregate success:
+
+- `make bootstrap doctor verify`: strict lint; 13 Swift tests (9 core + 4 named AppKit, including monitor ownership/restoration); 14 release-tool tests; universal application build and ad-hoc package verification.
+- `bash scripts/test-signing-cleanup.sh`: real temporary keychain created, synthetic invalid certificate rejected at import, temporary keychain/certificate directory removed. No real Apple credentials, notarization request or production release.
+- `node scripts/prepare.mjs 1.2.3`: fixed-version build injection, ZIP and drag-install DMG, final checksums and build-info.json; both extracted/mounted apps passed architecture, minimum OS, marketing/build/commit metadata, signature and safe launch/exit checks.
+- Both jobs uploaded separate RefPaste-macos-15 / RefPaste-macos-15-intel artifact bundles containing the four explicit release assets. Ad-hoc signed; not Developer ID signed; not notarized. These are CI test packages, not a published release.
+
+The native integration test initially exposed ownership failure after reading back a generated rich item. A dedicated marker-only read fixed it; the full integration test now passes. Later revision also pauses polling before sleep/session inactivity and strengthens cleanup search-list comparison; final revision CI is checked separately. No native test changes the general clipboard, system permissions or launch-at-login registration.
+
+Earlier NOT RUN/BLOCKED rows above describe the initial Linux stage and are superseded by this native evidence for automated checks. Receiving apps, interactive UI/VoiceOver/appearance, actual clipboard privacy policy changes, login approval, successful Developer ID signing/notarization and publication/recovery remain NOT RUN. Protection/environment/Renovate activation remains maintainer setup.
