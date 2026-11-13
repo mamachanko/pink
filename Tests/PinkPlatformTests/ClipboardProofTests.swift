@@ -1,12 +1,12 @@
 import AppKit
-import RefPasteCore
+import PinkCore
 import XCTest
 
-@testable import RefPastePlatform
+@testable import PinkPlatform
 
 final class ClipboardProofTests: XCTestCase {
     @MainActor func testOneItemRichAndPlainRoundTrip() async throws {
-        let board = NSPasteboard(name: .init("RefPaste.tests.\(UUID())"))
+        let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
         defer { board.releaseGlobally() }
         let reference = try XCTUnwrap(Parser().parse("https://github.com/Acme/Widget/pull/123?q=a&b=c#review"))
         let payload = try XCTUnwrap(NativeRepresentations().build(reference))
@@ -39,7 +39,7 @@ extension ClipboardProofTests {
         XCTAssertFalse(builder.hasNamedLink(Payload([Types.rtf: data]), original: original))
     }
     @MainActor func testUnknownTypesCannotBeRead() async throws {
-        let board = NSPasteboard(name: .init("RefPaste.tests.\(UUID())"))
+        let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
         defer { board.releaseGlobally() }
         let item = NSPasteboardItem()
         item.setString("https://github.com/a/b/pull/1", forType: .string)
@@ -56,7 +56,7 @@ extension ClipboardProofTests {
 }
 extension ClipboardProofTests {
     @MainActor func testNativeMonitorOwnershipAndRestoration() async throws {
-        let board = NSPasteboard(name: .init("RefPaste.tests.\(UUID())"))
+        let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
         defer { board.releaseGlobally() }
         let adapter = NativeBoard(board)
         let original = Payload([Types.text: Data("https://github.com/a/b/pull/1".utf8)])

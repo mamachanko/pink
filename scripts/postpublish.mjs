@@ -10,7 +10,7 @@ if (existsSync('dist/build-info.json')) {
  if(commit!==info.commit) throw new Error('Release commit mismatch');
  const ref=JSON.parse(execFileSync('gh',['api',`repos/${process.env.GITHUB_REPOSITORY}/git/ref/tags/${tag}`],{encoding:'utf8'}));
  if(ref.object.type!=='commit' || ref.object.sha!==info.commit) throw new Error('Published tag commit mismatch');
- const dir=mkdtempSync(join(tmpdir(),'refpaste-published-'));
+ const dir=mkdtempSync(join(tmpdir(),'pink-published-'));
  try {
   execFileSync('gh',['release','download',tag,'--dir',dir],{stdio:'inherit'});
   validate(dir);

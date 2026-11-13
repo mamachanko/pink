@@ -1,12 +1,12 @@
-# RefPaste
+# Pink 💕
 
 A native macOS 15+ menu-bar utility that adds short rich hyperlinks to copied GitHub and GitLab references. The exact original URL remains the plain-text representation.
 
-`https://github.com/acme/widget/pull/123` → **acme/widget#123** in a rich-text receiver, linked to the original URL. Terminals and plain editors get the original URL. The receiver chooses; RefPaste never intercepts paste or inspects the destination.
+`https://github.com/acme/widget/pull/123` → **acme/widget#123** in a rich-text receiver, linked to the original URL. Terminals and plain editors get the original URL. The receiver chooses; Pink never intercepts paste or inspects the destination.
 
 Install a verified release ZIP or drag the app from the DMG to Applications, then open it and choose Enable. **No release is published by this implementation task.** Default packages are **Ad-hoc signed; not Developer ID signed; not notarized.** macOS may block them. Review the source, build locally, or use the per-app Open Anyway option in Privacy & Security when offered. Never disable Gatekeeper globally. Developer ID releases require configured signing and notarization.
 
-The link menu provides Enable/Pause, Format current clipboard, safe Restore original clipboard, Settings, About and Quit. On activation it leaves existing content alone. Restore changes the current clipboard only. The app has no normal Dock icon. Launch at login is opt-in in Settings and may need approval in Login Items.
+The 💕 menu provides Enable/Pause, Format current clipboard, safe Restore original clipboard, Settings, About and Quit. On activation it leaves existing content alone. Restore changes the current clipboard only. The app has no normal Dock icon. Launch at login is opt-in in Settings and may need approval in Login Items.
 
 Supported HTTPS routes:
 
@@ -17,7 +17,7 @@ Settings supports exact enterprise hosts, service, optional explicit port, insta
 
 All processing is local. No account, telemetry, servers, lookup, clipboard history or updater. Only settings are persisted. Unknown types, files/images, sensitive/temporary/generated/remote markers, multiple items, existing HTML/named rich links and mismatched representations are skipped. Unmarked sensitive content cannot be reliably identified. See [privacy](docs/privacy.md).
 
-Initial consent is separate from OS privacy controls. On macOS 15.4+ Ask/Deny clipboard policies stop monitoring. Where provided, review System Settings → Privacy & Security → Paste from Other Apps, then use Retry. RefPaste does not request Accessibility, Input Monitoring or Screen Recording.
+Initial consent is separate from OS privacy controls. On macOS 15.4+ Ask/Deny clipboard policies stop monitoring. Where provided, review System Settings → Privacy & Security → Paste from Other Apps, then use Retry. Pink does not request Accessibility, Input Monitoring or Screen Recording.
 
 Polling runs about every 200 ms. Immediate paste can beat it; original URL is the fallback. Receivers may choose plain text or strip rich links; compatibility has **not been verified** on this Linux development host. See [actual compatibility status](docs/compatibility.md). External clipboard writes have an unavoidable race with clear/write. No atomicity claim.
 
@@ -35,4 +35,6 @@ make verify     # lint + test + package
 
 Build output lives in `build/`, artifacts in `dist/`; nothing installs automatically. App smoke mode `--smoke-test` exits before clipboard setup. Native tests use unique named boards, never your general clipboard. See [contribution](CONTRIBUTING.md), [architecture](docs/architecture.md), [verification](docs/verification.md), [requirements](docs/spec.md).
 
-Releases use semantic-release on main after reusable verification; GitHub Releases are the changelog. See [release contract](docs/release.md) and [repository setup](docs/repository-setup.md). To uninstall: disable launch at login, quit, delete the app, then optionally remove its `io.refpaste.app` UserDefaults preferences. No clipboard history files exist.
+Releases use semantic-release on main after reusable verification; GitHub Releases are the changelog. See [release contract](docs/release.md) and [repository setup](docs/repository-setup.md). To uninstall: disable launch at login, quit, delete the app, then optionally remove its `io.github.mamachanko.pink` UserDefaults preferences. No clipboard history files exist.
+
+Upgrading from the previous app name: Pink imports valid local settings once from the former preferences domain when Pink has no saved settings. No clipboard data is migrated. Quit the old app and disable its login item before removing it; enable launch at login for Pink separately if wanted. macOS may ask for clipboard access again for Pink’s new bundle identity.

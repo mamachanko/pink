@@ -2,7 +2,7 @@
 name: Bug report
 about: Report behavior without clipboard contents
 ---
-macOS / RefPaste / receiving app versions:
+macOS / Pink / receiving app versions:
 
 Expected and observed behavior:
 

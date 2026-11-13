@@ -17,7 +17,7 @@ const options = config.plugins[0][1];
 const logger = {log(){}, error(){}, success(){}};
 const cases = [['fix: repair','patch'], ['perf: faster','patch'], ['feat: add','minor'], ['feat!: changed','major'], ['docs!: changed','major'], ['chore: changed\n\nBREAKING CHANGE: schema changed','major'], ['docs: help',null], ['test: tests',null], ['ci: checks',null], ['chore: upkeep',null]];
 for (const [message, expected] of cases) test(`actual analyzer: ${message}`, async () => {
-  const cwd = mkdtempSync(join(tmpdir(), 'refpaste-git-'));
+  const cwd = mkdtempSync(join(tmpdir(), 'pink-git-'));
   try {
     const git = (...a) => execFileSync('git', a, {cwd,encoding:'utf8'}).trim();
     git('init','-b','main'); git('config','user.name','Test'); git('config','user.email','test@example.invalid');
@@ -37,12 +37,12 @@ test('signing fails closed and prepare rejects bad versions', () => {
  assert.throws(()=>prepare('1.0.0',{SIGNING_MODE:'developer-id'}));
 });
 test('asset allowlist and checksums enforce completeness', () => {
- const cwd=mkdtempSync(join(tmpdir(),'refpaste-assets-'));
+ const cwd=mkdtempSync(join(tmpdir(),'pink-assets-'));
  try {
-  const values={'build-info.json': JSON.stringify({version:'1.2.3',signingMode:'adhoc'}),'RefPaste-1.2.3-adhoc.zip':'zip','RefPaste-1.2.3-adhoc.dmg':'dmg'};
+  const values={'build-info.json': JSON.stringify({version:'1.2.3',signingMode:'adhoc'}),'Pink-1.2.3-adhoc.zip':'zip','Pink-1.2.3-adhoc.dmg':'dmg'};
   for(const [name,value] of Object.entries(values)) writeFileSync(join(cwd,name),value);
   writeFileSync(join(cwd,'SHA256SUMS'),Object.entries(values).map(([n,v])=>`${createHash('sha256').update(v).digest('hex')}  ${n}`).join('\n')+'\n');
-  validate(cwd);rmSync(join(cwd,'RefPaste-1.2.3-adhoc.zip'));assert.throws(()=>validate(cwd));writeFileSync(join(cwd,'RefPaste-1.2.3-adhoc.zip'),'corrupt');assert.throws(()=>validate(cwd));
+  validate(cwd);rmSync(join(cwd,'Pink-1.2.3-adhoc.zip'));assert.throws(()=>validate(cwd));writeFileSync(join(cwd,'Pink-1.2.3-adhoc.zip'),'corrupt');assert.throws(()=>validate(cwd));
  } finally {rmSync(cwd,{recursive:true,force:true});}
 });
 test('actual exec preparation failure blocks publication', () => runEngine('failure'));

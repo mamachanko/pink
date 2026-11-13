@@ -1,5 +1,5 @@
 import AppKit
-import RefPasteCore
+import PinkCore
 
 @MainActor public final class NativeBoard: PasteboardPort {
     private let board: NSPasteboard

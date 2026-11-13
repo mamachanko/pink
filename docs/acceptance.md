@@ -16,7 +16,7 @@ Status applies to the delivered implementation, not intended behavior. See verif
 | Temporary signing cleanup on invalid certificate | PASS | Both native CI jobs exercised real temporary keychain creation/import failure/cleanup |
 | Developer ID signing/notarization | BLOCKED | No real Apple credentials; no production release authorized |
 | Published release integrity / recovery | NOT RUN | Workflow implemented; no production test release |
-| Branch/PR/native CI | PASS | Pushed feat/refpaste; draft PR #1; reusable verification passed on both architectures |
+| Branch/PR/native CI | PASS | Merged implementation PR #1; reusable verification passed on both architectures |
 | Repository protection/environment/Renovate activation | NOT RUN | Maintainer setup only; no settings silently changed |
 
 Conservative implementation restrictions: existing HTML clipboard content is skipped rather than imported; ambiguous encoded separators aren't supported. Native tests cover the adapter and full monitor restoration but not every AppKit failure mode. Manual application and permission acceptance remains outstanding. These are unmet verification criteria, not passing claims.

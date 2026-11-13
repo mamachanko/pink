@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import RefPasteCore
+@testable import PinkCore
 
 final class ParserTests: XCTestCase {
     func testRoutesAndExactPreservation() throws {

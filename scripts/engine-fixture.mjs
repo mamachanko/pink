@@ -12,7 +12,7 @@ if(process.argv[2]==='versions') {
 
  const {default: semanticRelease} = await import('semantic-release');
  for (const [message, tag, expected] of [['fix: initial',null,'1.0.0'], ['fix: patch','v1.2.3','1.2.4'], ['feat: minor','v1.2.3','1.3.0'], ['ci!: breaking','v1.2.3','2.0.0'], ['docs: none','v1.2.3',null]]) {
-  const cwd = mkdtempSync(join(tmpdir(),'refpaste-engine-'));
+  const cwd = mkdtempSync(join(tmpdir(),'pink-engine-'));
   try {
    const git=(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
    git('init','-b','main');git('config','user.name','Test');git('config','user.email','test@example.invalid');git('commit','--allow-empty','-m','chore: base');
@@ -26,7 +26,7 @@ if(process.argv[2]==='versions') {
 } else {
 
  const {default:semanticRelease}=await import('semantic-release');
- const cwd=mkdtempSync(join(tmpdir(),'refpaste-failure-'));
+ const cwd=mkdtempSync(join(tmpdir(),'pink-failure-'));
  try {
   const git=(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
   git('init','-b','main');git('config','user.name','Test');git('config','user.email','test@example.invalid');git('commit','--allow-empty','-m','feat: package');

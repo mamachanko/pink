@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 export function validate(directory) {
   const files = readdirSync(directory).sort();
   const manifest = JSON.parse(readFileSync(`${directory}/build-info.json`));
-  const expected = ['SHA256SUMS','build-info.json', `RefPaste-${manifest.version}-${manifest.signingMode}.zip`, `RefPaste-${manifest.version}-${manifest.signingMode}.dmg`].sort();
+  const expected = ['SHA256SUMS','build-info.json', `Pink-${manifest.version}-${manifest.signingMode}.zip`, `Pink-${manifest.version}-${manifest.signingMode}.dmg`].sort();
   if (JSON.stringify(files) !== JSON.stringify(expected)) throw new Error('Unexpected release asset set');
   const lines = readFileSync(`${directory}/SHA256SUMS`,'utf8').trim().split('\n');
   if (lines.length !== 3) throw new Error('Incomplete checksums');
