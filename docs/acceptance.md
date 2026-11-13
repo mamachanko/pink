@@ -19,4 +19,4 @@ Status applies to the delivered implementation, not intended behavior. See verif
 | Branch/PR/native CI | PASS | Pushed feat/refpaste; draft PR #1; reusable verification passed on both architectures |
 | Repository protection/environment/Renovate activation | NOT RUN | Maintainer setup only; no settings silently changed |
 
-Conservative implementation restrictions: existing HTML clipboard content is skipped rather than imported; encoded separators and Unicode path segments aren't supported. Native tests cover the adapter and full monitor restoration but not every AppKit failure mode. Manual application and permission acceptance remains outstanding. These are unmet verification criteria, not passing claims.
+Conservative implementation restrictions: existing HTML clipboard content is skipped rather than imported; ambiguous encoded separators aren't supported. Native tests cover the adapter and full monitor restoration but not every AppKit failure mode. Manual application and permission acceptance remains outstanding. These are unmet verification criteria, not passing claims.
