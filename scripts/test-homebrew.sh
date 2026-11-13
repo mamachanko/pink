@@ -7,6 +7,8 @@ if brew tap | grep -q '^mamachanko/pink$'; then
   exit 1
 fi
 work=$(mktemp -d)
+# Homebrew 6+ records item trust here; keep verification trust out of user settings.
+export XDG_CONFIG_HOME="$work/config"
 tapped=false
 cleanup() {
   if [[ $tapped == true ]]; then
@@ -21,6 +23,7 @@ trap cleanup EXIT
 brew tap mamachanko/pink "$PWD"
 tapped=true
 brew style Casks/pink.rb
+brew trust --cask mamachanko/pink/pink
 brew audit --cask mamachanko/pink/pink
 brew install --cask --appdir="$work/Applications" mamachanko/pink/pink
 node scripts/package-layout.mjs "$work/Applications"
