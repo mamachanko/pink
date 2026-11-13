@@ -23,6 +23,8 @@ jobs:
           path: .tools
           key: tools-${{ runner.os }}-${{ runner.arch }}-xcode26.2-${{ hashFiles('tools/**', 'scripts/bootstrap.sh', 'scripts/lint-tools.sh') }}
       - run: make bootstrap doctor verify
+      - name: Verify keychain cleanup on signing failure
+        run: bash scripts/test-signing-cleanup.sh
       - name: Fixed version release preparation
         run: node scripts/prepare.mjs 1.2.3
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
