@@ -14,7 +14,16 @@ A native macOS 15+ menu-bar utility that adds short rich hyperlinks to copied Gi
 
 <sub>Actual Pink UI on macOS 15, using demo settings. Login availability depends on installation. [Capture details](docs/images/README.md).</sub>
 
-Install a verified release ZIP or drag the app from the DMG to Applications, then open it and choose Enable. **No release is published by this implementation task.** Default packages are **Ad-hoc signed; not Developer ID signed; not notarized.** macOS may block them. Review the source, build locally, or use the per-app Open Anyway option in Privacy & Security when offered. Never disable Gatekeeper globally. Developer ID releases require configured signing and notarization.
+Install with Homebrew (macOS 15+):
+
+```sh
+brew tap mamachanko/pink https://github.com/mamachanko/pink.git
+brew install --cask mamachanko/pink/pink
+```
+
+This repository is the custom tap; no separate tap repository is required. The cask pins a reviewed release and SHA-256, and installs `Pink.app`. Use `brew upgrade --cask mamachanko/pink/pink` for updates and `brew uninstall --cask mamachanko/pink/pink` to remove it. Quit Pink and disable launch at login before uninstalling. `--zap` additionally removes current and legacy settings. See [Homebrew maintenance](docs/homebrew.md).
+
+Or install a verified release ZIP or drag the app from the DMG to Applications, then open it and choose Enable. Default packages are **Ad-hoc signed; not Developer ID signed; not notarized.** macOS may block them. Review the source, build locally, or use the per-app Open Anyway option in Privacy & Security when offered. Never disable Gatekeeper globally. Developer ID releases require configured signing and notarization.
 
 The 💕 menu provides Enable/Pause, Format current clipboard, safe Restore original clipboard, Settings, About and Quit. On activation it leaves existing content alone. Restore changes the current clipboard only. The app has no normal Dock icon. Launch at login is opt-in in Settings and may need approval in Login Items.
 
@@ -48,3 +57,5 @@ Build output lives in `build/`, artifacts in `dist/`; nothing installs automatic
 Releases use semantic-release on main after reusable verification; GitHub Releases are the changelog. See [release contract](docs/release.md) and [repository setup](docs/repository-setup.md). To uninstall: disable launch at login, quit, delete the app, then optionally remove its `io.github.mamachanko.pink` UserDefaults preferences. No clipboard history files exist.
 
 Upgrading from the previous app name: Pink imports valid local settings once from the former preferences domain when Pink has no saved settings. No clipboard data is migrated. Quit the old app and disable its login item before removing it; enable launch at login for Pink separately if wanted. macOS may ask for clipboard access again for Pink’s new bundle identity.
+
+If a mounted image or installed app still says RefPaste, check its version: v1.0.0 predates the rename. Eject that image and use a current [Pink release](https://github.com/mamachanko/pink/releases/latest). New package verification requires the volume and its sole application bundle to be named Pink. Historical release files are retained rather than silently replaced.
