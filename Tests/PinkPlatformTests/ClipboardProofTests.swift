@@ -177,6 +177,18 @@ extension ClipboardProofTests {
             XCTAssertNil(builder.build(parsed, source: source))
         }
         XCTAssertTrue(builder.hasNamedLink(Payload([Types.rtf: data]), original: input + " different"))
+        let target = url + "#review"
+        let punctuated = "Review \(target)."
+        let autolink = NSMutableAttributedString(string: punctuated)
+        autolink.addAttribute(.link, value: target, range: (punctuated as NSString).range(of: target))
+        let autolinkRTF = try autolink.data(
+            from: NSRange(location: 0, length: autolink.length),
+            documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf])
+        let raw = Payload([Types.text: Data(punctuated.utf8), Types.rtf: autolinkRTF])
+        XCTAssertFalse(builder.hasNamedLink(raw, original: punctuated))
+        // The full token's fragment includes '.', unlike the existing hyperlink.
+        // Skip rather than silently replace an already-known target.
+        XCTAssertNil(builder.build(try XCTUnwrap(Parser().parseText(punctuated)), source: raw))
     }
 
     @MainActor func testUnicodeRTFRoundTrip() async throws {

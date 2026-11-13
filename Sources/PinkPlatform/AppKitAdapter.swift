@@ -57,6 +57,17 @@ import PinkCore
             }
         }
         guard offset == attributed.length else { return nil }
+        var existingLinks: [(NSRange, String)] = []
+        attributed.enumerateAttribute(.link, in: NSRange(location: 0, length: attributed.length)) { link, range, _ in
+            if let link { existingLinks.append((range, String(describing: link))) }
+        }
+        for (range, reference) in replacements {
+            for (existing, target) in existingLinks where NSIntersectionRange(range, existing).length > 0 {
+                // An existing raw autolink can provide a narrower boundary than
+                // prose tokenization. Never silently change that known target.
+                guard range == existing, reference.original == target else { return nil }
+            }
+        }
         for (range, reference) in replacements.reversed() {
             var attributes = attributed.attributes(at: range.location, effectiveRange: nil)
             attributes[.link] = reference.original
