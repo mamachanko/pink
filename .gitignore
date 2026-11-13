@@ -1,0 +1,9 @@
+.build/
+.tools/
+node_modules/
+build/
+dist/
+*.xcodeproj/
+.DS_Store
+core
+core.*

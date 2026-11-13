@@ -1,0 +1,1 @@
+Run `npm test` and `make lint`. Release config must use installed semantic-release plugins. Never publish test releases or log signing credentials. Ad-hoc is explicit; partial Developer ID configuration fails closed. Checksums follow all stapling.

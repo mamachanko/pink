@@ -1,0 +1,1 @@
+Run `swift test` on macOS. Test only unique named NSPasteboards. Keep serialization synchronous; build representations before clearContents. Never add a keyboard hook or destination inspection. Guard platform API availability.
