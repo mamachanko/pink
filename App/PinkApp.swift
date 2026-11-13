@@ -169,7 +169,8 @@ import SwiftUI
         let controller = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: controller)
         window.title = "Pink Settings"
-        window.setContentSize(NSSize(width: 540, height: 540))
+        window.setContentSize(NSSize(width: 640, height: 540))
+        window.contentMinSize = NSSize(width: 640, height: 540)
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
@@ -277,7 +278,7 @@ struct SettingsView: View {
                     error = "Saved"
                 } catch { self.error = "Invalid or overlapping host rules" }
             }.keyboardShortcut(.defaultAction)
-        }.padding()
+        }.padding().frame(minWidth: 640, minHeight: 540)
     }
     private var loginDescription: String {
         switch loginStatus {
