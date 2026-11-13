@@ -18,7 +18,11 @@ public enum Types {
     var changeCount: Int { get }
     var advertisedTypes: [[String]] { get }
     func read() -> Payload?
+    func readMarker() -> Data?
     func write(_ payload: Payload) -> Bool
+}
+extension PasteboardPort {
+    public func readMarker() -> Data? { read()?.values[Types.own] }
 }
 @MainActor public protocol RepresentationBuilder {
     func build(_ reference: Reference) -> Payload?
@@ -142,7 +146,7 @@ public enum MonitorState: String, Sendable {
             let writtenTypes = board.advertisedTypes
             guard writtenTypes.count == 1,
                 writtenTypes[0].contains(Types.own),
-                board.read()?.values[Types.own] == token,
+                board.readMarker() == token,
                 board.changeCount == ownCount
             else {
                 onChange?()
@@ -160,7 +164,7 @@ public enum MonitorState: String, Sendable {
     }
     public func restore() {
         guard canRestore, let original = snapshot, let expected = writtenCount,
-            board.read()?.values[Types.own] == marker, board.changeCount == expected
+            board.readMarker() == marker, board.changeCount == expected
         else {
             invalidate()
             onChange?()
