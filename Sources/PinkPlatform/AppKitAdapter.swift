@@ -35,34 +35,66 @@ import PinkCore
 }
 @MainActor public struct NativeRepresentations: RepresentationBuilder {
     public init() {}
-    public func build(_ reference: Reference) -> Payload? {
-        guard URL(string: reference.original) != nil else { return nil }
-        let attributed = NSAttributedString(string: reference.label, attributes: [.link: reference.original])
+    public func build(_ text: FormattedText, source: Payload = Payload([:])) -> Payload? {
+        guard !hasNamedLink(source, original: text.original) else { return nil }
+        let attributed: NSMutableAttributedString
+        if let data = source.values[Types.rtf] {
+            guard let value = readRTF(data), value.string == text.original else { return nil }
+            attributed = NSMutableAttributedString(attributedString: value)
+        } else {
+            attributed = NSMutableAttributedString(string: text.original)
+        }
+        // Work backwards in UTF-16 coordinates: each earlier source range stays valid.
+        var offset = 0
+        var replacements: [(NSRange, Reference)] = []
+        for part in text.parts {
+            switch part {
+            case .text(let value): offset += (value as NSString).length
+            case .reference(let reference):
+                let range = NSRange(location: offset, length: (reference.original as NSString).length)
+                replacements.append((range, reference))
+                offset += range.length
+            }
+        }
+        guard offset == attributed.length else { return nil }
+        for (range, reference) in replacements.reversed() {
+            var attributes = attributed.attributes(at: range.location, effectiveRange: nil)
+            attributes[.link] = reference.original
+            attributed.replaceCharacters(
+                in: range, with: NSAttributedString(string: reference.label, attributes: attributes))
+        }
         guard
             let rtf = try? attributed.data(
                 from: NSRange(location: 0, length: attributed.length),
                 documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf])
         else { return nil }
-        return Payload([
-            Types.text: Data(reference.original.utf8), Types.url: Data(reference.original.utf8),
-            Types.html: Data(reference.html.utf8), Types.rtf: rtf,
-        ])
+        var values = [Types.text: Data(text.original.utf8), Types.html: Data(text.html.utf8), Types.rtf: rtf]
+        // public.url must describe the whole item, never one link inside prose.
+        if let reference = text.singleReference { values[Types.url] = Data(reference.original.utf8) }
+        return Payload(values)
+    }
+    private func readRTF(_ data: Data) -> NSAttributedString? {
+        try? NSAttributedString(
+            data: data, options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
     }
     public func hasNamedLink(_ payload: Payload, original: String) -> Bool {
         // HTML import may load external resources. Never import untrusted HTML.
         // Conservatively skip existing HTML, including named hyperlinks.
         if payload.values[Types.html] != nil { return true }
-        for (type, document) in [(Types.rtf, NSAttributedString.DocumentType.rtf)] {
-            guard let data = payload.values[type] else { continue }
-            guard
-                let value = try? NSAttributedString(
-                    data: data, options: [.documentType: document], documentAttributes: nil)
-            else { return true }
-            // Conservative: rich content must be exactly the original URL, even if it has no link attribute.
+        if let data = payload.values[Types.rtf] {
+            guard let value = readRTF(data) else { return true }
             if value.string != original { return true }
             var conflict = false
-            value.enumerateAttribute(.link, in: NSRange(location: 0, length: value.length)) { link, _, _ in
-                if let link, String(describing: link) != original { conflict = true }
+            let entire = NSRange(location: 0, length: value.length)
+            value.enumerateAttribute(.attachment, in: entire) { attachment, _, _ in
+                if attachment != nil { conflict = true }
+            }
+            value.enumerateAttribute(.link, in: entire) { link, range, _ in
+                if let link,
+                    (value.string as NSString).substring(with: range) != String(describing: link)
+                {
+                    conflict = true
+                }
             }
             if conflict { return true }
         }

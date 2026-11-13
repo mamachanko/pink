@@ -1,8 +1,10 @@
 # Pink 💕
 
-A native macOS 15+ menu-bar utility that adds short rich hyperlinks to copied GitHub and GitLab references. The exact original URL remains the plain-text representation.
+A native macOS 15+ menu-bar utility that adds short rich hyperlinks to copied GitHub and GitLab references, including multiple URLs within prose. The exact original text remains the plain-text representation.
 
 `https://github.com/acme/widget/pull/123` → **acme/widget#123** in a rich-text receiver, linked to the original URL. Terminals and plain editors get the original URL. The receiver chooses; Pink never intercepts paste or inspects the destination.
+
+For example, `Please review https://github.com/acme/widget/pull/123 and https://gitlab.com/team/project/-/merge_requests/45.` becomes “Please review **acme/widget#123** and **team/project!45**.” in rich text, with each short label linked to its original URL. Prose, repeated links, line breaks and nested parentheses are retained. Plain paste keeps the entire original message, including both full URLs.
 
 <table>
   <tr><th>In the menu bar</th><th>Settings</th></tr>
@@ -33,6 +35,8 @@ Supported HTTPS routes:
 - GitLab `/namespace/project/-/issues/N` and `/merge_requests/N`; merge requests also accept `diffs`, `commits`, `pipelines`. Nested namespaces are retained. Issues use `#`; merge requests use `!`.
 
 Settings supports exact enterprise hosts, service, optional explicit port, installation prefix, enabled state and individual private-host HTTP opt-in. Rules cannot overlap. No wildcards or public-host HTTP. Prefixes are case-sensitive; host matching is case-insensitive. Explicit URL ports require matching explicit rule ports. Unicode names and unreserved percent escapes are supported; encoded separators are skipped. Query and fragment stay in the target.
+
+Text is limited to 8 KiB per item. Bare URLs need clear boundaries such as whitespace or prose delimiters; named Markdown links and HTML source are not reformatted. Valid query/fragment punctuation is kept as part of the target.
 
 All processing is local. No account, telemetry, servers, lookup, clipboard history or updater. Only settings are persisted. Unknown types, files/images, sensitive/temporary/generated/remote markers, multiple items, existing HTML/named rich links and mismatched representations are skipped. Unmarked sensitive content cannot be reliably identified. See [privacy](docs/privacy.md).
 

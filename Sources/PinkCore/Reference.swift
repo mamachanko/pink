@@ -32,7 +32,7 @@ public struct Reference: Equatable, Sendable {
     public let original: String
     public let label: String
     public var html: String { "<a href=\"\(Self.escape(original))\">\(Self.escape(label))</a>" }
-    private static func escape(_ s: String) -> String {
+    static func escape(_ s: String) -> String {
         s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;")
             .replacingOccurrences(of: ">", with: "&gt;").replacingOccurrences(of: "\"", with: "&quot;")
             .replacingOccurrences(of: "'", with: "&#39;")

@@ -98,7 +98,7 @@ import SwiftUI
         let alert = NSAlert()
         alert.messageText = "Enable Pink?"
         alert.informativeText =
-            "Pink checks new clipboard items locally and adds a short rich hyperlink to supported GitHub and GitLab URLs. Plain text stays the original URL. Clipboard contents are never stored or sent. Some unmarked sensitive content cannot be identified."
+            "Pink checks new clipboard items locally and adds short rich hyperlinks to supported GitHub and GitLab URLs, including links within prose. Plain paste keeps the exact original text. Clipboard contents are never stored or sent. Some unmarked sensitive content cannot be identified."
         alert.addButton(withTitle: "Enable")
         alert.addButton(withTitle: "Not now")
         if alert.runModal() == .alertFirstButtonReturn {
@@ -213,7 +213,9 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Toggle("Automatic formatting", isOn: $value.automatic).disabled(!value.consent)
-            Text("Processing is local. Plain paste keeps the exact URL. Immediate paste may beat the watcher.").font(
+            Text(
+                "Processing is local. Plain paste keeps the exact original text. Immediate paste may beat the watcher."
+            ).font(
                 .caption)
             Section("Host rules") {
                 List {
