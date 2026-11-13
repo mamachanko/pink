@@ -169,8 +169,8 @@ import SwiftUI
         let controller = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: controller)
         window.title = "Pink Settings"
-        window.setContentSize(NSSize(width: 640, height: 540))
-        window.contentMinSize = NSSize(width: 640, height: 540)
+        window.setContentSize(NSSize(width: 640, height: 660))
+        window.contentMinSize = NSSize(width: 640, height: 660)
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
@@ -224,14 +224,14 @@ struct SettingsView: View {
                             Button("Remove") { value.rules.remove(at: i) }
                         }
                     }
-                }.frame(height: 120)
+                }.frame(height: 80)
                 Picker("Service", selection: $service) {
                     ForEach(Service.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                 }
                 TextField("Exact hostname", text: $host)
                 HStack {
-                    TextField("Port (optional)", text: $port)
-                    TextField("Base path (optional)", text: $base)
+                    TextField("Port (optional)", text: $port, prompt: Text("Port (optional)")).labelsHidden()
+                    TextField("Base path (optional)", text: $base, prompt: Text("Base path (optional)")).labelsHidden()
                 }
                 Toggle("Allow HTTP for this private host", isOn: $http)
                 Button("Add host rule") {
@@ -278,7 +278,7 @@ struct SettingsView: View {
                     error = "Saved"
                 } catch { self.error = "Invalid or overlapping host rules" }
             }.keyboardShortcut(.defaultAction)
-        }.padding().frame(minWidth: 640, minHeight: 540)
+        }.formStyle(.grouped).padding().frame(minWidth: 640, minHeight: 660)
     }
     private var loginDescription: String {
         switch loginStatus {
