@@ -136,8 +136,18 @@ public enum MonitorState: String, Sendable {
             return
         }
         if board.write(output) {
-            seen = board.changeCount
-            writtenCount = seen
+            let ownCount = board.changeCount
+            // Don't mistake an external copy immediately after write for our generation.
+            guard board.advertisedTypes.count == 1,
+                board.advertisedTypes[0].contains(Types.own),
+                board.read()?.values[Types.own] == token,
+                board.changeCount == ownCount
+            else {
+                onChange?()
+                return
+            }
+            seen = ownCount
+            writtenCount = ownCount
             snapshot = original
             marker = token
         } else {
