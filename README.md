@@ -4,6 +4,16 @@ A native macOS 15+ menu-bar utility that adds short rich hyperlinks to copied Gi
 
 `https://github.com/acme/widget/pull/123` → **acme/widget#123** in a rich-text receiver, linked to the original URL. Terminals and plain editors get the original URL. The receiver chooses; Pink never intercepts paste or inspects the destination.
 
+<table>
+  <tr><th>In the menu bar</th><th>Settings</th></tr>
+  <tr>
+    <td valign="top"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s 💕 menu-bar icon and menu with automatic formatting, clipboard actions, Settings, About and Quit."></td>
+    <td><img src="docs/images/settings.png" width="480" alt="Pink Settings with automatic formatting, GitHub and GitLab host rules, enterprise host fields and opt-in launch at login."></td>
+  </tr>
+</table>
+
+<sub>Actual Pink UI on macOS 15, using demo settings. Login availability depends on installation. [Capture details](docs/images/README.md).</sub>
+
 Install a verified release ZIP or drag the app from the DMG to Applications, then open it and choose Enable. **No release is published by this implementation task.** Default packages are **Ad-hoc signed; not Developer ID signed; not notarized.** macOS may block them. Review the source, build locally, or use the per-app Open Anyway option in Privacy & Security when offered. Never disable Gatekeeper globally. Developer ID releases require configured signing and notarization.
 
 The 💕 menu provides Enable/Pause, Format current clipboard, safe Restore original clipboard, Settings, About and Quit. On activation it leaves existing content alone. Restore changes the current clipboard only. The app has no normal Dock icon. Launch at login is opt-in in Settings and may need approval in Login Items.
