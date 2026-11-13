@@ -9,13 +9,14 @@ Status applies to the delivered implementation, not intended behavior. See verif
 | Semantic-release version rules including breaking docs/chore | PASS | Installed plugins and temporary Git repositories |
 | Formatting, action pin policy, YAML/shell validation | PASS | make lint on Linux |
 | Native one-item HTML/plain/RTF mechanism | PASS (arm64 + Intel CI) | Three named AppKit tests passed natively on both architectures with exact plain text and RTF destination |
-| Full app build/universal package | BLOCKED | Linux cannot execute Xcode/AppKit/hdiutil |
+| Full app build/universal package | PASS | Both macOS CI jobs passed universal build, ZIP/DMG verification and smoke tests |
 | Native UI accessibility/light/dark/keyboard | NOT RUN | Requires actual macOS interaction |
 | OS clipboard permission / SMAppService behavior | NOT RUN | Guarded APIs implemented; needs OS verification |
 | Receiver compatibility | NOT RUN | All rows in compatibility.md |
-| Developer ID/notarization/cleanup on macOS failures | BLOCKED | No macOS or Apple credentials |
+| Temporary signing cleanup on invalid certificate | PASS | Both native CI jobs exercised real temporary keychain creation/import failure/cleanup |
+| Developer ID signing/notarization | BLOCKED | No real Apple credentials; no production release authorized |
 | Published release integrity / recovery | NOT RUN | Workflow implemented; no production test release |
-| Branch/PR/native CI | See verification.md | Remote delivery attempted after commit |
+| Branch/PR/native CI | PASS | Pushed feat/refpaste; draft PR #1; reusable verification passed on both architectures |
 | Repository protection/environment/Renovate activation | NOT RUN | Maintainer setup only; no settings silently changed |
 
-Conservative implementation restrictions: existing HTML clipboard content is skipped rather than imported; encoded/Unicode path segments aren't supported. Native tests don't yet cover every platform read failure/marker/serialization variant. A macOS build failure remains possible until real CI runs. These are unmet verification criteria, not passing claims.
+Conservative implementation restrictions: existing HTML clipboard content is skipped rather than imported; encoded/Unicode path segments aren't supported. Native tests cover the adapter and full monitor restoration but not every AppKit failure mode. Manual application and permission acceptance remains outstanding. These are unmet verification criteria, not passing claims.
