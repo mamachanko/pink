@@ -4,7 +4,7 @@ import PackageDescription
 #if os(macOS)
     let platformProducts: [Product] = [.library(name: "RefPastePlatform", targets: ["RefPastePlatform"])]
     let platformTargets: [Target] = [
-        .target(name: "RefPastePlatform", dependencies: ["RefPasteCore"]),
+        .target(name: "RefPastePlatform", dependencies: ["RefPasteCore"], exclude: ["AGENTS.md"]),
         .testTarget(name: "RefPastePlatformTests", dependencies: ["RefPastePlatform"]),
     ]
 #else

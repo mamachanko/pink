@@ -27,5 +27,5 @@ for app in "$work/zip/RefPaste.app" "$mount/RefPaste.app"; do
   test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$app/Contents/Info.plist")" = "$(node -p 'JSON.parse(require("fs").readFileSync("dist/build-info.json")).build')"
   test "$(/usr/libexec/PlistBuddy -c 'Print LSMinimumSystemVersion' "$app/Contents/Info.plist")" = 15.0
   test "$(/usr/libexec/PlistBuddy -c 'Print RefPasteCommit' "$app/Contents/Info.plist")" = "$(git rev-parse HEAD)"
-  "$app/Contents/MacOS/RefPaste" --smoke-test
+  node -e 'const r=require("node:child_process").spawnSync(process.argv[1],["--smoke-test"],{timeout:15000,stdio:"inherit"}); if(r.error || r.status!==0) process.exit(1)' "$app/Contents/MacOS/RefPaste"
  done
