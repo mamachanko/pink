@@ -8,7 +8,7 @@ Status applies to the delivered implementation, not intended behavior. See verif
 | Injected state machine, self-write/restoration/race behavior | PASS | Portable fake-clock tests; coverage is bounded to observable checkpoints |
 | Semantic-release version rules including breaking docs/chore | PASS | Installed plugins and temporary Git repositories |
 | Formatting, action pin policy, YAML/shell validation | PASS | make lint on Linux |
-| Native one-item HTML/plain/RTF mechanism | NOT RUN | Named AppKit proof test implemented; needs macOS |
+| Native one-item HTML/plain/RTF mechanism | PASS (arm64 + Intel CI) | Three named AppKit tests passed natively on both architectures with exact plain text and RTF destination |
 | Full app build/universal package | BLOCKED | Linux cannot execute Xcode/AppKit/hdiutil |
 | Native UI accessibility/light/dark/keyboard | NOT RUN | Requires actual macOS interaction |
 | OS clipboard permission / SMAppService behavior | NOT RUN | Guarded APIs implemented; needs OS verification |
