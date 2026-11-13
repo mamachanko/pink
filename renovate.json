@@ -1,6 +1,36 @@
 {
-  "$schema":"https://docs.renovatebot.com/renovate-schema.json",
-  "extends":["config:recommended", "helpers:pinGitHubActionDigests"],
-  "enabledManagers":["github-actions","npm","custom.regex"],
-  "customManagers":[{"customType":"regex","managerFilePatterns":["/scripts/bootstrap\\.sh$/"],"matchStrings":["checkout --detach (?<currentDigest>[a-f0-9]{40})"],"depNameTemplate":"yonaskolb/XcodeGen","datasourceTemplate":"git-refs","currentValueTemplate":"2.44.1"}]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "enabledManagers": [
+    "github-actions",
+    "npm",
+    "custom.regex"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/scripts/bootstrap\\.sh$/"
+      ],
+      "matchStrings": [
+        "# renovate: depName=(?<depName>\\S+) version=(?<currentValue>\\S+)\\s+git -C \\.tools/xcodegen-source checkout --detach (?<currentDigest>[a-f0-9]{40})"
+      ],
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/scripts/lint-tools\\.sh$/"
+      ],
+      "matchStrings": [
+        "[a-z]+_version=(?<currentValue>\\S+) # renovate: depName=(?<depName>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    }
+  ]
 }

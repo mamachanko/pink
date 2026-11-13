@@ -32,3 +32,5 @@ gh api --method PATCH repos/mamachanko/pink \
 ```
 
 Protection rules need actual emitted check names/app identities; do not submit an invented generic policy. Apply after inspecting the first workflow run. Keep release-environment reviewers, secrets and rules in the GitHub settings UI; never put secret values in issues or repository files.
+
+Renovate custom managers extract the XcodeGen tag plus commit digest from bootstrap, and actionlint/ShellCheck versions from lint-tools. Tool update PRs must include newly verified checksum entries and, for XcodeGen, the genuine upstream Package.resolved. CI deliberately fails an archive update with no matching checksum. Configuration validation does not prove app installation or activation.
