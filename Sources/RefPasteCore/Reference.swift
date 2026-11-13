@@ -44,7 +44,7 @@ public struct Parser: Sendable {
     public init(rules: [HostRule] = HostRule.defaults) throws {
         for (i, r) in rules.enumerated() {
             let labels = r.host.split(separator: ".", omittingEmptySubsequences: false)
-            guard !labels.isEmpty,
+            guard r.host.utf8.count <= 253, !labels.isEmpty,
                 labels.allSatisfy({ label in
                     !label.isEmpty && label.count <= 63 && label.first != "-" && label.last != "-"
                         && label.utf8.allSatisfy {
