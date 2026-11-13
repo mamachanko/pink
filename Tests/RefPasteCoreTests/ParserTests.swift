@@ -34,6 +34,15 @@ final class ParserTests: XCTestCase {
         ] { XCTAssertNil(parser.parse(input), input) }
     }
     func testEnterpriseRules() throws {
+        for suffix in ["", "/", "/diffs", "/commits", "/pipelines"] {
+            XCTAssertNotNil(try Parser().parse("https://gitlab.com/a/b/-/merge_requests/1" + suffix))
+        }
+        let disabled = try Parser(rules: [.init(service: .github, host: "github.com", enabled: false)])
+        XCTAssertNil(disabled.parse("https://github.com/a/b/pull/1"))
+        var settings = Settings()
+        XCTAssertEqual(try Settings.decode(JSONEncoder().encode(settings)), settings)
+        settings.schema = 2
+        XCTAssertThrowsError(try Settings.decode(JSONEncoder().encode(settings)))
         let parser = try Parser(rules: [
             .init(service: .gitlab, host: "git.example", port: 8443, basePath: "/code", allowHTTP: true)
         ])
