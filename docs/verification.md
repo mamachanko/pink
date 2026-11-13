@@ -26,3 +26,7 @@ Final local execution:
 - PASS `git diff --check`.
 - BLOCKED `make build`: exits 1, “macOS and Xcode required”. BLOCKED `make package`: exits 1, “macOS packaging required”. `make verify` consequently cannot pass on this host.
 - Native AppKit tests, universal build, extracted/mounted artifacts, fixed-version packaging, UI/permissions/login and receiving-app compatibility: NOT RUN. Apple signing/notarization/keychain cleanup: NOT RUN. No distributable artifacts produced.
+
+Remote delivery: git push succeeded using the configured transport. CLI API access was forbidden; the connected GitHub app created draft PR https://github.com/mamachanko/pink/pull/1. CI https://github.com/mamachanko/pink/actions/runs/43385865765 started both macos-15 arm64 and macos-15-intel jobs; title check passed. Native results are recorded below when available.
+
+Additional review: post-write ownership nonce check and external-copy regression test added; portable suite now has 9 tests. Icon rasterization uses an explicit bitmap context so output dimensions don't depend on runner display scale.

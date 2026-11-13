@@ -11,6 +11,7 @@ import XCTest
     var failRead = false
     var failWrite = false
     var afterRead: (() -> Void)?
+    var afterWrite: (() -> Void)?
     func read() -> Payload? {
         reads += 1
         let p = payload
@@ -22,6 +23,7 @@ import XCTest
         changeCount += 1
         if failWrite { return false }
         payload = value
+        afterWrite?()
         return true
     }
     func external(_ value: Payload? = nil) {
@@ -170,5 +172,24 @@ extension MonitorTests {
         XCTAssertFalse(m.canRestore)
         m.restore()
         XCTAssertEqual(b.writes, 2)
+    }
+}
+
+extension MonitorTests {
+    @MainActor func testExternalCopyImmediatelyAfterWriteIsNotSwallowed() async throws {
+        let b = FakeBoard()
+        let c = Clock()
+        let p = Permission()
+        let m = ClipboardMonitor(board: b, builder: Builder(), permission: p, scheduler: c, parser: try Parser())
+        m.enable()
+        let fresh = b.payload
+        b.afterWrite = { b.external(fresh) }
+        b.external()
+        c.tick?()
+        XCTAssertFalse(m.canRestore)
+        b.afterWrite = nil
+        c.tick?()
+        XCTAssertEqual(b.writes, 2)
+        XCTAssertTrue(m.canRestore)
     }
 }
