@@ -112,7 +112,7 @@ import SwiftUI
             if settings.automatic { monitor.enable() } else { monitor.baseline() }
         }
     }
-    @objc private func showRefPasteCore.Settings() {
+    @objc private func showSettings() {
         let view = SettingsView(initial: settings) { [weak self] value in
             guard let self else { return }
             self.settings = value
