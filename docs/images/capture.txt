@@ -1,0 +1,8 @@
+Captured from Pink's real UI on macOS Version 15.8.2 (Build 24H232). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
+
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/43399485800
+Capture source PR head: 317aa21c8d3bf3ac165dc9f4be770f8bdb7aa152
+The screenshots are unmodified PNG bytes from that run. A real neutral backdrop window kept other applications out of the menu region. Settings were captured from the actual window frame and hosted controls.
+
+c3b78622e86c73fa055f4160e1b2d1c208fe11b7358f21ea6be61b57088add24  menu-bar.png
+d2dc3f64efb8e61bfb7494dde26dff74680f75c803294ae45f2a9e9c96812a66  settings.png
