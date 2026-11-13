@@ -48,3 +48,32 @@ extension ClipboardProofTests {
         XCTAssertNil(NativeBoard(board).read())
     }
 }
+
+@MainActor private struct AllowedPermission: PermissionPort { var canRead: Bool { true } }
+@MainActor private final class ManualScheduler: SchedulerPort {
+    func start(_ tick: @escaping @MainActor () -> Void) {}
+    func stop() {}
+}
+extension ClipboardProofTests {
+    @MainActor func testNativeMonitorOwnershipAndRestoration() async throws {
+        let board = NSPasteboard(name: .init("RefPaste.tests.\(UUID())"))
+        defer { board.releaseGlobally() }
+        let adapter = NativeBoard(board)
+        let original = Payload([Types.text: Data("https://github.com/a/b/pull/1".utf8)])
+        XCTAssertTrue(adapter.write(original))
+        let monitor = ClipboardMonitor(
+            board: adapter, builder: NativeRepresentations(), permission: AllowedPermission(),
+            scheduler: ManualScheduler(), parser: try Parser())
+        monitor.enable()
+        XCTAssertEqual(board.pasteboardItems?.first?.types.count, 1)
+        monitor.process()
+        XCTAssertEqual(board.pasteboardItems?.count, 1)
+        XCTAssertTrue(monitor.canRestore)
+        XCTAssertNotNil(board.data(forType: .init(Types.own)))
+        XCTAssertNotNil(board.data(forType: .init(Types.generated)))
+        monitor.restore()
+        XCTAssertEqual(adapter.read(), original)
+        XCTAssertFalse(monitor.canRestore)
+        monitor.pause()
+    }
+}
