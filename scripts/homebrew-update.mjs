@@ -4,6 +4,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {caskForDistribution} from './homebrew.mjs';
+function compareVersions(a,b) {
+ const left=a.split('.').map(BigInt), right=b.split('.').map(BigInt);
+ for(let i=0;i<3;i++) { if(left[i]>right[i]) return 1; if(left[i]<right[i]) return -1; }
+ return 0;
+}
 export function proposeCaskUpdate({directory='dist',repository=process.env.GITHUB_REPOSITORY,runGh=(args)=>execFileSync('gh',args,{encoding:'utf8'}).trim()}={}) {
  if(!existsSync(`${directory}/build-info.json`)) return {created:false};
  if(repository!=='mamachanko/pink') throw new Error('Unexpected tap repository');
@@ -12,8 +17,12 @@ export function proposeCaskUpdate({directory='dist',repository=process.env.GITHU
  const branch=`homebrew/v${info.version}`;
  const gh=(...args)=>runGh(args);
  const main=JSON.parse(gh('api',`repos/${repository}/git/ref/heads/main`)).object.sha;
- const current=JSON.parse(gh('api',`repos/${repository}/contents/Casks/pink.rb?ref=main`));
- if(Buffer.from(current.content,'base64').toString('utf8')===content) return {created:false};
+ const current=JSON.parse(gh('api',`repos/${repository}/contents/Casks/pink.rb?ref=${main}`));
+ const currentContent=Buffer.from(current.content,'base64').toString('utf8');
+ if(currentContent===content) return {created:false};
+ const currentVersion=currentContent.match(/^\s*version "(\d+\.\d+\.\d+)"/m)?.[1];
+ if(!currentVersion) throw new Error('Malformed current Homebrew metadata');
+ if(compareVersions(currentVersion,info.version)>0) return {created:false,reason:'newer-cask-already-reviewed'};
  const temporary=mkdtempSync(join(tmpdir(),'pink-homebrew-'));
  try {
   const refs=JSON.parse(gh('api',`repos/${repository}/git/matching-refs/heads/${branch}`));
@@ -22,7 +31,9 @@ export function proposeCaskUpdate({directory='dist',repository=process.env.GITHU
    gh('api','--method','POST',`repos/${repository}/git/refs`,'--input',file);
   }
   const old=JSON.parse(gh('api',`repos/${repository}/contents/Casks/pink.rb?ref=${branch}`));
-  if(Buffer.from(old.content,'base64').toString('utf8')!==content) {
+  const oldContent=Buffer.from(old.content,'base64').toString('utf8');
+  if(oldContent!==currentContent && oldContent!==content) throw new Error('Homebrew update branch changed; manual review required');
+  if(oldContent!==content) {
    const file=join(temporary,'cask.json');writeFileSync(file,JSON.stringify({message:`chore(homebrew): update Pink to ${info.version}`,content:Buffer.from(content).toString('base64'),sha:old.sha,branch}));
    gh('api','--method','PUT',`repos/${repository}/contents/Casks/pink.rb`,'--input',file);
   }

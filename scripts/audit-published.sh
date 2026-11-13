@@ -5,9 +5,9 @@ mount="$work/mount"
 cleanup() { hdiutil detach "$mount" >/dev/null 2>&1 || true; rm -rf "$work"; }
 trap cleanup EXIT
 while read -r version checksum commit; do
-  curl --fail --location --silent --show-error "https://github.com/mamachanko/pink/releases/download/v$version/Pink-$version-adhoc.dmg" -o "$work/published.dmg"
-  printf '%s  %s\n' "$checksum" "$work/published.dmg" | shasum -a 256 -c -
-  hdiutil attach "$work/published.dmg" -mountpoint "$mount" -nobrowse -readonly >/dev/null
+  curl --fail --location --silent --show-error "https://github.com/mamachanko/pink/releases/download/v$version/Pink-$version-adhoc.dmg" -o "$work/Pink-$version.dmg"
+  printf '%s  %s\n' "$checksum" "$work/Pink-$version.dmg" | shasum -a 256 -c -
+  hdiutil attach "$work/Pink-$version.dmg" -mountpoint "$mount" -nobrowse -readonly >/dev/null
   diskutil info -plist "$mount" > "$work/volume.plist"
   test "$(/usr/libexec/PlistBuddy -c 'Print VolumeName' "$work/volume.plist")" = Pink
   node scripts/package-layout.mjs "$mount"
