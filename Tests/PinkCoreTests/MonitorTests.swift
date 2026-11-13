@@ -183,6 +183,15 @@ extension MonitorTests {
         clock.tick?()
         XCTAssertEqual(board.writes, writes + 1)
         XCTAssertFalse(monitor.canRestore)
+        for invalid in [
+            Payload([Types.text: Data(text.utf8), Types.url: Data(text.utf8)]),
+            Payload([Types.text: Data(text.utf8), Types.url: Data([0xFF])]),
+            Payload([Types.text: Data([0xFF]), Types.url: Data("https://github.com/a/b/pull/1".utf8)]),
+        ] {
+            board.external(invalid)
+            clock.tick?()
+            XCTAssertEqual(board.writes, writes + 1)
+        }
     }
 
     @MainActor func testExternalChangeDuringConstructionAndConflictingURL() async throws {
