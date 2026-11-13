@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_INSTALL_CLEANUP=1
+export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_DEVELOPER=1
 brew --version
 if brew tap | grep -q '^mamachanko/pink$'; then
   echo 'Refusing to change an existing Pink tap during verification' >&2
@@ -11,13 +11,21 @@ work=$(mktemp -d)
 export XDG_CONFIG_HOME="$work/config"
 tapped=false
 cleanup() {
+  local result=$?
   if [[ $tapped == true ]]; then
     if brew list --cask mamachanko/pink/pink >/dev/null 2>&1; then
-      brew uninstall --cask --appdir="$work/Applications" mamachanko/pink/pink
+      # Homebrew remembers the app directory in installed cask metadata.
+      brew uninstall --cask mamachanko/pink/pink || result=1
     fi
-    brew untap mamachanko/pink
+    if [[ -e "$work/Applications/Pink.app" ]]; then
+      echo 'Homebrew did not remove the temporary application' >&2
+      result=1
+    fi
+    brew untap mamachanko/pink || result=1
   fi
   rm -rf "$work"
+  if [[ $result == 0 ]]; then echo 'PASS: Homebrew uninstalled Pink and removed the temporary tap/configuration'; fi
+  return "$result"
 }
 trap cleanup EXIT
 brew tap mamachanko/pink "$PWD"
