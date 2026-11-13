@@ -16,7 +16,7 @@
   <a href="#development">Development</a>
 </p>
 
-Pink is a small, native menu-bar app that turns copied GitHub and GitLab URLs into short, clickable references. Rich-text receivers can use the short labels; plain-text receivers get exactly what you copied.
+Pink is a native macOS menu-bar app that gives copied GitHub and GitLab URLs short, clickable labels. Your original text stays available for plain-text paste.
 
 Copy `https://github.com/acme/widget/pull/123` → paste [**acme/widget#123**](https://github.com/acme/widget/pull/123) in a rich-text field.
 
@@ -56,7 +56,7 @@ Download a ZIP or DMG from [GitHub Releases](https://github.com/mamachanko/pink/
 
 1. Open Pink and choose **Enable** to allow local clipboard processing.
 2. Copy a supported URL, or text containing several supported URLs.
-3. Paste normally. The receiving application chooses the rich-text or plain-text representation.
+3. Paste normally. Your app chooses whether to use rich or plain text.
 
 Pink lives in the menu bar, with no Dock icon. Its menu gives you:
 
@@ -100,7 +100,7 @@ Pink does not need Accessibility, Input Monitoring or Screen Recording permissio
 
 ## Limitations
 
-- **Paste behavior depends on the receiver.** An app can select plain text or strip links. Manual receiving-app compatibility checks remain **NOT RUN**; see the [compatibility record](docs/compatibility.md).
+- **Paste behavior depends on the app.** An app can select plain text or strip links. App-specific compatibility has not yet been manually verified; see the [compatibility record](docs/compatibility.md).
 - **An immediate paste can beat the watcher.** Pink checks about every 200 ms. The safe fallback is your original text. It never intercepts paste, simulates keys or inspects the destination app.
 - **Some clipboard items are deliberately skipped.** These include files, images, multiple items, unknown types, protected/temporary/generated/remote markers, existing HTML and named hyperlinks. Unmarked sensitive content cannot always be identified.
 - **Text is limited to 8 KiB per item.** Bare URLs need clear boundaries. Named Markdown destinations and HTML source are not reformatted; ambiguous adjacent URLs are left unchanged. Existing raw RTF links must agree with the proposed targets.
