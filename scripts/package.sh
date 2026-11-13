@@ -25,10 +25,11 @@ mkdir -p dist
 rm -f dist/RefPaste-*.zip dist/RefPaste-*.dmg dist/SHA256SUMS dist/build-info.json
 notarization=none
 if [[ $mode == developer-id ]]; then
-  secret_dir=$(mktemp -d)
+  secret_dir=$(mktemp -d "${REFPASTE_TEMP_ROOT:-${TMPDIR:-/tmp}}/refpaste-signing.XXXXXX")
   keychain="$secret_dir/signing.keychain-db"
   password=$(openssl rand -hex 32)
   security create-keychain -p "$password" "$keychain"
+  echo signing-keychain-created
   security set-keychain-settings -lut 21600 "$keychain"
   security unlock-keychain -p "$password" "$keychain"
   printf '%s' "$APPLE_CERTIFICATE_P12_BASE64" | /usr/bin/base64 -D > "$secret_dir/cert.p12"

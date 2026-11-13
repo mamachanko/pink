@@ -42,7 +42,7 @@ test('asset allowlist and checksums enforce completeness', () => {
   const values={'build-info.json': JSON.stringify({version:'1.2.3',signingMode:'adhoc'}),'RefPaste-1.2.3-adhoc.zip':'zip','RefPaste-1.2.3-adhoc.dmg':'dmg'};
   for(const [name,value] of Object.entries(values)) writeFileSync(join(cwd,name),value);
   writeFileSync(join(cwd,'SHA256SUMS'),Object.entries(values).map(([n,v])=>`${createHash('sha256').update(v).digest('hex')}  ${n}`).join('\n')+'\n');
-  validate(cwd);writeFileSync(join(cwd,'RefPaste-1.2.3-adhoc.zip'),'corrupt');assert.throws(()=>validate(cwd));
+  validate(cwd);rmSync(join(cwd,'RefPaste-1.2.3-adhoc.zip'));assert.throws(()=>validate(cwd));writeFileSync(join(cwd,'RefPaste-1.2.3-adhoc.zip'),'corrupt');assert.throws(()=>validate(cwd));
  } finally {rmSync(cwd,{recursive:true,force:true});}
 });
 test('actual exec preparation failure blocks publication', () => runEngine('failure'));
