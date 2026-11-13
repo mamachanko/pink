@@ -2,16 +2,16 @@
 set -euo pipefail
 node --input-type=module -e 'import {signingMode} from "./scripts/prepare.mjs"; signingMode(process.env)'
 [[ $(uname -s) == Darwin ]] || { echo 'BLOCKED: macOS packaging required' >&2; exit 1; }
-export REFPASTE_VERSION=${REFPASTE_VERSION:-0.0.0}
+export PINK_VERSION=${PINK_VERSION:-0.0.0}
 # Numeric CFBundleVersion, independent from marketing version; CI run number or local 1.
-REFPASTE_BUILD=1
+PINK_BUILD=1
 if [[ -n ${GITHUB_RUN_NUMBER:-} ]]; then
   if [[ ! $GITHUB_RUN_NUMBER =~ ^[0-9]{1,8}$ ]] || (( GITHUB_RUN_NUMBER >= 99990000 )); then
     echo 'CI build number out of range' >&2; exit 1
   fi
-  REFPASTE_BUILD="$((GITHUB_RUN_NUMBER / 10000 + 1)).$((GITHUB_RUN_NUMBER / 100 % 100)).$((GITHUB_RUN_NUMBER % 100))"
+  PINK_BUILD="$((GITHUB_RUN_NUMBER / 10000 + 1)).$((GITHUB_RUN_NUMBER / 100 % 100)).$((GITHUB_RUN_NUMBER % 100))"
 fi
-export REFPASTE_BUILD
+export PINK_BUILD
 mode=${SIGNING_MODE:-adhoc}
 keychain=''
 cleanup() {
@@ -20,12 +20,14 @@ cleanup() {
 }
 trap cleanup EXIT
 bash scripts/build.sh
-app=build/DerivedData/Build/Products/Release/RefPaste.app
+app=build/DerivedData/Build/Products/Release/Pink.app
 mkdir -p dist
-rm -f dist/RefPaste-*.zip dist/RefPaste-*.dmg dist/SHA256SUMS dist/build-info.json
+# Remove only generated packages from the previous product name.
+rm -f dist/RefPaste-*.zip dist/RefPaste-*.dmg
+rm -f dist/Pink-*.zip dist/Pink-*.dmg dist/SHA256SUMS dist/build-info.json
 notarization=none
 if [[ $mode == developer-id ]]; then
-  secret_dir=$(mktemp -d "${REFPASTE_TEMP_ROOT:-${TMPDIR:-/tmp}}/refpaste-signing.XXXXXX")
+  secret_dir=$(mktemp -d "${PINK_TEMP_ROOT:-${TMPDIR:-/tmp}}/pink-signing.XXXXXX")
   keychain="$secret_dir/signing.keychain-db"
   password=$(openssl rand -hex 32)
   security create-keychain -p "$password" "$keychain"
@@ -46,14 +48,14 @@ else
   codesign --force --options runtime --sign - "$app"
 fi
 suffix=$mode
-zip="dist/RefPaste-$REFPASTE_VERSION-$suffix.zip"
-dmg="dist/RefPaste-$REFPASTE_VERSION-$suffix.dmg"
+zip="dist/Pink-$PINK_VERSION-$suffix.zip"
+dmg="dist/Pink-$PINK_VERSION-$suffix.dmg"
 ditto -c -k --keepParent "$app" "$zip"
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"; cleanup' EXIT
-ditto "$app" "$stage/RefPaste.app"
+ditto "$app" "$stage/Pink.app"
 ln -s /Applications "$stage/Applications"
-hdiutil create -volname RefPaste -srcfolder "$stage" -ov -format UDZO "$dmg" >/dev/null
+hdiutil create -volname Pink -srcfolder "$stage" -ov -format UDZO "$dmg" >/dev/null
 if [[ $mode == developer-id ]]; then
   codesign --force --timestamp --keychain "$keychain" --sign "$APPLE_SIGNING_IDENTITY" "$dmg"
   xcrun notarytool submit "$dmg" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
@@ -61,7 +63,7 @@ if [[ $mode == developer-id ]]; then
   xcrun stapler validate "$dmg"
   spctl --assess --type open --context context:primary-signature "$dmg"
 fi
-export REFPASTE_NOTARIZATION=$notarization
+export PINK_NOTARIZATION=$notarization
 node scripts/manifest.mjs
-(cd dist && shasum -a 256 RefPaste-*.zip RefPaste-*.dmg build-info.json > SHA256SUMS)
+(cd dist && shasum -a 256 Pink-*.zip Pink-*.dmg build-info.json > SHA256SUMS)
 bash scripts/verify-artifacts.sh

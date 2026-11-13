@@ -14,14 +14,14 @@ for size in [16, 32, 128, 256, 512] {
         else { fatalError("Icon context creation failed") }
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = context
-        NSColor.systemIndigo.setFill()
+        NSColor(srgbRed: 1, green: 0.92, blue: 0.95, alpha: 1).setFill()
         NSBezierPath(
             roundedRect: NSRect(x: 0, y: 0, width: CGFloat(pixels), height: CGFloat(pixels)),
             xRadius: CGFloat(pixels) * 0.22, yRadius: CGFloat(pixels) * 0.22
         ).fill()
-        let text = "↗" as NSString
+        let text = "💕" as NSString
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: CGFloat(pixels) * 0.75, weight: .semibold),
+            .font: NSFont.systemFont(ofSize: CGFloat(pixels) * 0.68, weight: .semibold),
             .foregroundColor: NSColor.white,
         ]
         let textSize = text.size(withAttributes: attributes)

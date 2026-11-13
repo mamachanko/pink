@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import RefPasteCore
+@testable import PinkCore
 
 @MainActor final class FakeBoard: PasteboardPort {
     var changeCount = 1

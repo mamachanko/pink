@@ -53,3 +53,9 @@ PASS on both macos-15 arm64 and macos-15-intel x86_64 in https://github.com/mama
 The native integration test initially exposed ownership failure after reading back a generated rich item. A dedicated marker-only read fixed it; the full integration test now passes. Later revision also pauses polling before sleep/session inactivity and strengthens cleanup search-list comparison; final revision CI is checked separately. No native test changes the general clipboard, system permissions or launch-at-login registration.
 
 Earlier NOT RUN/BLOCKED rows above describe the initial Linux stage and are superseded by this native evidence for automated checks. Receiving apps, interactive UI/VoiceOver/appearance, actual clipboard privacy policy changes, login approval, successful Developer ID signing/notarization and publication/recovery remain NOT RUN. Protection/environment/Renovate activation remains maintainer setup.
+
+## Pink 💕 naming follow-up
+
+Product identity is now Pink throughout UI, Swift targets/modules, XcodeGen, bundle/executable/icon, CI artifacts, release assets, build variables and current documentation. The 💕 emoji replaces the menu-bar link symbol and application icon glyph. Earlier records above retain original names and paths as historical evidence.
+
+Local PASS: `make lint test` with Swift 6.2 on Linux (12 core tests, including two settings-migration tests; 14 installed release-tooling tests). `npm install --package-lock-only --ignore-scripts` regenerated the package-name metadata with no dependency-version changes. `git diff --check` passed. Native bundle metadata checks now require Pink, its new bundle ID and Pink executable/icon paths; native compilation, icon generation and packaging are verified by follow-up CI, not inferred from Linux results. Preference migration imports validated settings only, never overrides existing Pink preferences, and never changes clipboard permissions or login registration.

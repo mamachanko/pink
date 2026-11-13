@@ -12,7 +12,7 @@ export function signingMode(env) {
 export function prepare(version, env = process.env) {
   if (!/^[1-9]\d*\.\d+\.\d+$/.test(version)) throw new Error('Expected stable release version');
   signingMode(env);
-  const result = spawnSync('bash', ['scripts/package.sh'], {stdio: 'inherit', env: {...env, REFPASTE_VERSION: version}});
+  const result = spawnSync('bash', ['scripts/package.sh'], {stdio: 'inherit', env: {...env, PINK_VERSION: version}});
   if (result.status !== 0) throw new Error('Package preparation failed');
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) prepare(process.argv[2]);

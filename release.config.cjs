@@ -7,7 +7,7 @@ module.exports = {
     ['@semantic-release/exec', { prepareCmd: 'node scripts/prepare.mjs ${nextRelease.version}' }],
     ['@semantic-release/github', {
       assets: [
-        {path: 'dist/RefPaste-*.zip'}, {path: 'dist/RefPaste-*.dmg'},
+        {path: 'dist/Pink-*.zip'}, {path: 'dist/Pink-*.dmg'},
         {path: 'dist/SHA256SUMS'}, {path: 'dist/build-info.json'}
       ], successComment: false, failComment: false, releasedLabels: false
     }]
