@@ -62,6 +62,11 @@ extension ParserTests {
             r.html,
             "<a href=\"https://github.com/a/b/pull/1?x=&#39;&quot;&amp;y=&lt;&gt;\">a&amp;&lt;&gt;&#39;&quot;</a>")
         let p = try Parser()
+        let encoded = "https://github.com/%41cme/%57idget/pull/123?x=%2F#review"
+        XCTAssertEqual(p.parse(encoded)?.label, "Acme/Widget#123")
+        XCTAssertEqual(p.parse(encoded)?.original, encoded)
+        XCTAssertNil(p.parse("https://github.com/a%5Cb/b/pull/1"))
+        XCTAssertNil(p.parse("https://github.com/%2e/b/pull/1"))
         XCTAssertNil(p.parse("https://github.com/a/b/pull/1?q=%E2%80%AE"))
         XCTAssertNil(p.parse("https://github.com/a/b/pull/1?q=%FF"))
         XCTAssertNil(p.parse("https://gitlab.com/a/b/-/issues/1/diffs"))
