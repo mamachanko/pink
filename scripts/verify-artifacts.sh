@@ -9,7 +9,7 @@ trap cleanup EXIT
 zip=(dist/Pink-*.zip)
 dmg=(dist/Pink-*.dmg)
 ditto -x -k "${zip[0]}" "$work/zip"
-hdiutil attach "${dmg[0]}" -mountpoint "$mount" -nobrowse -readonly >/dev/null
+node scripts/mount-image.mjs "${dmg[0]}" "$mount"
 diskutil info -plist "$mount" > "$work/volume.plist"
 test "$(/usr/libexec/PlistBuddy -c 'Print VolumeName' "$work/volume.plist")" = Pink
 test -L "$mount/Applications"
