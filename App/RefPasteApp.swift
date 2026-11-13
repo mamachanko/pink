@@ -14,6 +14,7 @@ import SwiftUI
     private var monitor: ClipboardMonitor!
     private var settings = RefPasteCore.Settings()
     private var window: NSWindow?
+    private var resumeAfterSuspension = false
     private var lastLoggedState: MonitorState?
     private let log = Logger(subsystem: "io.refpaste.app", category: "state")
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -35,6 +36,11 @@ import SwiftUI
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = NSImage(systemSymbolName: "link", accessibilityDescription: "RefPaste")
         let center = NSWorkspace.shared.notificationCenter
+        center.addObserver(
+            self, selector: #selector(suspendMonitoring), name: NSWorkspace.willSleepNotification, object: nil)
+        center.addObserver(
+            self, selector: #selector(suspendMonitoring), name: NSWorkspace.sessionDidResignActiveNotification,
+            object: nil)
         center.addObserver(self, selector: #selector(rebaseline), name: NSWorkspace.didWakeNotification, object: nil)
         center.addObserver(
             self, selector: #selector(rebaseline), name: NSWorkspace.sessionDidBecomeActiveNotification, object: nil)
@@ -46,7 +52,18 @@ import SwiftUI
     private func save() {
         if let data = try? JSONEncoder().encode(settings) { UserDefaults.standard.set(data, forKey: "settings.v1") }
     }
-    @objc private func rebaseline() { monitor.baseline() }
+    @objc private func suspendMonitoring() {
+        resumeAfterSuspension = resumeAfterSuspension || monitor.state == .active
+        monitor.pause()
+    }
+    @objc private func rebaseline() {
+        if resumeAfterSuspension && settings.automatic && settings.consent {
+            resumeAfterSuspension = false
+            monitor.enable()
+        } else {
+            monitor.baseline()
+        }
+    }
     private func showConsent() {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
