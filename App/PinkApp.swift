@@ -14,6 +14,9 @@ import SwiftUI
     private var monitor: ClipboardMonitor!
     private var settings = PinkCore.Settings()
     private let settingsStore = SettingsStore()
+    #if PINK_README_CAPTURE
+        private var readmeCapture: ReadmeCapture?
+    #endif
     private var window: NSWindow?
     private var resumeAfterSuspension = false
     private var lastLoggedState: MonitorState?
@@ -24,12 +27,28 @@ import SwiftUI
             return
         }
         NSApp.setActivationPolicy(.accessory)
-        do { settings = try settingsStore.load() } catch {
-            settings = PinkCore.Settings()
-            log.error("invalid-settings")
-        }
+        #if PINK_README_CAPTURE
+            let capture = ReadmeCapture()
+            readmeCapture = capture
+            settings.consent = true
+            settings.automatic = true
+            configure(board: NativeBoard(capture.board), permission: ReadmeCapturePermission())
+            capture.start(statusItem: item) { [weak self] in
+                self?.showSettings()
+                return self?.window
+            }
+        #else
+            do { settings = try settingsStore.load() } catch {
+                settings = PinkCore.Settings()
+                log.error("invalid-settings")
+            }
+            configure(board: NativeBoard(.general), permission: NativePermission())
+            if !settings.consent { showConsent() }
+        #endif
+    }
+    private func configure(board: any PasteboardPort, permission: any PermissionPort) {
         monitor = ClipboardMonitor(
-            board: NativeBoard(.general), builder: NativeRepresentations(), permission: NativePermission(),
+            board: board, builder: NativeRepresentations(), permission: permission,
             scheduler: TimerScheduler(), parser: try! Parser(rules: settings.rules))
         monitor.onChange = { [weak self] in self?.refresh() }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -48,11 +67,19 @@ import SwiftUI
             self, selector: #selector(rebaseline), name: NSWorkspace.sessionDidBecomeActiveNotification, object: nil)
         if settings.consent && settings.automatic { monitor.enable() }
         refresh()
-        if !settings.consent { showConsent() }
     }
-    func applicationWillTerminate(_ notification: Notification) { monitor?.pause() }
+    func applicationWillTerminate(_ notification: Notification) {
+        monitor?.pause()
+        #if PINK_README_CAPTURE
+            readmeCapture?.stop()
+        #endif
+    }
     private func save() {
-        do { try settingsStore.save(settings) } catch { log.error("settings-save-failed") }
+        #if PINK_README_CAPTURE
+            return
+        #else
+            do { try settingsStore.save(settings) } catch { log.error("settings-save-failed") }
+        #endif
     }
     @objc private func suspendMonitoring() {
         resumeAfterSuspension = resumeAfterSuspension || monitor.state == .active
