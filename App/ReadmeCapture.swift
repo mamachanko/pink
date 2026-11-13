@@ -9,6 +9,7 @@
     @MainActor final class ReadmeCapture {
         let board = NSPasteboard(name: .init("Pink.readme.\(UUID())"))
         private let output: URL
+        private var backdrop: NSWindow?
         private var timer: Timer?
         private var stage = 0
         private var stopped = false
@@ -32,6 +33,14 @@
             self.timer = timer
             RunLoop.main.add(timer, forMode: .common)
             RunLoop.main.add(timer, forMode: .eventTracking)
+            // A real neutral backdrop keeps other applications out of the capture region.
+            let backdrop = NSWindow(
+                contentRect: NSScreen.main?.visibleFrame ?? .zero,
+                styleMask: .borderless, backing: .buffered, defer: false)
+            backdrop.backgroundColor = .windowBackgroundColor
+            backdrop.ignoresMouseEvents = true
+            backdrop.orderFrontRegardless()
+            self.backdrop = backdrop
             NSApp.activate(ignoringOtherApps: true)
             DispatchQueue.main.async { statusItem.button?.performClick(nil) }
         }
