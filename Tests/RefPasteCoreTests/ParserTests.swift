@@ -65,6 +65,9 @@ extension ParserTests {
         let encoded = "https://github.com/%41cme/%57idget/pull/123?x=%2F#review"
         XCTAssertEqual(p.parse(encoded)?.label, "Acme/Widget#123")
         XCTAssertEqual(p.parse(encoded)?.original, encoded)
+        let unicode = "https://gitlab.com/%C3%89quipe/Sous/Projet/-/merge_requests/1"
+        XCTAssertEqual(p.parse(unicode)?.label, "Équipe/Sous/Projet!1")
+        XCTAssertEqual(p.parse(unicode)?.original, unicode)
         XCTAssertNil(p.parse("https://github.com/a%5Cb/b/pull/1"))
         XCTAssertNil(p.parse("https://github.com/%2e/b/pull/1"))
         XCTAssertNil(p.parse("https://github.com/a/b/pull/1?q=%E2%80%AE"))

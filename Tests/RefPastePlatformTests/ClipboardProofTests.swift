@@ -77,3 +77,16 @@ extension ClipboardProofTests {
         monitor.pause()
     }
 }
+
+extension ClipboardProofTests {
+    @MainActor func testUnicodeRTFRoundTrip() async throws {
+        let original = "https://gitlab.com/%C3%89quipe/Sous/Projet/-/merge_requests/1?x=a&b=c#note"
+        let reference = try XCTUnwrap(Parser().parse(original))
+        let payload = try XCTUnwrap(NativeRepresentations().build(reference))
+        let rtf = try XCTUnwrap(payload.values[Types.rtf])
+        let rich = try NSAttributedString(
+            data: rtf, options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+        XCTAssertEqual(rich.string, "Équipe/Sous/Projet!1")
+        XCTAssertEqual((rich.attribute(.link, at: 0, effectiveRange: nil) as? URL)?.absoluteString, original)
+    }
+}

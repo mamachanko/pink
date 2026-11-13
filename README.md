@@ -13,7 +13,7 @@ Supported HTTPS routes:
 - GitHub `/owner/repo/pull/N`, `/owner/repo/issues/N`, with trailing slash or `files`, `commits`, `checks` review suffix.
 - GitLab `/namespace/project/-/issues/N` and `/merge_requests/N`; merge requests also accept `diffs`, `commits`, `pipelines`. Nested namespaces are retained. Issues use `#`; merge requests use `!`.
 
-Settings supports exact enterprise hosts, service, optional explicit port, installation prefix, enabled state and individual private-host HTTP opt-in. Rules cannot overlap. No wildcards or public-host HTTP. Prefixes are case-sensitive; host matching is case-insensitive. Explicit URL ports require matching explicit rule ports. Conservative ASCII path names only; unreserved percent escapes are accepted, while encoded separators are skipped. Query and fragment stay in the target.
+Settings supports exact enterprise hosts, service, optional explicit port, installation prefix, enabled state and individual private-host HTTP opt-in. Rules cannot overlap. No wildcards or public-host HTTP. Prefixes are case-sensitive; host matching is case-insensitive. Explicit URL ports require matching explicit rule ports. Unicode names and unreserved percent escapes are supported; encoded separators are skipped. Query and fragment stay in the target.
 
 All processing is local. No account, telemetry, servers, lookup, clipboard history or updater. Only settings are persisted. Unknown types, files/images, sensitive/temporary/generated/remote markers, multiple items, existing HTML/named rich links and mismatched representations are skipped. Unmarked sensitive content cannot be reliably identified. See [privacy](docs/privacy.md).
 

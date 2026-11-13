@@ -71,9 +71,9 @@ public struct Parser: Sendable {
     }
     private static func segment(_ s: String) -> Bool {
         !s.isEmpty && s != "." && s != ".."
-            && s.utf8.allSatisfy {
-                (48...57).contains($0) || (65...90).contains($0) || (97...122).contains($0)
-                    || [45, 46, 95].contains($0)
+            && s.unicodeScalars.allSatisfy {
+                CharacterSet.alphanumerics.contains($0) || CharacterSet.nonBaseCharacters.contains($0)
+                    || [45, 46, 95, 126].contains($0.value)
             }
     }
     public func parse(_ input: String) -> Reference? {
@@ -120,7 +120,7 @@ public struct Parser: Sendable {
             let value = UInt8(String(bytes: encodedBytes[(i + 1)...(i + 2)], encoding: .utf8)!, radix: 16)!
             guard
                 (48...57).contains(value) || (65...90).contains(value) || (97...122).contains(value)
-                    || [45, 46, 95, 126].contains(value)
+                    || [45, 46, 95, 126].contains(value) || value >= 128
             else { return nil }
         }
         guard let path = encodedPath.removingPercentEncoding, !path.contains("//"),

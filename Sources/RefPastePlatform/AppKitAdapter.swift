@@ -36,8 +36,8 @@ import RefPasteCore
 @MainActor public struct NativeRepresentations: RepresentationBuilder {
     public init() {}
     public func build(_ reference: Reference) -> Payload? {
-        guard let url = URL(string: reference.original) else { return nil }
-        let attributed = NSAttributedString(string: reference.label, attributes: [.link: url])
+        guard URL(string: reference.original) != nil else { return nil }
+        let attributed = NSAttributedString(string: reference.label, attributes: [.link: reference.original])
         guard
             let rtf = try? attributed.data(
                 from: NSRange(location: 0, length: attributed.length),
