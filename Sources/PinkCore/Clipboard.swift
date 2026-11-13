@@ -126,7 +126,8 @@ public enum MonitorState: String, Sendable {
         guard board.changeCount == count,
             let text = original.string(Types.text) ?? original.string(Types.url),
             original.values.values.reduce(0, { $0 + $1.count }) <= 65536,
-            original.string(Types.url).map({ $0 == text }) ?? true,
+            original.values[Types.text] == nil || original.string(Types.text) == text,
+            original.values[Types.url] == nil || (original.string(Types.url) == text && parser.parse(text) != nil),
             let formatted = parser.parseText(text), !builder.hasNamedLink(original, original: text),
             var output = builder.build(formatted, source: original)
         else {
