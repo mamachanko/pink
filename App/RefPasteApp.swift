@@ -12,7 +12,7 @@ import SwiftUI
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
     private var item: NSStatusItem!
     private var monitor: ClipboardMonitor!
-    private var settings = Settings()
+    private var settings = RefPasteCore.Settings()
     private var window: NSWindow?
     private var lastLoggedState: MonitorState?
     private let log = Logger(subsystem: "io.refpaste.app", category: "state")
@@ -23,8 +23,8 @@ import SwiftUI
         }
         NSApp.setActivationPolicy(.accessory)
         if let data = UserDefaults.standard.data(forKey: "settings.v1") {
-            do { settings = try Settings.decode(data) } catch {
-                settings = Settings()
+            do { settings = try RefPasteCore.Settings.decode(data) } catch {
+                settings = RefPasteCore.Settings()
                 log.error("invalid-settings")
             }
         }
@@ -112,7 +112,7 @@ import SwiftUI
             if settings.automatic { monitor.enable() } else { monitor.baseline() }
         }
     }
-    @objc private func showSettings() {
+    @objc private func showRefPasteCore.Settings() {
         let view = SettingsView(initial: settings) { [weak self] value in
             guard let self else { return }
             self.settings = value
@@ -150,7 +150,7 @@ import SwiftUI
     @objc private func quit() { NSApp.terminate(nil) }
 }
 struct SettingsView: View {
-    @State var value: Settings
+    @State var value: RefPasteCore.Settings
     @State private var host = ""
     @State private var base = ""
     @State private var port = ""
@@ -158,8 +158,8 @@ struct SettingsView: View {
     @State private var http = false
     @State private var error = ""
     @State private var loginStatus = SMAppService.mainApp.status
-    let apply: (Settings) -> Void
-    init(initial: Settings, apply: @escaping (Settings) -> Void) {
+    let apply: (RefPasteCore.Settings) -> Void
+    init(initial: RefPasteCore.Settings, apply: @escaping (RefPasteCore.Settings) -> Void) {
         _value = State(initialValue: initial)
         self.apply = apply
     }
