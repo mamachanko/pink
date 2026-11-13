@@ -39,12 +39,33 @@ import XCTest
 }
 @MainActor final class Permission: PermissionPort { var canRead = true }
 @MainActor struct Builder: RepresentationBuilder {
-    func build(_ reference: Reference) -> Payload? {
+    func build(_ reference: FormattedText, source: Payload) -> Payload? {
         Payload([Types.text: Data(reference.original.utf8), Types.html: Data(reference.html.utf8)])
     }
     func hasNamedLink(_ payload: Payload, original: String) -> Bool { false }
 }
 final class MonitorTests: XCTestCase {
+    @MainActor func testFormatsSupportedLinksAnywhereInProse() async throws {
+        let first = "https://github.com/Acme/Widget/pull/123"
+        let second = "https://gitlab.com/Group/Sub/Repo/-/merge_requests/45"
+        for text in [
+            "Please review \(first) when ready.",
+            "\(first) is ready.",
+            "Please review \(first)",
+            "Review (\(first)), then \(second).\nThanks 💕",
+        ] {
+            let board = FakeBoard()
+            let clock = Clock()
+            let monitor = ClipboardMonitor(
+                board: board, builder: Builder(), permission: Permission(), scheduler: clock, parser: try Parser())
+            monitor.enable()
+            board.external(Payload([Types.text: Data(text.utf8)]))
+            clock.tick?()
+            XCTAssertEqual(board.writes, 1, "A text item with supported embedded URLs must be formatted")
+            XCTAssertEqual(board.payload.string(Types.text), text)
+            XCTAssertTrue(board.payload.string(Types.html)?.contains("Acme/Widget#123") == true)
+        }
+    }
     @MainActor func testBaselineSelfWriteRepeatAndRestore() async throws {
         let b = FakeBoard()
         let c = Clock()
@@ -126,13 +147,44 @@ final class MonitorTests: XCTestCase {
 
 @MainActor final class RacingBuilder: RepresentationBuilder {
     var duringBuild: (() -> Void)?
-    func build(_ reference: Reference) -> Payload? {
+    func build(_ reference: FormattedText, source: Payload) -> Payload? {
         duringBuild?()
         return Payload([Types.text: Data(reference.original.utf8)])
     }
     func hasNamedLink(_ payload: Payload, original: String) -> Bool { false }
 }
 extension MonitorTests {
+    @MainActor func testProseRestorationConflictsAndConstructionRace() async throws {
+        let text = "Review https://github.com/a/b/pull/1 and https://gitlab.com/a/b/-/issues/2 please"
+        let original = Payload([Types.text: Data(text.utf8)])
+        let board = FakeBoard()
+        let clock = Clock()
+        let builder = RacingBuilder()
+        let monitor = ClipboardMonitor(
+            board: board, builder: builder, permission: Permission(), scheduler: clock, parser: try Parser())
+        monitor.enable()
+        board.external(original)
+        builder.duringBuild = { board.external() }
+        clock.tick?()
+        XCTAssertEqual(board.writes, 0)
+        builder.duringBuild = nil
+        board.external(original)
+        clock.tick?()
+        XCTAssertTrue(monitor.canRestore)
+        let writes = board.writes
+        clock.tick?()
+        XCTAssertEqual(board.writes, writes)
+        monitor.restore()
+        XCTAssertEqual(board.payload, original)
+        board.external(
+            Payload([
+                Types.text: Data(text.utf8), Types.url: Data("https://github.com/a/b/pull/1".utf8),
+            ]))
+        clock.tick?()
+        XCTAssertEqual(board.writes, writes + 1)
+        XCTAssertFalse(monitor.canRestore)
+    }
+
     @MainActor func testExternalChangeDuringConstructionAndConflictingURL() async throws {
         let b = FakeBoard()
         let c = Clock()

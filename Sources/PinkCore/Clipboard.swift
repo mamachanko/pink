@@ -25,7 +25,7 @@ extension PasteboardPort {
     public func readMarker() -> Data? { read()?.values[Types.own] }
 }
 @MainActor public protocol RepresentationBuilder {
-    func build(_ reference: Reference) -> Payload?
+    func build(_ text: FormattedText, source: Payload) -> Payload?
     func hasNamedLink(_ payload: Payload, original: String) -> Bool
 }
 @MainActor public protocol PermissionPort { var canRead: Bool { get } }
@@ -127,8 +127,8 @@ public enum MonitorState: String, Sendable {
             let text = original.string(Types.text) ?? original.string(Types.url),
             original.values.values.reduce(0, { $0 + $1.count }) <= 65536,
             original.string(Types.url).map({ $0 == text }) ?? true,
-            let reference = parser.parse(text), !builder.hasNamedLink(original, original: text),
-            var output = builder.build(reference)
+            let formatted = parser.parseText(text), !builder.hasNamedLink(original, original: text),
+            var output = builder.build(formatted, source: original)
         else {
             onChange?()
             return
