@@ -5,7 +5,8 @@ import XCTest
 @MainActor final class FakeBoard: PasteboardPort {
     var changeCount = 1
     var payload = Payload([Types.text: Data("https://github.com/a/b/pull/1".utf8)])
-    var advertisedTypes: [[String]] { [Array(payload.values.keys)] }
+    var itemCount = 1
+    var advertisedTypes: [[String]] { Array(repeating: Array(payload.values.keys), count: itemCount) }
     var reads = 0
     var writes = 0
     var failRead = false
@@ -191,5 +192,32 @@ extension MonitorTests {
         c.tick?()
         XCTAssertEqual(b.writes, 2)
         XCTAssertTrue(m.canRestore)
+    }
+}
+
+extension MonitorTests {
+    @MainActor func testMultipleItemsAndChangeDuringRestoration() async throws {
+        let b = FakeBoard()
+        let c = Clock()
+        let p = Permission()
+        let m = ClipboardMonitor(board: b, builder: Builder(), permission: p, scheduler: c, parser: try Parser())
+        m.enable()
+        for count in [0, 2] {
+            b.itemCount = count
+            b.external()
+            c.tick?()
+            XCTAssertEqual(b.reads, 0)
+            XCTAssertEqual(b.writes, 0)
+        }
+        b.itemCount = 1
+        b.external()
+        c.tick?()
+        XCTAssertTrue(m.canRestore)
+        let original = Payload([Types.text: Data("https://github.com/a/b/pull/2".utf8)])
+        b.afterRead = { b.external(original) }
+        m.restore()
+        XCTAssertEqual(b.writes, 1)
+        XCTAssertEqual(b.payload, original)
+        XCTAssertFalse(m.canRestore)
     }
 }
