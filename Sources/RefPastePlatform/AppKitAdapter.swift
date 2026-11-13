@@ -17,6 +17,13 @@ import RefPasteCore
         }
         return Payload(result)
     }
+    public func readMarker() -> Data? {
+        guard let items = board.pasteboardItems, items.count == 1,
+            items[0].types.contains(.init(Types.own)),
+            let data = items[0].data(forType: .init(Types.own)), data.count <= 64
+        else { return nil }
+        return data
+    }
     public func write(_ payload: Payload) -> Bool {
         let item = NSPasteboardItem()
         for (key, value) in payload.values {
