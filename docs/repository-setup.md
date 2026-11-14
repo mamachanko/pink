@@ -5,7 +5,7 @@ Repository identity is mamachanko/pink. CODEOWNERS uses its actual owner @mamach
 Review repository Settings:
 
 - Apply `.github/rulesets/main.json` after the workflow changes have passed on main. It requires a PR, the unique `Required checks` gate from the observed GitHub Actions integration (15368), an up-to-date base, resolved review threads, squash/rebase merging and linear history; it blocks deletion/force pushes and provides no admin bypass. Required approving reviews is zero for this single-owner repository so the owner can merge their own checked PRs. Add a second-person approval requirement when another reviewer is available.
-- Enable squash merge. Choose PR title for squash subject and PR body for body so `!` and `BREAKING CHANGE:` reach main. Disable other merge methods if the team adopts this release policy. Review final squash message before merging.
+- If the squash-plus-rebase option is selected, enable squash without disabling the existing rebase method. Choose PR title for squash subject and PR body for body so `!` and `BREAKING CHANGE:` reach main. Source commit subjects are also validated for rebase merges. Review the final merge message.
 - Actions default token: read-only. Permit only pinned/reviewed actions. Release publishing explicitly escalates contents:write. Trusted Homebrew maintenance separately uses contents/pull-requests/actions write scopes; dispatched CI remains read-only. Fork workflows must never receive release secrets.
 - Create `release` environment restricted to main; optionally require a reviewer and prevent self-review. Default SIGNING_MODE adhoc, or configure complete Developer ID contract in docs/release.md. GitHub environment protections availability depends on plan and repository visibility; don't change visibility to acquire them.
 - Protect v* tags from unauthorized creation/update/deletion while allowing the authorized release workflow identity to create them. Check ruleset bypass implications before applying. Never give general write tokens to fork workflows.
@@ -23,11 +23,11 @@ gh api repos/mamachanko/pink/rulesets
 gh api repos/mamachanko/pink/environments
 ```
 
-Reviewable settings template (not automatically executed):
+Optional squash-plus-rebase settings template (not executed; apply only after choosing that merge-method option):
 
 ```sh
 gh api --method PATCH repos/mamachanko/pink \
-  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
+  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=true \
   -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY
 ```
 
