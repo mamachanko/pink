@@ -1,11 +1,6 @@
 name: README images
 on:
-  pull_request:
-    paths:
-      - 'App/**'
-      - 'project.yml'
-      - 'scripts/capture-readme.mjs'
-      - '.github/workflows/readme-images.yml'
+  workflow_call:
 permissions:
   contents: read
 jobs:

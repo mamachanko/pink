@@ -5,3 +5,5 @@
 - Keep original text exact; baseline on activation. No hooks or destination detection.
 - Use Conventional Commits on feature branches. Never merge or publish manually.
 - Release only through semantic-release after verification. Never silently downgrade signing.
+- `Required checks` covers title validation and reusable native/UI/package verification; unexpected skips must fail. Ruleset files require separate verified admin activation.
+- Cask automation uses one branch/PR, verified release bytes, non-forced updates and read-only exact-head CI dispatch. Never overwrite manual bot-branch edits or automatically merge.

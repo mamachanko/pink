@@ -36,12 +36,15 @@ jobs:
           name: Pink-${{ matrix.runner }}
           path: dist/
           if-no-files-found: error
+  readme:
+    uses: ./.github/workflows/readme-images.yml
   required:
     name: Required verification
     if: always()
-    needs: [native]
+    needs: [native, readme]
     runs-on: ubuntu-24.04
     steps:
       - env:
-          RESULT: ${{ needs.native.result }}
-        run: test "$RESULT" = success
+          NATIVE_RESULT: ${{ needs.native.result }}
+          README_RESULT: ${{ needs.readme.result }}
+        run: test "$NATIVE_RESULT" = success && test "$README_RESULT" = success

@@ -1,18 +1,49 @@
 name: CI
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Open same-repository PR number to verify at this exact branch head
+        required: true
+        type: string
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || inputs.pull_request || github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     uses: ./.github/workflows/verify.yml
   title:
-    if: github.event_name == 'pull_request'
+    if: github.event_name != 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node 24)
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 (Node 24)
+        with:
+          node-version: '24.22.1'
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-pr.mjs
+  required:
+    name: Required checks
+    if: always()
+    needs: [verify, title]
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node 24)
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 (Node 24)
+        with:
+          node-version: '24.22.1'
       - env:
-          TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          node -e 'if (!/^(feat|fix|perf|docs|test|chore|ci|build|refactor|style|revert)(\([^)]+\))?!?: .+/.test(process.env.TITLE)) process.exit(1)'
+          CI_EVENT: ${{ github.event_name }}
+          VERIFICATION_RESULT: ${{ needs.verify.result }}
+          TITLE_RESULT: ${{ needs.title.result }}
+        run: node scripts/ci-gate.mjs
