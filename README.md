@@ -1,8 +1,32 @@
 <h1 align="center">Pink 💕</h1>
 
 <p align="center">
-  <strong>Readable GitHub and GitLab links. Your original text, intact.</strong>
+  <strong>Copy full URLs. Paste readable references.</strong>
 </p>
+
+Pink makes long GitHub and GitLab references easier to read in messages, notes and reviews. Copy normally; Pink adds short, clickable links alongside your untouched original text.
+
+<table>
+  <thead><tr><th>You copy</th><th>Rich-text paste</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/<wbr>pull/123</code></td>
+      <td><a href="https://github.com/acme/widget/pull/123"><strong>acme/widget#123</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://gitlab.com/<wbr>team/platform/api/<wbr>-/merge_requests/<wbr>45</code></td>
+      <td><a href="https://gitlab.com/team/platform/api/-/merge_requests/45"><strong>team/platform/api!45</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>Please review https://github.com/<wbr>acme/widget/<wbr>pull/123 and https://gitlab.com/<wbr>team/project/<wbr>-/issues/7. Thanks!</code></td>
+      <td>Please review <a href="https://github.com/acme/widget/pull/123"><strong>acme/widget#123</strong></a> and <a href="https://gitlab.com/team/project/-/issues/7"><strong>team/project#7</strong></a>. Thanks!</td>
+    </tr>
+  </tbody>
+</table>
+
+**Plain-text paste keeps the left column exactly.** A terminal or plain-text field can select the full original URLs and message. An app accepting rich text can select the right column, with every short label pointing to its original destination. Both representations are on the same clipboard item—your app chooses what to paste.
+
+Pink works with single links, repeated links and multiline prose. It stays in your menu bar, runs locally, and never intercepts your paste shortcut. [How paste formats work](docs/architecture.md#urls-embedded-in-prose).
 
 <p align="center">
   <a href="https://github.com/mamachanko/pink/actions/workflows/ci.yml"><img src="https://github.com/mamachanko/pink/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status"></a>
@@ -15,12 +39,6 @@
   <a href="#supported-links">Supported links</a> ·
   <a href="#development">Development</a>
 </p>
-
-Pink is a native macOS menu-bar app that gives copied GitHub and GitLab URLs short, clickable labels. Your original text stays available for plain-text paste.
-
-Copy `https://github.com/acme/widget/pull/123` → paste [**acme/widget#123**](https://github.com/acme/widget/pull/123) in a rich-text field.
-
-It works with a single URL or a whole message containing several links, keeping surrounding prose, repeated references and line breaks in place.
 
 <table align="center">
   <tr><th>In the menu bar</th><th>Settings</th></tr>
@@ -43,7 +61,7 @@ brew tap mamachanko/pink https://github.com/mamachanko/pink.git
 brew install --cask mamachanko/pink/pink
 ```
 
-Update with `brew upgrade --cask mamachanko/pink/pink`. The custom tap lives in this repository and follows reviewed, checksum-pinned releases; a direct download may be newer while a cask update awaits review.
+Update with `brew upgrade --cask mamachanko/pink/pink`. The custom tap lives in this repository and follows reviewed, checksum-pinned releases. Automation keeps one update PR current and starts its checks automatically; a direct download may be newer while that PR awaits merge.
 
 ### Direct download
 
