@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {mkdtempSync,readFileSync,writeFileSync,rmSync,existsSync,copyFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -155,4 +156,9 @@ test('a stale release snapshot cannot downgrade an already proposed newer genera
   assert.equal(proposeCaskUpdate({directory:f.directory,repository,runGh:r.runGh}).reason,'newer-cask-already-proposed');
   assert.equal(r.state.writes.length,0);assert.equal(r.state.dispatches.length,0);
  }finally{f.remove();}
+});
+
+test('the CLI requires explicit published-release mode before it can call GitHub',()=>{
+ const result=spawnSync(process.execPath,['scripts/homebrew-update.mjs'],{encoding:'utf8'});
+ assert.notEqual(result.status,0);assert.match(result.stderr,/Use --latest to update from verified published assets/);
 });

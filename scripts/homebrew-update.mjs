@@ -116,4 +116,7 @@ export function updateLatest({repository=process.env.GITHUB_REPOSITORY,runGh=exe
   return proposeCaskUpdate({directory,repository,runGh});
  } finally {rmSync(directory,{recursive:true,force:true});}
 }
-if(process.argv[1]===fileURLToPath(import.meta.url)) console.log(JSON.stringify(process.argv.includes('--latest')?updateLatest():proposeCaskUpdate()));
+if(process.argv[1]===fileURLToPath(import.meta.url)) {
+ if(process.argv.length!==3||process.argv[2]!=='--latest')throw new Error('Use --latest to update from verified published assets');
+ console.log(JSON.stringify(updateLatest()));
+}
