@@ -148,3 +148,11 @@ test('latest-release maintenance verifies actual asset bytes and tag identity be
   assert.throws(()=>updateLatest({repository,runGh}),/Checksum mismatch/);assert.equal(existsSync(downloadDirectory),false);
  }finally{f.remove();}
 });
+
+test('a stale release snapshot cannot downgrade an already proposed newer generated cask',()=>{
+ const f=distribution(),r=remote({branch:true,pr:true,oldFile:renderCask({version:'3.0.0',sha256:'a'.repeat(64),signingMode:'adhoc'})});
+ try {
+  assert.equal(proposeCaskUpdate({directory:f.directory,repository,runGh:r.runGh}).reason,'newer-cask-already-proposed');
+  assert.equal(r.state.writes.length,0);assert.equal(r.state.dispatches.length,0);
+ }finally{f.remove();}
+});

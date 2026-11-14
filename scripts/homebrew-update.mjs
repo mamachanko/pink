@@ -49,6 +49,7 @@ function syncCaskAttempt({directory='dist',repository=process.env.GITHUB_REPOSIT
     if(!oldCommit.message.trimEnd().endsWith(`Pink-Generated-Cask-SHA256: ${digest(oldFile)}`))throw new Error('Automation branch changed manually; review required');
    }
   }
+  if(oldFile&&(!versionOf(oldFile)||compareVersions(versionOf(oldFile),info.version)>0))return {created:false,reason:'newer-cask-already-proposed'};
   if(pr&&(!/^chore\(homebrew\): update Pink to [1-9]\d*\.\d+\.\d+$/.test(pr.title)||!pr.body.includes('<!-- pink-homebrew:start -->')||!pr.body.includes('<!-- pink-homebrew:end -->')))throw new Error('Automation PR changed manually; review required');
   // A main push may race this run. Leave the branch untouched and let the next
   // serialized maintenance run use a fresh snapshot, rather than publishing stale metadata.
