@@ -28,7 +28,7 @@ No PAT, additional GitHub App, automatic approval or protection bypass is used. 
 
 ## Activation and recovery
 
-1. Merge the workflow change so `ci.yml` declares `workflow_dispatch` on the default branch. GitHub requires that default-branch declaration before dispatch is available.
+1. Confirm the merge-method choice before merging this draft change. For the proposed single refreshed PR, enable squash alongside the existing rebase option using the reviewed template in repository-setup.md. If rebase-only operation is required, select and test the fresh-PR alternative first. Then merge the workflow change so `ci.yml` declares `workflow_dispatch` on the default branch. GitHub requires that default-branch declaration before dispatch is available.
 2. Allow GitHub Actions to create pull requests under repository Settings → Actions → General. The repository files cannot activate that setting. Keep default workflow permissions read-only; job-level write scopes are explicit.
 3. Run `Homebrew metadata` once if no new main push or successful release has triggered it. Review the single generated PR and merge after `Required checks` succeeds.
 4. Apply the main ruleset described in [repository setup](repository-setup.md). New main pushes automatically refresh an outstanding bot PR and dispatch its new head's checks.
