@@ -25,9 +25,17 @@ for binary in Sparkle Autoupdate Updater.app/Contents/MacOS/Updater XPCServices/
 done
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-codesign -d --entitlements :- "$framework/XPCServices/Downloader.xpc" > "$work/downloader.plist" 2>/dev/null
-for entitlement in com.apple.security.app-sandbox com.apple.security.network.client; do
-  test "$(/usr/libexec/PlistBuddy -c "Print $entitlement" "$work/downloader.plist")" = true
+for helper in Autoupdate Updater.app XPCServices/Downloader.xpc XPCServices/Installer.xpc; do
+  codesign -d --entitlements :- ".tools/sparkle/Sparkle.framework/Versions/B/$helper" > "$work/vendor.plist" 2>/dev/null
+  codesign -d --entitlements :- "$framework/$helper" > "$work/bundled.plist" 2>/dev/null
+  for side in vendor bundled; do
+    if [[ -s "$work/$side.plist" ]]; then
+      plutil -convert json -o "$work/$side.json" "$work/$side.plist"
+    else
+      printf '{}\n' > "$work/$side.json"
+    fi
+  done
+  node -e 'const fs=require("node:fs"); require("node:assert/strict").deepEqual(JSON.parse(fs.readFileSync(process.argv[1])),JSON.parse(fs.readFileSync(process.argv[2])))' "$work/vendor.json" "$work/bundled.json"
 done
 codesign -d --entitlements :- "$app" > "$work/entitlements.plist" 2>/dev/null
 exception=$(/usr/libexec/PlistBuddy -c 'Print com.apple.security.cs.disable-library-validation' "$work/entitlements.plist" 2>/dev/null || true)
