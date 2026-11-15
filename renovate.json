@@ -12,6 +12,14 @@
   "customManagers": [
     {
       "customType": "regex",
+      "managerFilePatterns": ["/tools/sparkle\\.json$/"],
+      "matchStrings": ["\"version\": \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "sparkle-project/Sparkle",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": [
         "/scripts/bootstrap\\.sh$/"
       ],

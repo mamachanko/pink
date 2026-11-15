@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 node --input-type=module -e 'import {signingMode} from "./scripts/prepare.mjs"; signingMode(process.env)'
+node --input-type=module -e 'import {updateConfiguration} from "./scripts/updates.mjs"; updateConfiguration(process.env)'
 [[ $(uname -s) == Darwin ]] || { echo 'BLOCKED: macOS packaging required' >&2; exit 1; }
 export PINK_VERSION=${PINK_VERSION:-0.0.0}
 # Numeric CFBundleVersion, independent from marketing version; CI run number or local 1.
@@ -24,7 +25,7 @@ app=build/DerivedData/Build/Products/Release/Pink.app
 mkdir -p dist
 # Remove only generated packages from the previous product name.
 rm -f dist/RefPaste-*.zip dist/RefPaste-*.dmg
-rm -f dist/Pink-*.zip dist/Pink-*.dmg dist/SHA256SUMS dist/build-info.json
+rm -f dist/Pink-*.zip dist/Pink-*.dmg dist/SHA256SUMS dist/build-info.json dist/appcast.xml
 notarization=none
 if [[ $mode == developer-id ]]; then
   secret_dir=$(mktemp -d "${PINK_TEMP_ROOT:-${TMPDIR:-/tmp}}/pink-signing.XXXXXX")
@@ -37,7 +38,7 @@ if [[ $mode == developer-id ]]; then
   printf '%s' "$APPLE_CERTIFICATE_P12_BASE64" | /usr/bin/base64 -D > "$secret_dir/cert.p12"
   security import "$secret_dir/cert.p12" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign >/dev/null
   security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
-  codesign --force --options runtime --timestamp --keychain "$keychain" --sign "$APPLE_SIGNING_IDENTITY" "$app"
+  bash scripts/sign-app.sh "$app" "$APPLE_SIGNING_IDENTITY" "$keychain"
   ditto -c -k --keepParent "$app" "$secret_dir/notarize.zip"
   xcrun notarytool submit "$secret_dir/notarize.zip" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
   xcrun stapler staple "$app"
@@ -45,7 +46,7 @@ if [[ $mode == developer-id ]]; then
   spctl --assess --type execute --verbose "$app"
   notarization=accepted
 else
-  codesign --force --options runtime --sign - "$app"
+  bash scripts/sign-app.sh "$app"
 fi
 suffix=$mode
 zip="dist/Pink-$PINK_VERSION-$suffix.zip"
@@ -65,5 +66,6 @@ if [[ $mode == developer-id ]]; then
 fi
 export PINK_NOTARIZATION=$notarization
 node scripts/manifest.mjs
-(cd dist && shasum -a 256 Pink-*.zip Pink-*.dmg build-info.json > SHA256SUMS)
+node scripts/updates.mjs
+(cd dist && shasum -a 256 Pink-*.zip Pink-*.dmg build-info.json appcast.xml > SHA256SUMS)
 bash scripts/verify-artifacts.sh

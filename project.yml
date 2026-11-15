@@ -19,12 +19,17 @@ settings:
     CURRENT_PROJECT_VERSION: '$(PINK_BUILD)'
     PINK_VERSION: '0.0.0'
     PINK_BUILD: '1'
+    PINK_UPDATE_PUBLIC_KEY: ''
+    PINK_UPDATE_MODE: manual
+    CODE_SIGN_ENTITLEMENTS: App/Adhoc.entitlements
 targets:
   Pink:
     type: application
     platform: macOS
     sources: [App]
     dependencies:
+      - framework: .tools/sparkle/Sparkle.framework
+        embed: true
       - package: Pink
         product: PinkCore
       - package: Pink
@@ -43,6 +48,17 @@ targets:
         NSHumanReadableCopyright: 'MIT License; Copyright © 2026 Max Brauer'
         PinkCommit: '$(PINK_COMMIT)'
         CFBundleIconFile: Pink
+        SUFeedURL: https://github.com/mamachanko/pink/releases/latest/download/appcast.xml
+        SUPublicEDKey: '$(PINK_UPDATE_PUBLIC_KEY)'
+        PinkUpdateMode: '$(PINK_UPDATE_MODE)'
+        SUEnableAutomaticChecks: false
+        SUAutomaticallyUpdate: false
+        SUAllowsAutomaticUpdates: false
+        SUEnableSystemProfiling: false
+        SUShowReleaseNotes: false
+        SUVerifyUpdateBeforeExtraction: true
+        SURequireSignedFeed: true
+        SUSignedFeedFailureExpirationInterval: 0
 
   PinkReadmeCapture:
     type: application
@@ -53,6 +69,8 @@ targets:
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: PINK_README_CAPTURE
     sources: [App]
     dependencies:
+      - framework: .tools/sparkle/Sparkle.framework
+        embed: true
       - package: Pink
         product: PinkCore
       - package: Pink

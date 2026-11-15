@@ -84,6 +84,7 @@ Pink lives in the menu bar, with no Dock icon. Its menu gives you:
 | **Format current clipboard** | Process content you already copied. |
 | **Restore original clipboard** | Restore the last original item while Pink still owns the current clipboard. It cannot change text already pasted. |
 | **Settings** | Manage host rules, automatic formatting and opt-in launch at login. macOS may require login-item approval. |
+| **Check for Updates…** | Check for a newer release and choose whether to update. Also available in Settings. |
 
 Enabling or resuming Pink leaves existing clipboard content alone. Use **Format current clipboard** to process it explicitly.
 
@@ -92,6 +93,12 @@ A message containing a pull request and a merge request can appear as:
 > Please review [acme/widget#123](https://github.com/acme/widget/pull/123) and [team/project!45](https://gitlab.com/team/project/-/merge_requests/45).
 
 Each label keeps its own destination. Plain paste retains the entire original message, including both full URLs.
+
+### Updating Pink
+
+Open **Settings → Check for Updates…**, or use the same action in the menu. Pink reports when you’re up to date and lets you retry if the check fails. Checks contact GitHub only when you ask; they never send clipboard contents.
+
+Releases configured for signed in-app updates offer **Install Update**, then restart Pink using Sparkle’s native update dialog. Builds without update-signing configuration offer the release download for manual installation. Homebrew users can continue using `brew upgrade --cask mamachanko/pink/pink`. See [update delivery and setup](docs/updates.md).
 
 ## Supported links
 
@@ -112,7 +119,7 @@ Add a rule in **Settings → Host rules** for your GitHub or GitLab installation
 
 ## Privacy and permissions
 
-Processing stays on your Mac. Pink has no accounts, telemetry, network lookups, clipboard history or automatic updater. Only settings are saved. Clipboard contents and the single temporary restoration snapshot are never logged or persisted.
+Clipboard processing stays on your Mac. Pink has no accounts, telemetry, repository lookups or clipboard history. Update checks and downloads contact GitHub only after you request them. Clipboard contents and the single temporary restoration snapshot are never logged, persisted or sent. Settings and update preferences are saved locally.
 
 Pink does not need Accessibility, Input Monitoring or Screen Recording permissions. Its initial **Enable** consent is separate from macOS clipboard policy. On macOS 15.4+, an Ask/Deny policy stops monitoring; review the per-app **Paste from Other Apps** setting where available, then use **Retry**. See [privacy](docs/privacy.md) and [permission guidance](docs/installation.md#clipboard-permissions).
 

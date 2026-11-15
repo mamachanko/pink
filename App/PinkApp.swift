@@ -14,6 +14,7 @@ import SwiftUI
     private var monitor: ClipboardMonitor!
     private var settings = PinkCore.Settings()
     private let settingsStore = SettingsStore()
+    private let updates = UpdateController()
     #if PINK_README_CAPTURE
         private var readmeCapture: ReadmeCapture?
     #endif
@@ -27,6 +28,7 @@ import SwiftUI
             return
         }
         NSApp.setActivationPolicy(.accessory)
+        updates.onChange = { [weak self] in self?.refresh() }
         #if PINK_README_CAPTURE
             let capture = ReadmeCapture()
             readmeCapture = capture
@@ -69,6 +71,7 @@ import SwiftUI
         refresh()
     }
     func applicationWillTerminate(_ notification: Notification) {
+        updates.stop()
         monitor?.pause()
         #if PINK_README_CAPTURE
             readmeCapture?.stop()
@@ -128,6 +131,7 @@ import SwiftUI
         }
         menu.addItem(.separator())
         add("Settings…", #selector(showSettings), ",")
+        add("Check for Updates…", #selector(checkForUpdates), enabled: !updates.busy)
         add("About Pink…", #selector(about))
         add("Quit Pink", #selector(quit), "q")
         item.menu = menu
@@ -159,7 +163,7 @@ import SwiftUI
         }
     }
     @objc private func showSettings() {
-        let view = SettingsView(initial: settings) { [weak self] value in
+        let view = SettingsView(initial: settings, updates: updates) { [weak self] value in
             guard let self else { return }
             self.settings = value
             self.save()
@@ -169,8 +173,8 @@ import SwiftUI
         let controller = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: controller)
         window.title = "Pink Settings"
-        window.setContentSize(NSSize(width: 640, height: 660))
-        window.contentMinSize = NSSize(width: 640, height: 660)
+        window.setContentSize(NSSize(width: 640, height: 760))
+        window.contentMinSize = NSSize(width: 640, height: 760)
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
@@ -195,6 +199,7 @@ import SwiftUI
         }
     }
     @objc private func quit() { NSApp.terminate(nil) }
+    @objc private func checkForUpdates() { updates.check() }
 }
 struct SettingsView: View {
     @State var value: PinkCore.Settings
@@ -206,12 +211,15 @@ struct SettingsView: View {
     @State private var error = ""
     @State private var loginStatus = SMAppService.mainApp.status
     let apply: (PinkCore.Settings) -> Void
-    init(initial: PinkCore.Settings, apply: @escaping (PinkCore.Settings) -> Void) {
+    let updates: UpdateController
+    init(initial: PinkCore.Settings, updates: UpdateController, apply: @escaping (PinkCore.Settings) -> Void) {
         _value = State(initialValue: initial)
+        self.updates = updates
         self.apply = apply
     }
     var body: some View {
         Form {
+            UpdatesSettings(updates: updates)
             Toggle("Automatic formatting", isOn: $value.automatic).disabled(!value.consent)
             Text(
                 "Processing is local. Plain paste keeps the exact original text. Immediate paste may beat the watcher."
@@ -280,7 +288,7 @@ struct SettingsView: View {
                     error = "Saved"
                 } catch { self.error = "Invalid or overlapping host rules" }
             }.keyboardShortcut(.defaultAction)
-        }.formStyle(.grouped).padding().frame(minWidth: 640, minHeight: 660)
+        }.formStyle(.grouped).padding().frame(minWidth: 640, minHeight: 760)
     }
     private var loginDescription: String {
         switch loginStatus {

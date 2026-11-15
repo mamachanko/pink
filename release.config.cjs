@@ -8,7 +8,7 @@ module.exports = {
     ['@semantic-release/github', {
       assets: [
         {path: 'dist/Pink-*.zip'}, {path: 'dist/Pink-*.dmg'},
-        {path: 'dist/SHA256SUMS'}, {path: 'dist/build-info.json'}
+        {path: 'dist/SHA256SUMS'}, {path: 'dist/build-info.json'}, {path: 'dist/appcast.xml'}
       ], successComment: false, failComment: false, releasedLabels: false
     }]
   ]

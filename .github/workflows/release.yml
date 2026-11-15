@@ -38,6 +38,9 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          PINK_UPDATE_MODE: ${{ vars.PINK_UPDATE_MODE || 'manual' }}
+          PINK_UPDATE_PUBLIC_KEY: ${{ vars.PINK_UPDATE_PUBLIC_KEY }}
+          PINK_UPDATE_PRIVATE_KEY: ${{ secrets.PINK_UPDATE_PRIVATE_KEY }}
       - name: Verify published identity and assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
