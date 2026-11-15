@@ -13,6 +13,8 @@ const publicKey=pair.publicKey.export({format:'der',type:'spki'}).subarray(-32).
 const env={...process.env,PINK_UPDATE_MODE:'sparkle',PINK_UPDATE_PUBLIC_KEY:publicKey,PINK_UPDATE_PRIVATE_KEY:secret};
 prepare('1.2.3',env);
 validate('dist');
+const startup=spawnSync('build/DerivedData/Build/Products/Release/Pink.app/Contents/MacOS/Pink',['--update-smoke-test'],{timeout:15000,stdio:'inherit'});
+assert.equal(startup.error,undefined);assert.equal(startup.status,0,'Sparkle must accept the embedded release configuration without requesting a feed');
 const feed=readFileSync('dist/appcast.xml','utf8');
 assert.ok(feed.includes('https://github.com/mamachanko/pink/releases/download/v1.2.3/Pink-1.2.3-adhoc.zip'));
 assert.ok(feed.includes('<sparkle:shortVersionString>1.2.3</sparkle:shortVersionString>'));

@@ -12,6 +12,7 @@ cask "pink" do
   app "Pink.app"
 
   zap trash: [
+    "~/Library/Caches/io.github.mamachanko.pink",
     "~/Library/Preferences/io.github.mamachanko.pink.plist",
     "~/Library/Preferences/io.refpaste.app.plist",
   ]

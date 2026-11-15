@@ -7,6 +7,7 @@ import {join,dirname} from 'node:path';
 import {createHash} from 'node:crypto';
 import {proposeCaskUpdate,updateLatest,compareVersions} from './homebrew-update.mjs';
 import {renderCask,caskForDistribution} from './homebrew.mjs';
+import {expectedAssets} from './check-assets.mjs';
 const repository='mamachanko/pink';
 const sha=text=>createHash('sha256').update(text).digest('hex');
 const template=readFileSync('Casks/pink.rb','utf8');
@@ -161,4 +162,27 @@ test('a stale release snapshot cannot downgrade an already proposed newer genera
 test('the CLI requires explicit published-release mode before it can call GitHub',()=>{
  const result=spawnSync(process.execPath,['scripts/homebrew-update.mjs'],{encoding:'utf8'});
  assert.notEqual(result.status,0);assert.match(result.stderr,/Use --latest to update from verified published assets/);
+});
+
+test('latest-release maintenance includes and verifies the new update feed before proposing metadata',()=>{
+ const f=distribution(),r=remote();
+ f.info.updates={mode:'manual'};
+ writeFileSync(join(f.directory,'build-info.json'),JSON.stringify(f.info));
+ writeFileSync(join(f.directory,'appcast.xml'),'<rss/>');
+ const names=expectedAssets(f.info);
+ writeFileSync(join(f.directory,'SHA256SUMS'),names.filter(n=>n!=='SHA256SUMS').map(n=>`${sha(readFileSync(join(f.directory,n)))}  ${n}`).join('\n')+'\n');
+ const runGh=args=>{
+  if(args[0]==='release'&&args[1]==='view')return JSON.stringify({tagName:'v1.2.3',assets:names.map(name=>({name}))});
+  if(args[0]==='release') {
+   const directory=args[args.indexOf('--dir')+1];
+   args.forEach((arg,i)=>{if(arg==='--pattern')copyFileSync(join(f.directory,args[i+1]),join(directory,args[i+1]));});return '';
+  }
+  if(args[1]?.includes('git/ref/tags/'))return JSON.stringify({object:{type:'commit',sha:f.info.commit}});
+  return r.runGh(args);
+ };
+ try {
+  assert.equal(updateLatest({repository,runGh}).number,21);
+  writeFileSync(join(f.directory,'appcast.xml'),'tampered');
+  assert.throws(()=>updateLatest({repository,runGh}),/Checksum mismatch/);
+ }finally{f.remove();}
 });

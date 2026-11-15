@@ -10,4 +10,4 @@ for (const file of readdirSync('.github/workflows')) {
 }
 YAML.parse(readFileSync('project.yml','utf8'));
 const sparkle=JSON.parse(readFileSync('tools/sparkle.json'));
-if(!/^\d+\.\d+\.\d+$/.test(sparkle.version)||!/[a-f0-9]{40}/.test(sparkle.commit)||!/^[a-f0-9]{64}$/.test(sparkle.sha256)||sparkle.url!==`https://github.com/sparkle-project/Sparkle/releases/download/${sparkle.version}/Sparkle-${sparkle.version}.tar.xz`)throw new Error('Inconsistent Sparkle pin; verify upstream commit and archive checksum');
+if(!/^\d+\.\d+\.\d+$/.test(sparkle.version)||!/^[a-f0-9]{40}$/.test(sparkle.commit)||!/^[a-f0-9]{64}$/.test(sparkle.sha256)||sparkle.url!==`https://github.com/sparkle-project/Sparkle/releases/download/${sparkle.version}/Sparkle-${sparkle.version}.tar.xz`)throw new Error('Inconsistent Sparkle pin; verify upstream commit and archive checksum');
