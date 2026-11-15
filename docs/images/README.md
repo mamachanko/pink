@@ -11,4 +11,4 @@ The separate PinkReadmeCapture target compiles the same menu/settings implementa
 
 The README images are reviewed copies of the PNG files under build/readme-captures. Keep capture OS/source provenance alongside the committed images. Retake when the UI changes; do not edit labels/states into screenshot pixels.
 
-Committed images were captured on macOS 15.8.2 (24H232) by [capture run 4](https://github.com/mamachanko/pink/actions/runs/43399485800), then visually inspected. See capture.txt for source revision and checksums. The neutral menu backdrop is a real window in the capture build, not a pixel edit. The settings layout shown is shared with the shipping app; capture revealed clipped fields, which were corrected with the native grouped form and a suitable minimum window size.
+Committed images were captured on macOS 15.8.2 (24H232) by [CI run 62](https://github.com/mamachanko/pink/actions/runs/43688245907) on 2026-11-15, then visually inspected. They show the real update controls and persistent Save footer. See capture.txt for source revision and checksums. The neutral menu backdrop is a real window in the capture build, not a pixel edit.
