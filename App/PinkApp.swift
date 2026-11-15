@@ -23,6 +23,11 @@ import SwiftUI
     private var lastLoggedState: MonitorState?
     private let log = Logger(subsystem: "io.github.mamachanko.pink", category: "state")
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if ProcessInfo.processInfo.arguments.contains("--update-smoke-test") {
+            if !updates.verifyConfigurationForSmokeTest() { exit(1) }
+            NSApp.terminate(nil)
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--smoke-test") {
             NSApp.terminate(nil)
             return
@@ -280,15 +285,24 @@ struct SettingsView: View {
                     Button("Refresh") { loginStatus = SMAppService.mainApp.status }
                 }
             }
-            if !error.isEmpty { Text(error).foregroundStyle(.red).accessibilityLabel(error) }
-            Button("Save settings") {
-                do {
-                    _ = try Parser(rules: value.rules)
-                    apply(value)
-                    error = "Saved"
-                } catch { self.error = "Invalid or overlapping host rules" }
-            }.keyboardShortcut(.defaultAction)
-        }.formStyle(.grouped).padding().frame(minWidth: 640, minHeight: 760)
+        }.formStyle(.grouped)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    Divider()
+                    HStack {
+                        if !error.isEmpty { Text(error).accessibilityLabel(error) }
+                        Spacer()
+                        Button("Save settings") {
+                            do {
+                                _ = try Parser(rules: value.rules)
+                                apply(value)
+                                error = "Saved"
+                            } catch { self.error = "Invalid or overlapping host rules" }
+                        }.keyboardShortcut(.defaultAction)
+                    }.padding()
+                }.background(.background)
+            }
+            .padding().frame(minWidth: 640, minHeight: 760)
     }
     private var loginDescription: String {
         switch loginStatus {

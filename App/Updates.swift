@@ -14,6 +14,16 @@ import SwiftUI
     private var observation: AnyCancellable?
     private var session: UpdateCheckSession?
 
+    /// CI validation only: starts the updater with checks disabled, without a feed request.
+    func verifyConfigurationForSmokeTest() -> Bool {
+        let key = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String ?? ""
+        guard Data(base64Encoded: key)?.count == 32 else { return false }
+        let controller = SPUStandardUpdaterController(
+            startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+        controller.startUpdater()
+        return controller.updater.canCheckForUpdates
+    }
+
     func check() {
         guard !busy else { return }
         NSApp.activate(ignoringOtherApps: true)
@@ -93,7 +103,9 @@ struct UpdatesSettings: View {
             HStack {
                 Text("Pink \(updates.version)")
                 Spacer()
-                if updates.busy { ProgressView().controlSize(.small) }
+                if updates.busy {
+                    ProgressView().controlSize(.small).accessibilityLabel("Checking for updates")
+                }
                 Button("Check for Updates…") { updates.check() }.disabled(updates.busy)
             }
             Text(updates.status).font(.caption).foregroundStyle(.secondary)

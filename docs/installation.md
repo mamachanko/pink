@@ -22,13 +22,13 @@ On macOS 15.4+, Pink checks the available clipboard policy before monitoring. An
 2. Quit Pink from its menu-bar menu.
 3. Run `brew uninstall --cask mamachanko/pink/pink`, or delete **Pink.app** if installed manually.
 
-Ordinary uninstall preserves preferences. To intentionally remove current and legacy preferences through Homebrew, use:
+Ordinary uninstall preserves preferences and public update caches. To intentionally remove current/legacy preferences and Pink's update cache through Homebrew, use:
 
 ```sh
 brew uninstall --cask --zap mamachanko/pink/pink
 ```
 
-For a manual installation, preferences use the UserDefaults domain `io.github.mamachanko.pink`. The legacy domain is `io.refpaste.app`. Remove those preferences only if you intend to reset settings. There are no clipboard-history files to delete.
+For a manual installation, preferences use the UserDefaults domain `io.github.mamachanko.pink`. The legacy domain is `io.refpaste.app`. Remove those preferences only if you intend to reset settings. Public update caches may be removed from `~/Library/Caches/io.github.mamachanko.pink` after quitting. There are no clipboard-history files to delete.
 
 ## Upgrading from RefPaste
 

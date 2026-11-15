@@ -168,7 +168,7 @@ Disable **launch at login** in Settings and quit Pink, then run:
 brew uninstall --cask mamachanko/pink/pink
 ```
 
-For a manual installation, delete **Pink.app**. Ordinary uninstall preserves preferences; use Homebrew’s `--zap` only if you also want to remove them. See [removal and legacy upgrades](docs/installation.md#uninstall) for details.
+For a manual installation, delete **Pink.app**. Ordinary uninstall preserves preferences and update caches; use Homebrew’s `--zap` only if you also want to remove them. See [removal and legacy upgrades](docs/installation.md#uninstall) for details.
 
 ## License
 
