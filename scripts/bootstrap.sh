@@ -7,6 +7,7 @@ if [[ $(uname -s) != Darwin ]]; then
   exit 0
 fi
 mkdir -p .tools
+node scripts/bootstrap-sparkle.mjs
 # Build pinned source commit; no mutable binary download or unverified archive.
 if [[ ! -x .tools/xcodegen ]]; then
   git clone --filter=blob:none https://github.com/yonaskolb/XcodeGen.git .tools/xcodegen-source

@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {caskForDistribution} from './homebrew.mjs';
-import {validate} from './check-assets.mjs';
+import {validate,expectedAssets} from './check-assets.mjs';
 const execute=args=>execFileSync('gh',args,{encoding:'utf8'}).trim();
 const branch='homebrew/update';
 const digest=text=>createHash('sha256').update(text).digest('hex');
@@ -108,9 +108,9 @@ export function updateLatest({repository=process.env.GITHUB_REPOSITORY,runGh=exe
   // Validates version/signing/notarization before constructing any artifact paths.
   const validModes=['adhoc','developer-id'];
   if(!validModes.includes(info.signingMode))throw new Error('Invalid signing mode');
-  const expected=['build-info.json','SHA256SUMS',`Pink-${info.version}-${info.signingMode}.zip`,`Pink-${info.version}-${info.signingMode}.dmg`];
+  const expected=expectedAssets(info);
   if(JSON.stringify(release.assets.map(a=>a.name).sort())!==JSON.stringify([...expected].sort()))throw new Error('Unexpected published asset set');
-  download(expected.slice(2));validate(directory);
+  download(expected.filter(name=>!['build-info.json','SHA256SUMS'].includes(name)));validate(directory);
   const tag=JSON.parse(runGh(['api',`repos/${repository}/git/ref/tags/${release.tagName}`]));
   if(tag.object.type!=='commit'||tag.object.sha!==info.commit)throw new Error('Published commit mismatch');
   return proposeCaskUpdate({directory,repository,runGh});

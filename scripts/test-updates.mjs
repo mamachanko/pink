@@ -1,0 +1,33 @@
+import {generateKeyPairSync} from 'node:crypto';
+import {readFileSync,writeFileSync,copyFileSync,mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import assert from 'node:assert/strict';
+import {prepare} from './prepare.mjs';
+import {validate} from './check-assets.mjs';
+if(process.platform!=='darwin')throw new Error('Native Sparkle verification requires macOS');
+const pair=generateKeyPairSync('ed25519');
+const secret=pair.privateKey.export({format:'der',type:'pkcs8'}).subarray(-32).toString('base64');
+const publicKey=pair.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64');
+const env={...process.env,PINK_UPDATE_MODE:'sparkle',PINK_UPDATE_PUBLIC_KEY:publicKey,PINK_UPDATE_PRIVATE_KEY:secret};
+prepare('1.2.3',env);
+validate('dist');
+const feed=readFileSync('dist/appcast.xml','utf8');
+assert.ok(feed.includes('https://github.com/mamachanko/pink/releases/download/v1.2.3/Pink-1.2.3-adhoc.zip'));
+assert.ok(feed.includes('<sparkle:shortVersionString>1.2.3</sparkle:shortVersionString>'));
+const signature=feed.match(/sparkle:edSignature="([A-Za-z0-9+/=]+)"/)[1];
+const work=mkdtempSync(join(tmpdir(),'pink-tampered-update-'));
+const verify=(file,sig)=>spawnSync('.tools/sparkle/bin/sign_update',['--ed-key-file','-','--verify',file,...(sig?[sig]:[])],{input:secret+'\n',encoding:'utf8'}).status;
+try {
+ const zip=join(work,'tampered.zip');
+ copyFileSync('dist/Pink-1.2.3-adhoc.zip',zip);
+ assert.equal(verify(zip,signature),0);
+ writeFileSync(zip,Buffer.concat([readFileSync(zip),Buffer.from('tamper')]));
+ assert.notEqual(verify(zip,signature),0);
+ const xml=join(work,'tampered.xml');
+ copyFileSync('dist/appcast.xml',xml);assert.equal(verify(xml),0);
+ writeFileSync(xml,feed.replace('1.2.3','9.9.9'));assert.notEqual(verify(xml),0);
+ for(const name of ['appcast.xml','build-info.json','SHA256SUMS'])assert.ok(!readFileSync(`dist/${name}`,'utf8').includes(secret));
+}finally{rmSync(work,{recursive:true,force:true});}
+console.log('PASS: real Sparkle archive/feed generation, verification, tamper rejection and fixed-version packaging with ephemeral signing keys');

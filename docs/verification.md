@@ -1,5 +1,9 @@
 # Verification record
 
+## User-initiated updates — 2026-11-15
+
+Local `make lint test`: PASS at initial implementation (23 portable Swift and 43 tooling tests). Official Sparkle 2.10.1 release/tag/CLI and documentation sources consulted; the downloaded archive SHA-256 matched `1a856d2a9edb8e628de88121d7be04cf0e2167f8641650b78fca00b14244cf27`. No production key, tag, release or user clipboard was created/changed. Native builds, actual signed appcast/archive generation, tamper rejection and extracted/mounted package checks run in required macOS CI; final run evidence is in the feature PR. Production key configuration and interactive old→new installation/relaunch remain NOT RUN. Portable tests do not establish native compatibility.
+
 2026-11-13: Debian 13 x86_64 Linux; Node 24.22.1, npm; Swift 6.2 RELEASE downloaded from official download.swift.org into /tmp/refpaste-swift (outside repository). This ephemeral toolchain is for portable checks only. Native build toolchain pinned in CI is Xcode 26.2.
 
 | Command | Result | Evidence |

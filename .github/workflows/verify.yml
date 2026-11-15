@@ -30,7 +30,7 @@ jobs:
       - name: Verify Homebrew cask
         run: bash scripts/test-homebrew.sh
       - name: Fixed version release preparation
-        run: node scripts/prepare.mjs 1.2.3
+        run: node scripts/test-updates.mjs
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node 24)
         with:
           name: Pink-${{ matrix.runner }}

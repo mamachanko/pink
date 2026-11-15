@@ -1,5 +1,7 @@
 # Maintainer setup (review before applying)
 
+Optional signed in-app update delivery requires release-environment `PINK_UPDATE_MODE=sparkle`, public-key variable and private-key secret as documented in [updates.md](updates.md). These are not activated by repository files or test keys. Existing Apple signing configuration remains separate.
+
 Repository identity is mamachanko/pink. CODEOWNERS uses its actual owner @mamachanko; existing MIT copyright Max Brauer is preserved. No new legal identity/contact is inferred. No remote settings were changed.
 
 Review repository Settings:
