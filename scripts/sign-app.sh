@@ -10,9 +10,9 @@ if [[ $identity != - ]]; then
 fi
 framework="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
 # Sign inside out; never use --deep to sign or apply app entitlements to helpers.
-codesign "${args[@]}" "$framework/Autoupdate"
+codesign "${args[@]}" --preserve-metadata=entitlements "$framework/Autoupdate"
 while IFS= read -r -d '' nested; do
-  codesign "${args[@]}" "$nested"
+  codesign "${args[@]}" --preserve-metadata=entitlements "$nested"
 done < <(find "$framework" -depth \( -name '*.xpc' -o -name '*.app' \) -type d -print0)
 codesign "${args[@]}" "$app/Contents/Frameworks/Sparkle.framework"
 if [[ $identity == - ]]; then

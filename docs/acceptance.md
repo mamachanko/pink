@@ -20,3 +20,10 @@ Status applies to the delivered implementation, not intended behavior. See verif
 | Repository protection/environment/Renovate activation | NOT RUN | Maintainer setup only; no settings silently changed |
 
 Conservative implementation restrictions: existing HTML clipboard content is skipped rather than imported; ambiguous encoded separators aren't supported. Native tests cover the adapter and full monitor restoration but not every AppKit failure mode. Manual application and permission acceptance remains outstanding. These are unmet verification criteria, not passing claims.
+
+## User-initiated update follow-up (2026-11-15)
+
+- Version/check-state/key/asset tests: PASS locally; 23 portable Swift tests and 44 tooling tests.
+- Actual signed archive/feed generation and tamper rejection: PASS on Apple Silicon in run 43687782875. Both architectures rerun required verification on the final PR #12 head.
+- Native Settings/menu captures: PASS; real images from run 43688245907 reviewed, no update requests or clipboard access during capture.
+- Production update key and interactive install/relaunch, read-only-location/authorization failure and Homebrew-versus-in-app behavior: NOT RUN. See updates.md for the acceptance protocol. No production release was used as a test.

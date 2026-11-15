@@ -18,12 +18,17 @@ for flag in SUVerifyUpdateBeforeExtraction SURequireSignedFeed; do
 done
 test -s "$app/Contents/Resources/Sparkle-LICENSE"
 framework="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
+test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$framework/Resources/Info.plist")" = "$(node -p 'JSON.parse(require("fs").readFileSync("tools/sparkle.json")).version')"
 for binary in Sparkle Autoupdate Updater.app/Contents/MacOS/Updater XPCServices/Downloader.xpc/Contents/MacOS/Downloader XPCServices/Installer.xpc/Contents/MacOS/Installer; do
   test -x "$framework/$binary"
   lipo "$framework/$binary" -verify_arch arm64 x86_64
 done
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
+codesign -d --entitlements :- "$framework/XPCServices/Downloader.xpc" > "$work/downloader.plist" 2>/dev/null
+for entitlement in com.apple.security.app-sandbox com.apple.security.network.client; do
+  test "$(/usr/libexec/PlistBuddy -c "Print $entitlement" "$work/downloader.plist")" = true
+done
 codesign -d --entitlements :- "$app" > "$work/entitlements.plist" 2>/dev/null
 exception=$(/usr/libexec/PlistBuddy -c 'Print com.apple.security.cs.disable-library-validation' "$work/entitlements.plist" 2>/dev/null || true)
 if [[ $signing == adhoc ]]; then
