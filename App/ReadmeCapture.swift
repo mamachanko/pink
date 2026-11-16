@@ -119,10 +119,17 @@
                             "Captured from Pink's real UI on macOS \(ProcessInfo.processInfo.operatingSystemVersionString). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.\n"
                         try evidence.write(
                             to: self.output.appendingPathComponent("capture.txt"), atomically: true, encoding: .utf8)
+                        window.makeKeyAndOrderFront(nil)
+                        try JSONEncoder().encode(["id": window.windowNumber]).write(
+                            to: self.output.appendingPathComponent("settings-window.json"), options: .atomic)
                         self.stage = 3
-                        NSApp.terminate(nil)
                     } catch { self.fail("settings-write-failed") }
                 }
+            } else if stage == 3,
+                FileManager.default.fileExists(atPath: output.appendingPathComponent("settings-captured").path)
+            {
+                stage = 4
+                NSApp.terminate(nil)
             }
         }
 

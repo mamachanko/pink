@@ -1,8 +1,9 @@
 import {spawn, spawnSync} from 'node:child_process';
-import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {existsSync, mkdirSync, readFileSync, writeFileSync,rmSync} from 'node:fs';
 import {resolve} from 'node:path';
 const output = resolve(process.argv[2] ?? 'build/readme-captures');
 mkdirSync(output, {recursive:true});
+for(const name of ['menu-region.json','menu-captured','settings-window.json','settings-captured','settings.png','menu-bar.png','link-formats.png','capture.txt','failure.txt'])rmSync(`${output}/${name}`,{force:true});
 function command(program,args) {
  const result=spawnSync(program,args,{stdio:'inherit'});
  if(result.error || result.status!==0) throw new Error(`Capture command failed: ${program}`);
@@ -25,6 +26,11 @@ try {
  // Native region capture; no image generation, compositing, or permission changes.
  command('/usr/sbin/screencapture',['-x','-R',`${b.x},${b.y},${b.width},${b.height}`,`${output}/menu-bar.png`]);
  writeFileSync(`${output}/menu-captured`,'');
- await waitFor('settings.png');
+ await waitFor('settings-window.json');
+ const window=JSON.parse(readFileSync(`${output}/settings-window.json`));
+ if(!Number.isSafeInteger(window.id)||window.id<=0)throw new Error('Invalid Settings window identity');
+ // Capture the compositor's actual window: bitmap drawing misses layer-backed tab labels.
+ command('/usr/sbin/screencapture',['-x','-o','-l',String(window.id),`${output}/settings.png`]);
+ writeFileSync(`${output}/settings-captured`,'');
  await waitFor('capture.txt');
 } finally { if(!exited) app.kill('SIGTERM'); }
