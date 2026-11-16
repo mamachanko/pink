@@ -31,7 +31,7 @@ if(process.argv[2]==='versions') {
   const git=(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
   git('init','-b','main');git('config','user.name','Test');git('config','user.email','test@example.invalid');git('commit','--allow-empty','-m','feat: package');
   const publishPlugin=join(cwd,'publish.cjs');
-  writeFileSync(publishPlugin,`exports.publish=()=>{require('fs').writeFileSync(${JSON.stringify(join(cwd,'published'))},'unexpected')}`);
+  writeFileSync(publishPlugin,"exports.publish=()=>{require('node:fs').writeFileSync(require('node:path').join(__dirname,'published'),'unexpected')}");
   await assert.rejects(semanticRelease({...config,repositoryUrl:`file://${cwd}`,ci:false,dryRun:false,
    plugins:[config.plugins[0],['@semantic-release/exec',{prepareCmd:`node ${JSON.stringify(join(process.cwd(),'scripts/prepare.mjs'))} \${nextRelease.version}`}],publishPlugin]
   },{cwd,env:{...process.env,GITHUB_ACTIONS:'',GITHUB_TOKEN:'',GH_TOKEN:'',SIGNING_MODE:'developer-id',APPLE_ID:''},stdout:sink(),stderr:sink()}));
