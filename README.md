@@ -1,7 +1,7 @@
 <h1 align="center">Pink 💕</h1>
 
 <p align="center">
-  <strong>Copy full URLs. Paste readable references.</strong>
+  <strong>Copy URLs. Paste links.</strong>
 </p>
 
 Pink makes long links easier to read in messages, notes and reviews. Copy normally; Pink adds short, clickable links alongside your untouched original text.
