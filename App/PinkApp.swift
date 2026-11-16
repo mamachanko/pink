@@ -55,7 +55,8 @@ import SwiftUI
     }
     private func configure(board: any PasteboardPort, permission: any PermissionPort) {
         monitor = ClipboardMonitor(
-            board: board, builder: NativeRepresentations(), permission: permission,
+            board: board, builder: NativeRepresentations(rewriteFormattedURLs: settings.rewriteFormattedURLs),
+            permission: permission,
             scheduler: TimerScheduler(), parser: try! Parser(rules: settings.rules, linkRules: settings.linkRules))
         monitor.onChange = { [weak self] in self?.refresh() }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -173,6 +174,7 @@ import SwiftUI
             self.settings = value
             self.save()
             self.monitor.parser = try! Parser(rules: value.rules, linkRules: value.linkRules)
+            self.monitor.builder = NativeRepresentations(rewriteFormattedURLs: value.rewriteFormattedURLs)
             if value.automatic && value.consent { self.monitor.enable() } else { self.monitor.pause() }
         }
         let controller = NSHostingController(rootView: view)
@@ -250,6 +252,13 @@ struct SettingsView: View {
     private var generalSettings: some View {
         Form {
             UpdatesSettings(updates: updates)
+            Section("Copied rich text") {
+                Toggle("Rewrite already-formatted URLs", isOn: $value.rewriteFormattedURLs)
+                Text(
+                    "Also shorten raw URL links copied from browsers and chat. May simplify formatting. Messages with named links stay unchanged. Plain paste stays exact."
+                )
+                .font(.caption).foregroundStyle(.secondary)
+            }
             Toggle("Automatic formatting", isOn: $value.automatic).disabled(!value.consent)
             Text(
                 "Processing is local. Plain paste keeps the exact original text. Immediate paste may beat the watcher."

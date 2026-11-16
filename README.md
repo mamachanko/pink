@@ -62,7 +62,7 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
   <tr><th>In the menu bar</th><th>General settings</th></tr>
   <tr>
     <td align="center" valign="top"><a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu-bar icon and menu, with formatting controls, Settings, About and Quit."></a></td>
-    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink General settings with the General and Link formats tabs, update controls, automatic formatting, service presets and launch at login."></a></td>
+    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink Settings showing the opt-in formatted-URL control, automatic formatting and host rules."></a></td>
   </tr>
 </table>
 
@@ -115,6 +115,14 @@ A message containing a pull request and a merge request can appear as:
 > Please review [acme/widget#123](https://github.com/acme/widget/pull/123) and [team/project!45](https://gitlab.com/team/project/-/merge_requests/45).
 
 Each label keeps its own destination. Plain paste retains the entire original message, including both full URLs.
+
+### Links copied from chat or a browser
+
+Turn on **Settings → General → Rewrite already-formatted URLs**, then **Save settings**. Copy the message again, or choose **Format current clipboard**.
+
+For example, a clickable `https://github.com/acme/widget/pull/123` can become [acme/widget#123](https://github.com/acme/widget/pull/123), even when copied from another message. The visible URL must match its destination. Messages containing deliberately named links stay unchanged, and plain paste always keeps the exact original text.
+
+This option is off by default. It can simplify rich formatting and accepts only a conservative set of HTML fragments. Images, attachments, unknown clipboard types and conflicting representations remain ineligible. It never opens or fetches copied HTML resources.
 
 ### Updating Pink
 
@@ -172,7 +180,7 @@ Pink does not need Accessibility, Input Monitoring or Screen Recording permissio
 
 - **Paste behavior depends on the app.** An app can select plain text or strip links. App-specific compatibility has not yet been manually verified; see the [compatibility record](docs/compatibility.md).
 - **An immediate paste can beat the watcher.** Pink checks about every 200 ms. The safe fallback is your original text. It never intercepts paste, simulates keys or inspects the destination app.
-- **Some clipboard items are deliberately skipped.** These include files, images, multiple items, unknown types, protected/temporary/generated/remote markers, existing HTML and named hyperlinks. Unmarked sensitive content cannot always be identified.
+- **Some clipboard items are deliberately skipped.** These include files, images, multiple items, unknown types, protected/temporary/generated/remote markers and named hyperlinks. Existing HTML is skipped unless the optional formatted-URL setting can safely validate it. Unmarked sensitive content cannot always be identified.
 - **Text is limited to 8 KiB per item.** Bare URLs need clear boundaries. Named Markdown destinations and HTML source are not reformatted; ambiguous adjacent URLs are left unchanged. Existing raw RTF links must agree with the proposed targets.
 
 Clipboard writes also have a small, unavoidable race with other applications. Pink checks for changes before writing and before offering restoration. The [architecture notes](docs/architecture.md) describe that boundary.
