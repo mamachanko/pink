@@ -12,7 +12,8 @@ import SwiftUI
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
     private var item: NSStatusItem!
     private var monitor: ClipboardMonitor!
-    private var settings = PinkCore.Settings()
+    private var preferences: SettingsModel!
+    private var settings: PinkCore.Settings { preferences.value }
     private let settingsStore = SettingsStore()
     private let updates = UpdateController()
     #if PINK_README_CAPTURE
@@ -37,18 +38,24 @@ import SwiftUI
         #if PINK_README_CAPTURE
             let capture = ReadmeCapture()
             readmeCapture = capture
-            settings.consent = true
-            settings.automatic = true
+            var demo = PinkCore.Settings()
+            demo.consent = true
+            demo.automatic = true
+            demo.linkRules = [LinkRule.templates[0]]
+            preferences = try! SettingsModel(initial: demo, persist: { _ in })
             configure(board: NativeBoard(capture.board), permission: ReadmeCapturePermission())
             capture.start(statusItem: item) { [weak self] in
                 self?.showSettings()
                 return self?.window
             }
         #else
-            do { settings = try settingsStore.load() } catch {
-                settings = PinkCore.Settings()
+            let initial: PinkCore.Settings
+            do { initial = try settingsStore.load() } catch {
+                initial = PinkCore.Settings()
                 log.error("invalid-settings")
             }
+            let store = settingsStore
+            preferences = try! SettingsModel(initial: initial, persist: store.save)
             configure(board: NativeBoard(.general), permission: NativePermission())
             if !settings.consent { showConsent() }
         #endif
@@ -58,6 +65,26 @@ import SwiftUI
             board: board, builder: NativeRepresentations(rewriteFormattedURLs: settings.rewriteFormattedURLs),
             permission: permission,
             scheduler: TimerScheduler(), parser: try! Parser(rules: settings.rules, linkRules: settings.linkRules))
+        preferences.onChange = { [weak self] previous, current in
+            guard let self else { return }
+            if previous.rules != current.rules || previous.linkRules != current.linkRules {
+                self.monitor.parser = try! Parser(rules: current.rules, linkRules: current.linkRules)
+            }
+            if previous.rewriteFormattedURLs != current.rewriteFormattedURLs {
+                self.monitor.builder = NativeRepresentations(rewriteFormattedURLs: current.rewriteFormattedURLs)
+            }
+            let wasAutomatic = previous.consent && previous.automatic
+            let isAutomatic = current.consent && current.automatic
+            if wasAutomatic != isAutomatic {
+                if isAutomatic {
+                    self.monitor.enable()
+                } else {
+                    self.resumeAfterSuspension = false
+                    self.monitor.pause()
+                }
+            }
+            self.refresh()
+        }
         monitor.onChange = { [weak self] in self?.refresh() }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.title = "💕"
@@ -83,12 +110,14 @@ import SwiftUI
             readmeCapture?.stop()
         #endif
     }
-    private func save() {
-        #if PINK_README_CAPTURE
-            return
-        #else
-            do { try settingsStore.save(settings) } catch { log.error("settings-save-failed") }
-        #endif
+    private func editSettings(_ change: (inout PinkCore.Settings) -> Void) {
+        do { try preferences.edit(change) } catch {
+            let alert = NSAlert()
+            alert.messageText = "Couldn’t save settings"
+            alert.informativeText = "Your previous settings are still active. Try again."
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
     }
     @objc private func suspendMonitoring() {
         resumeAfterSuspension = resumeAfterSuspension || monitor.state == .active
@@ -111,10 +140,10 @@ import SwiftUI
         alert.addButton(withTitle: "Enable")
         alert.addButton(withTitle: "Not now")
         if alert.runModal() == .alertFirstButtonReturn {
-            settings.consent = true
-            settings.automatic = true
-            save()
-            monitor.enable()
+            editSettings {
+                $0.consent = true
+                $0.automatic = true
+            }
         }
     }
     private func refresh() {
@@ -151,9 +180,7 @@ import SwiftUI
             showConsent()
             return
         }
-        settings.automatic.toggle()
-        save()
-        if settings.automatic { monitor.enable() } else { monitor.pause() }
+        editSettings { $0.automatic.toggle() }
     }
     @objc private func format() { if settings.consent { monitor.process() } else { showConsent() } }
     @objc private func restore() { monitor.restore() }
@@ -169,19 +196,17 @@ import SwiftUI
         }
     }
     @objc private func showSettings() {
-        let view = SettingsView(initial: settings, updates: updates) { [weak self] value in
-            guard let self else { return }
-            self.settings = value
-            self.save()
-            self.monitor.parser = try! Parser(rules: value.rules, linkRules: value.linkRules)
-            self.monitor.builder = NativeRepresentations(rewriteFormattedURLs: value.rewriteFormattedURLs)
-            if value.automatic && value.consent { self.monitor.enable() } else { self.monitor.pause() }
+        if let window, window.isVisible {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
         }
+        let view = SettingsView(preferences: preferences, updates: updates)
         let controller = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: controller)
         window.title = "Pink Settings"
-        window.setContentSize(NSSize(width: 640, height: 760))
-        window.contentMinSize = NSSize(width: 640, height: 760)
+        window.setContentSize(NSSize(width: 680, height: 640))
+        window.contentMinSize = NSSize(width: 680, height: 640)
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
@@ -209,125 +234,106 @@ import SwiftUI
     @objc private func checkForUpdates() { updates.check() }
 }
 struct SettingsView: View {
-    @State var value: PinkCore.Settings
-    @State private var host = ""
-    @State private var base = ""
-    @State private var port = ""
-    @State private var service = Service.github
-    @State private var http = false
+    @ObservedObject var preferences: SettingsModel
     @State private var error = ""
     @State private var loginStatus = SMAppService.mainApp.status
-    let apply: (PinkCore.Settings) -> Void
     let updates: UpdateController
-    init(initial: PinkCore.Settings, updates: UpdateController, apply: @escaping (PinkCore.Settings) -> Void) {
-        _value = State(initialValue: initial)
-        self.updates = updates
-        self.apply = apply
-    }
+
     var body: some View {
         TabView {
-            generalSettings.tabItem { Text("General") }
-            LinkRulesView(hostRules: value.rules, rules: $value.linkRules)
-                .tabItem { Text("Link formats") }
+            LinkRulesView(preferences: preferences)
+                .tabItem { Label("Link formats", systemImage: "link") }
+            generalSettings
+                .tabItem { Label("General", systemImage: "gearshape") }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: 0) {
-                Divider()
-                HStack {
-                    if !error.isEmpty { Text(error).accessibilityLabel(error) }
-                    Spacer()
-                    Button("Save settings") {
-                        do {
-                            _ = try Parser(rules: value.rules, linkRules: value.linkRules)
-                            apply(value)
-                            error = "Saved"
-                        } catch { self.error = "Invalid link formats or overlapping host rules" }
-                    }.keyboardShortcut(.defaultAction)
-                }.padding()
-            }.background(.background)
+        .tint(.pink)
+        .frame(minWidth: 680, minHeight: 640)
+        .alert(
+            "Couldn’t apply change",
+            isPresented: Binding(
+                get: { !error.isEmpty }, set: { if !$0 { error = "" } }
+            )
+        ) {
+            Button("OK") { error = "" }
+        } message: {
+            Text(error)
         }
-        .padding().frame(minWidth: 640, minHeight: 760)
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            loginStatus = SMAppService.mainApp.status
+        }
     }
 
     private var generalSettings: some View {
         Form {
-            UpdatesSettings(updates: updates)
+            Section {
+                Toggle(
+                    "Format links automatically",
+                    isOn: Binding(
+                        get: { preferences.value.automatic },
+                        set: { enabled in
+                            do { try preferences.edit { $0.automatic = enabled } } catch {
+                                error = "Your previous settings are still active. Try again."
+                            }
+                        }
+                    )
+                ).disabled(!preferences.value.consent)
+                Text("Copy a link, then paste a shorter, clickable version. Plain-text paste keeps your original text.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if !preferences.value.consent {
+                    Text("Choose Enable automatic formatting in Pink’s menu to get started.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("General").font(.title2.bold())
+            }
             Section("Copied rich text") {
-                Toggle("Rewrite already-formatted URLs", isOn: $value.rewriteFormattedURLs)
+                Toggle(
+                    "Rewrite already-formatted URLs",
+                    isOn: Binding(
+                        get: { preferences.value.rewriteFormattedURLs },
+                        set: { enabled in
+                            do { try preferences.edit { $0.rewriteFormattedURLs = enabled } } catch {
+                                error = "Your previous settings are still active. Try again."
+                            }
+                        }
+                    ))
                 Text(
                     "Also shorten raw URL links copied from browsers and chat. May simplify formatting. Messages with named links stay unchanged. Plain paste stays exact."
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }
-            Toggle("Automatic formatting", isOn: $value.automatic).disabled(!value.consent)
-            Text(
-                "Processing is local. Plain paste keeps the exact original text. Immediate paste may beat the watcher."
-            ).font(
-                .caption)
-            Section("Service presets and enterprise hosts") {
-                List {
-                    ForEach(value.rules.indices, id: \.self) { i in
-                        HStack {
-                            Toggle(value.rules[i].host + value.rules[i].basePath, isOn: $value.rules[i].enabled)
-                            Text(value.rules[i].service.rawValue).foregroundStyle(.secondary)
-                            Button("Remove") { value.rules.remove(at: i) }
+            Section {
+                Toggle(
+                    "Open Pink at login",
+                    isOn: Binding(
+                        get: { loginStatus == .enabled || loginStatus == .requiresApproval },
+                        set: { enabled in
+                            do {
+                                if enabled {
+                                    try SMAppService.mainApp.register()
+                                } else {
+                                    try SMAppService.mainApp.unregister()
+                                }
+                            } catch { self.error = "Couldn’t change login settings. Try again in System Settings." }
+                            loginStatus = SMAppService.mainApp.status
                         }
-                    }
-                }.frame(height: 80)
-                Picker("Service", selection: $service) {
-                    ForEach(Service.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ))
+                if loginStatus == .requiresApproval {
+                    Text("Allow Pink in Login Items to finish setting up.")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-                TextField("Exact hostname", text: $host)
-                HStack {
-                    TextField("Port (optional)", text: $port, prompt: Text("Port (optional)")).labelsHidden()
-                    TextField("Base path (optional)", text: $base, prompt: Text("Base path (optional)")).labelsHidden()
-                }
-                Toggle("Allow HTTP for this private host", isOn: $http)
-                Button("Add host rule") {
-                    guard port.isEmpty || Int(port) != nil else {
-                        error = "Invalid port"
-                        return
-                    }
-                    var next = value
-                    next.rules.append(
-                        HostRule(service: service, host: host, port: Int(port), basePath: base, allowHTTP: http))
-                    do {
-                        _ = try Parser(rules: next.rules)
-                        value = next
-                        host = ""
-                        base = ""
-                        port = ""
-                        error = ""
-                    } catch { self.error = "Invalid or overlapping host rule" }
-                }
+                Button("Login Items Settings…") { SMAppService.openSystemSettingsLoginItems() }
+            } header: {
+                Text("Start with your Mac")
             }
-            Section("Launch at login (opt-in)") {
-                Text(loginDescription)
-                HStack {
-                    Button(loginStatus == .enabled ? "Disable login launch" : "Enable login launch") {
-                        do {
-                            if loginStatus == .enabled {
-                                try SMAppService.mainApp.unregister()
-                            } else {
-                                try SMAppService.mainApp.register()
-                            }
-                            error = ""
-                        } catch { self.error = "Login registration failed" }
-                        loginStatus = SMAppService.mainApp.status
-                    }
-                    Button("Login Items settings") { SMAppService.openSystemSettingsLoginItems() }
-                    Button("Refresh") { loginStatus = SMAppService.mainApp.status }
-                }
+            UpdatesSettings(updates: updates)
+            Section("Private by design") {
+                Label("Your clipboard stays on your Mac.", systemImage: "lock.shield")
+                Text(
+                    "No clipboard history, accounts or telemetry. Pink never intercepts your paste shortcut. An immediate paste may arrive before formatting finishes."
+                )
+                .font(.caption).foregroundStyle(.secondary)
             }
         }.formStyle(.grouped)
-    }
-    private var loginDescription: String {
-        switch loginStatus {
-        case .enabled: "Enabled"
-        case .requiresApproval: "Approval required in Login Items settings"
-        case .notRegistered: "Not registered"
-        case .notFound: "Application service unavailable"
-        @unknown default: "Unknown state"
-        }
     }
 }

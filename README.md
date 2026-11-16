@@ -58,19 +58,11 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
   <a href="#development">Development</a>
 </p>
 
-<table align="center">
-  <tr><th>In the menu bar</th><th>General settings</th></tr>
-  <tr>
-    <td align="center" valign="top"><a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu-bar icon and menu, with formatting controls, Settings, About and Quit."></a></td>
-    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink Settings showing the opt-in formatted-URL control, automatic formatting and host rules."></a></td>
-  </tr>
-</table>
-
 <p align="center">
-  <a href="docs/images/link-formats.png"><img src="docs/images/link-formats.png" width="640" alt="Pink’s link format builder showing a Jira URL pattern, a label template, and a live TNZ-184273 hyperlink preview with the captured issue value."></a>
+  <a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu-bar icon and menu, with formatting controls, Settings, About and Quit."></a>
 </p>
 
-<p align="center"><sub>Actual Pink UI on macOS, using demo settings. <a href="docs/images/README.md">Capture details</a>.</sub></p>
+<p align="center"><sub>Actual Pink menu on macOS, using demo settings. Settings screenshots are awaiting a new macOS capture. <a href="docs/images/README.md">Capture details</a>.</sub></p>
 
 ## Installation
 
@@ -105,7 +97,7 @@ Pink lives in the menu bar, with no Dock icon. Its menu gives you:
 | **Pause automatic formatting** | Stop processing new copies. Enable it again to resume. |
 | **Format current clipboard** | Process content you already copied. |
 | **Restore original clipboard** | Restore the last original item while Pink still owns the current clipboard. It cannot change text already pasted. |
-| **Settings** | Build and preview custom link formats; manage service presets, automatic formatting and opt-in launch at login. macOS may require login-item approval. |
+| **Settings** | Manage and preview all link formats in one collection; choose automatic formatting and opt-in launch at login. macOS may require login-item approval. |
 | **Check for Updates…** | Check for a newer release and choose whether to update. Also available in Settings. |
 
 Enabling or resuming Pink leaves existing clipboard content alone. Use **Format current clipboard** to process it explicitly.
@@ -150,7 +142,9 @@ Files keep the revision and path together because branch names can contain slash
 
 ### Custom link formats and preview
 
-Open **Settings → Link formats** and choose a starter preset or enter your own pattern and label:
+Open **Settings → Link formats** to manage every supported website together. Click a format to edit it, use its switch to enable or disable it, or choose **Add format** to start from a template or add another website. Changes apply immediately. The shared **Try a link** preview works with all enabled formats.
+
+For example, choose **Add format → Jira issue**:
 
 ```text
 Name:         Jira issue
@@ -162,13 +156,13 @@ Preview:      TNZ-184273
 
 Replace `jira.example` with your installation's hostname. `{issue}` captures exactly one nonempty path segment. A final `{path...}` captures one or more remaining segments; use `{path}` in the label. Captures occupy whole segments, have unique letter-first names, and cannot appear in the hostname. Matching uses an exact host, scheme and optional port; path literals are case sensitive. Patterns do not use regex and cannot contain queries or fragments. Queries and fragments in copied links remain in the exact destination. Literal pattern paths use unescaped characters; captures can match percent-encoded text, including spaces in filenames. Invalid escapes, encoded separators, dot segments and controls are rejected.
 
-The live preview uses the clipboard formatter and shows the winning format, captured values and competing matches. Preview examples stay in memory. Custom rules run in list order, with **Override matching service presets** rules ahead of service presets and other custom rules after them. You can edit, enable, remove and reorder rules. Use **Add to settings** / **Update rule**, then **Save settings** to apply. Starter presets are editable copies, and existing enterprise host settings are preserved. GitLab starter patterns have one group segment; specify additional namespace segments for deeper installations, while the built-in GitLab preset continues to handle arbitrary nesting.
+The live preview uses the clipboard formatter. Expand the match details to see captured values and competing matches. Preview examples stay in memory. Pattern formats run in list order; **Advanced → Prefer over matching website formats** places a pattern before website formats. Other patterns run after website formats. Each row’s options menu lets you edit or remove a format, or move a pattern earlier or later. Removing a format asks for confirmation; switching it off keeps its configuration for later. Editors offer **Add format** or **Done** to apply changes, and **Cancel** to discard the draft. Starter templates are editable copies, and existing enterprise host settings are preserved. GitLab starter patterns have one group segment; specify additional namespace segments for deeper installations, while the built-in GitLab preset continues to handle arbitrary nesting.
 
 The builder supports at most 64 custom rules. HTTP in a custom pattern explicitly opts that host into HTTP; public GitHub and GitLab hosts require HTTPS. Matching and label generation stay local. Labels are plain text escaped for rich output, and rules never rewrite destinations or run scripts. In prose, trailing sentence punctuation outside a query or fragment stays outside the hyperlink; encode a literal trailing path punctuation character when needed. A whole-URL item always keeps its exact valid target.
 
 ### Enterprise installations
 
-Add a rule in **Settings → General → Service presets and enterprise hosts** for your GitHub or GitLab installation. Rules support an exact hostname, optional port, installation base path and enabled state. HTTP requires an explicit opt-in for that particular private host; HTTPS remains the default. Wildcards and overlapping enabled rules are rejected. See [matching rules](docs/architecture.md) for port and path-boundary details.
+Choose **Settings → Link formats → Add format → GitHub or GitLab installation…** for your installation. Website formats support an exact hostname and enabled state, with an optional port, installation base path and HTTP opt-in under **Advanced**. They appear alongside every other format in the same collection. HTTP requires an explicit opt-in for that particular private host; HTTPS remains the default. Wildcards and overlapping enabled rules are rejected. See [matching rules](docs/architecture.md) for port and path-boundary details.
 
 ## Privacy and permissions
 

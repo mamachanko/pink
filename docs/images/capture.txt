@@ -15,3 +15,5 @@ All screenshots are unmodified PNG bytes from their recorded runs. The documenta
 7637557e6fa5b14d0e408c1a58f607a11bb31c1a26c35a2ac1d2bef43fc58491  menu-bar.png
 21a9a62244280d9d8814a1410206b861e8e962f96d064e838d0cb3f41de628ac  settings.png
 3d5f852bc601a132652d904d5338c6c612c2937546bef7f1da33e29ad219dd79  link-formats.png
+
+Status after settings redesign (2026-11-16): settings.png and link-formats.png above are historical captures of the previous UI. They have been removed from the README pending a real macOS recapture. The menu-bar image is unchanged. This Linux workspace cannot produce or visually verify macOS screenshots; no replacement screenshots or checksums are claimed.
