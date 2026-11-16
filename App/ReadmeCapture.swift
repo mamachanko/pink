@@ -15,6 +15,8 @@
         private var statusItem: NSStatusItem?
         private var openSettings: (@MainActor () -> NSWindow?)?
         private var stage = 0
+        private var captureWindow: NSWindow?
+        private var readyAt = Date.distantFuture
         private var stopped = false
         private let deadline = Date().addingTimeInterval(60)
 
@@ -75,55 +77,63 @@
                         self?.fail("settings-window-failed")
                         return
                     }
-                    window.contentView?.layoutSubtreeIfNeeded()
-                    window.displayIfNeeded()
-                    // Draw the actual window frame and its hosted SwiftUI/AppKit controls.
-                    guard let view = window.contentView?.superview,
-                        let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds)
-                    else {
-                        self.fail("settings-bitmap-failed")
-                        return
-                    }
-                    view.cacheDisplay(in: view.bounds, to: bitmap)
-                    guard let png = bitmap.representation(using: .png, properties: [:]) else {
-                        self.fail("settings-encoding-failed")
-                        return
-                    }
-                    do {
-                        try png.write(to: self.output.appendingPathComponent("settings.png"), options: .atomic)
-                        // Exercise and capture the real builder with a reserved-host example.
-                        let formats = NSHostingView(
-                            rootView: LinkRulesView(
-                                hostRules: HostRule.defaults, rules: .constant([]),
-                                example: "https://jira.example/browse/TNZ-184273"))
-                        formats.frame = CGRect(x: 0, y: 0, width: 740, height: 900)
-                        let formatWindow = NSWindow(
-                            contentRect: formats.frame, styleMask: [.titled], backing: .buffered, defer: false)
-                        formatWindow.title = "Pink Link Formats"
-                        formatWindow.contentView = formats
-                        formatWindow.makeKeyAndOrderFront(nil)
-                        formats.layoutSubtreeIfNeeded()
-                        formatWindow.displayIfNeeded()
-                        guard let formatBitmap = formats.bitmapImageRepForCachingDisplay(in: formats.bounds) else {
-                            self.fail("formats-bitmap-failed")
-                            return
-                        }
-                        formats.cacheDisplay(in: formats.bounds, to: formatBitmap)
-                        guard let formatPNG = formatBitmap.representation(using: .png, properties: [:]) else {
-                            self.fail("formats-encoding-failed")
-                            return
-                        }
-                        try formatPNG.write(
-                            to: self.output.appendingPathComponent("link-formats.png"), options: .atomic)
-                        let evidence =
-                            "Captured from Pink's real UI on macOS \(ProcessInfo.processInfo.operatingSystemVersionString). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.\n"
-                        try evidence.write(
-                            to: self.output.appendingPathComponent("capture.txt"), atomically: true, encoding: .utf8)
-                        self.stage = 3
-                        NSApp.terminate(nil)
-                    } catch { self.fail("settings-write-failed") }
+                    window.setContentSize(NSSize(width: 740, height: 900))
+                    self.prepare(window)
                 }
+            } else if stage == 2, Date() >= readyAt {
+                writeWindowNumber("settings-window.json")
+                stage = 3
+            } else if stage == 3, captured("settings-captured") {
+                // Render the actual builder with a reserved-host example.
+                let formats = NSHostingView(
+                    rootView: LinkRulesView(
+                        hostRules: HostRule.defaults, rules: .constant([]),
+                        example: "https://jira.example/browse/TNZ-184273"))
+                let window = NSWindow(
+                    contentRect: CGRect(x: 0, y: 0, width: 740, height: 900),
+                    styleMask: [.titled, .closable], backing: .buffered, defer: false)
+                window.title = "Pink Link Formats"
+                window.contentView = formats
+                window.center()
+                window.makeKeyAndOrderFront(nil)
+                prepare(window)
+                stage = 4
+            } else if stage == 4, Date() >= readyAt {
+                writeWindowNumber("formats-window.json")
+                stage = 5
+            } else if stage == 5, captured("formats-captured") {
+                do {
+                    let evidence =
+                        "Captured from Pink's real UI on macOS \(ProcessInfo.processInfo.operatingSystemVersionString). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.\n"
+                    try evidence.write(
+                        to: output.appendingPathComponent("capture.txt"), atomically: true, encoding: .utf8)
+                    stage = 6
+                    NSApp.terminate(nil)
+                } catch { fail("capture-evidence-failed") }
             }
+        }
+
+        private func prepare(_ window: NSWindow) {
+            captureWindow = window
+            window.contentView?.layoutSubtreeIfNeeded()
+            window.displayIfNeeded()
+            // Give WindowServer and SwiftUI time to render native controls before capture.
+            readyAt = Date().addingTimeInterval(0.5)
+        }
+
+        private func captured(_ name: String) -> Bool {
+            FileManager.default.fileExists(atPath: output.appendingPathComponent(name).path)
+        }
+
+        private func writeWindowNumber(_ name: String) {
+            guard let captureWindow else {
+                fail("capture-window-missing")
+                return
+            }
+            do {
+                try JSONEncoder().encode(["number": captureWindow.windowNumber]).write(
+                    to: output.appendingPathComponent(name), options: .atomic)
+            } catch { fail("capture-window-metadata-failed") }
         }
 
         private func menuRegion(statusItem: NSStatusItem) -> CGRect? {
