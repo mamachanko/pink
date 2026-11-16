@@ -21,8 +21,26 @@ Pink makes long links easier to read in messages, notes and reviews. Copy normal
       <td><code>Please review https://github.com/<wbr>acme/widget/<wbr>pull/123 and https://gitlab.com/<wbr>team/project/<wbr>-/issues/7. Thanks!</code></td>
       <td>Please review <a href="https://github.com/acme/widget/pull/123"><strong>acme/widget#123</strong></a> and <a href="https://gitlab.com/team/project/-/issues/7"><strong>team/project#7</strong></a>. Thanks!</td>
     </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget</code></td>
+      <td><a href="https://github.com/acme/widget"><strong>acme/widget</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/blob/<wbr>main/Sources/App.swift#L10-L20</code></td>
+      <td><a href="https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20"><strong>acme/widget · main/Sources/App.swift:10–20</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/<wbr>releases/tag/v1.2.3</code></td>
+      <td><a href="https://github.com/acme/widget/releases/tag/v1.2.3"><strong>acme/widget@v1.2.3</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://jira.example/<wbr>browse/TNZ-184273</code></td>
+      <td><a href="https://jira.example/browse/TNZ-184273"><strong>TNZ-184273</strong></a></td>
+    </tr>
   </tbody>
 </table>
+
+The Jira example uses a [custom link format](#custom-link-formats-and-preview) for your installation. GitHub and GitLab presets work by default.
 
 **Plain-text paste keeps the left column exactly.** A terminal or plain-text field can select the full original URLs and message. An app accepting rich text can select the right column, with every short label pointing to its original destination. Both representations are on the same clipboard item—your app chooses what to paste.
 
@@ -41,12 +59,16 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
 </p>
 
 <table align="center">
-  <tr><th>In the menu bar</th><th>Settings</th></tr>
+  <tr><th>In the menu bar</th><th>General settings</th></tr>
   <tr>
     <td align="center" valign="top"><a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu-bar icon and menu, with formatting controls, Settings, About and Quit."></a></td>
-    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink Settings showing automatic formatting, GitHub and GitLab host rules, enterprise configuration and opt-in launch at login."></a></td>
+    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink General settings with the General and Link formats tabs, update controls, automatic formatting, service presets and launch at login."></a></td>
   </tr>
 </table>
+
+<p align="center">
+  <a href="docs/images/link-formats.png"><img src="docs/images/link-formats.png" width="640" alt="Pink’s link format builder showing a Jira URL pattern, a label template, and a live TNZ-184273 hyperlink preview with the captured issue value."></a>
+</p>
 
 <p align="center"><sub>Actual Pink UI on macOS, using demo settings. <a href="docs/images/README.md">Capture details</a>.</sub></p>
 
@@ -83,7 +105,7 @@ Pink lives in the menu bar, with no Dock icon. Its menu gives you:
 | **Pause automatic formatting** | Stop processing new copies. Enable it again to resume. |
 | **Format current clipboard** | Process content you already copied. |
 | **Restore original clipboard** | Restore the last original item while Pink still owns the current clipboard. It cannot change text already pasted. |
-| **Settings** | Manage host rules, automatic formatting and opt-in launch at login. macOS may require login-item approval. |
+| **Settings** | Build and preview custom link formats; manage service presets, automatic formatting and opt-in launch at login. macOS may require login-item approval. |
 | **Check for Updates…** | Check for a newer release and choose whether to update. Also available in Settings. |
 
 Enabling or resuming Pink leaves existing clipboard content alone. Use **Format current clipboard** to process it explicitly.
@@ -96,7 +118,7 @@ Each label keeps its own destination. Plain paste retains the entire original me
 
 ### Updating Pink
 
-Open **Settings → Check for Updates…**, or use the same action in the menu. Pink reports when you’re up to date and lets you retry if the check fails. Checks contact GitHub only when you ask; they never send clipboard contents.
+Open **Settings → General → Check for Updates…**, or use the same action in the menu. Pink reports when you’re up to date and lets you retry if the check fails. Checks contact GitHub only when you ask; they never send clipboard contents.
 
 Releases configured for signed in-app updates offer **Install Update**, then restart Pink using Sparkle’s native update dialog. Builds without update-signing configuration offer the release download for manual installation. Homebrew users can continue using `brew upgrade --cask mamachanko/pink/pink`. See [update delivery and setup](docs/updates.md).
 

@@ -1,5 +1,6 @@
 # Pink operations
 - Run `make lint test` before committing; macOS: `make verify`.
+- Keep `README.md` current with user-visible changes in the same PR: refresh feature descriptions, usage, supported links, limitations, and the copy/paste demo. For UI changes, retake affected real macOS screenshots with `node scripts/capture-readme.mjs`, visually review and commit them, and update `docs/images/capture.txt` source provenance and checksums. Verify README links and examples; never present mock or stale screenshots as the changed UI.
 - Core is Foundation-only. Platform owns AppKit. App owns UI and ServiceManagement.
 - Never log/persist clipboard contents or private hostnames. Use named pasteboards in tests.
 - Updates are user initiated; Sparkle validates signed feeds/archives. Never ship private update keys, enable profiling, or silently fall back from configured signing. `node scripts/test-updates.mjs` tests real signed preparation on macOS with ephemeral keys.
