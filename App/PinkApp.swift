@@ -272,7 +272,7 @@ struct SettingsView: View {
                         get: { preferences.value.automatic },
                         set: { enabled in
                             do { try preferences.edit { $0.automatic = enabled } } catch {
-                                error = "Your previous settings are still active. Try again."
+                                self.error = "Your previous settings are still active. Try again."
                             }
                         }
                     )
@@ -293,7 +293,7 @@ struct SettingsView: View {
                         get: { preferences.value.rewriteFormattedURLs },
                         set: { enabled in
                             do { try preferences.edit { $0.rewriteFormattedURLs = enabled } } catch {
-                                error = "Your previous settings are still active. Try again."
+                                self.error = "Your previous settings are still active. Try again."
                             }
                         }
                     ))

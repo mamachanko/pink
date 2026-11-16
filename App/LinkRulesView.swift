@@ -181,7 +181,7 @@ struct LinkRulesView: View {
             error =
                 "Another enabled website format covers this hostname and installation path. Edit it before enabling this format."
         } catch {
-            error = "Your previous settings are still active. Try again."
+            self.error = "Your previous settings are still active. Try again."
         }
     }
 
@@ -271,7 +271,7 @@ struct LinkPreview: View {
     var body: some View {
         let results = matches
         TextField("Example URL", text: $example, prompt: Text("Paste a URL to see how it will look"))
-            .textContentType(.URL)
+            .textContentType(.URL).autocorrectionDisabled()
         if !isValid && !example.isEmpty {
             Text("Finish the format above to preview this link.").foregroundStyle(.secondary)
         } else if let winner = results.first, let destination = URL(string: winner.reference.original) {
@@ -305,6 +305,7 @@ struct PatternEditor: View {
     @State private var draft: LinkRule
     @State private var example: String
     @State private var saveError = ""
+    @State private var hasEdited = false
     @FocusState private var primaryFieldFocused: Bool
     @Environment(\.dismiss) private var dismiss
     let save: (LinkRule) throws -> Void
@@ -345,8 +346,8 @@ struct PatternEditor: View {
                 Section {
                     TextField("Name", text: $draft.name, prompt: Text("e.g. Team wiki"))
                         .focused($primaryFieldFocused)
-                    TextField("URL pattern", text: $draft.urlPattern).textContentType(.URL)
-                    TextField("Link label", text: $draft.labelTemplate)
+                    TextField("URL pattern", text: $draft.urlPattern).textContentType(.URL).autocorrectionDisabled()
+                    TextField("Link label", text: $draft.labelTemplate).autocorrectionDisabled()
                 } header: {
                     Text(isEditing ? "Edit link format" : "Add link format").font(.title2.bold())
                 } footer: {
@@ -369,7 +370,7 @@ struct PatternEditor: View {
                         Text("This pattern allows unencrypted HTTP for this host.").font(.caption)
                     }
                 }
-                if let validation, !draft.name.isEmpty {
+                if let validation, isEditing || hasEdited {
                     Label(validation, systemImage: "exclamationmark.circle")
                         .font(.callout).foregroundStyle(.red)
                 }
@@ -383,6 +384,7 @@ struct PatternEditor: View {
                 dismiss()
             }
         }
+        .onChange(of: draft) { _, _ in hasEdited = true }
         .defaultFocus($primaryFieldFocused, true)
         .frame(minWidth: 560, idealWidth: 560, minHeight: 580, idealHeight: 580)
         .alert(
@@ -405,6 +407,7 @@ private struct HostFormatEditor: View {
     @State private var port: String
     @State private var example = ""
     @State private var saveError = ""
+    @State private var hasEdited = false
     @FocusState private var primaryFieldFocused: Bool
     @Environment(\.dismiss) private var dismiss
     let save: (HostRule) throws -> Void
@@ -444,6 +447,7 @@ private struct HostFormatEditor: View {
                         ForEach(Service.allCases, id: \.self) { Text($0.displayName).tag($0) }
                     }
                     TextField("Hostname", text: $draft.host, prompt: Text("git.example.com"))
+                        .autocorrectionDisabled()
                         .focused($primaryFieldFocused)
                     Text(
                         draft.service == .github
@@ -464,7 +468,7 @@ private struct HostFormatEditor: View {
                     Toggle("Allow HTTP for this host", isOn: $draft.allowHTTP)
                     Toggle("Enable format", isOn: $draft.enabled)
                 }
-                if let validation, !draft.host.isEmpty {
+                if let validation, index != nil || hasEdited {
                     Label(validation, systemImage: "exclamationmark.circle")
                         .font(.callout).foregroundStyle(.red)
                 }
@@ -478,6 +482,8 @@ private struct HostFormatEditor: View {
                 dismiss()
             }
         }
+        .onChange(of: draft) { _, _ in hasEdited = true }
+        .onChange(of: port) { _, _ in hasEdited = true }
         .defaultFocus($primaryFieldFocused, true)
         .frame(minWidth: 560, idealWidth: 560, minHeight: 580, idealHeight: 580)
         .alert(
