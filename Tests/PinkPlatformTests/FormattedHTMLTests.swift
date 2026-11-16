@@ -102,6 +102,37 @@ final class FormattedHTMLTests: XCTestCase {
         XCTAssertEqual(observed.writes, 3, "An identical external copy must still be formatted")
         monitor.pause()
     }
+    @MainActor func testHTMLAndRTFMustAgreeAndRetainValidatedStyles() async throws {
+        let (plain, original) = fixture()
+        var source = original
+        let styled = NSMutableAttributedString(string: plain, attributes: [.font: NSFont.boldSystemFont(ofSize: 14)])
+        for url in [first, second] { styled.addAttribute(.link, value: url, range: (plain as NSString).range(of: url)) }
+        source.values[Types.rtf] = try rtf(styled)
+        let builder = NativeRepresentations(rewriteFormattedURLs: true)
+        let formatted = try XCTUnwrap(Parser().parseText(plain))
+        let output = try XCTUnwrap(builder.build(formatted, source: source))
+        let rich = try readRTF(XCTUnwrap(output.values[Types.rtf]))
+        XCTAssertEqual(output.string(Types.text), plain)
+        XCTAssertEqual(rich.string, formatted.displayText)
+        for index in [0, rich.length - 1] {
+            let font = try XCTUnwrap(rich.attribute(.font, at: index, effectiveRange: nil) as? NSFont)
+            XCTAssertTrue(NSFontManager.shared.traits(of: font).contains(.boldFontMask))
+        }
+        styled.addAttribute(.link, value: "https://example.invalid", range: (plain as NSString).range(of: first))
+        source.values[Types.rtf] = try rtf(styled)
+        XCTAssertNil(builder.build(formatted, source: source))
+        source.values[Types.rtf] = try rtf(NSAttributedString(string: plain + " different"))
+        XCTAssertNil(builder.build(formatted, source: source))
+        let jira = "https://jira.example/browse/TEAM-123"
+        let parser = try Parser(linkRules: [
+            LinkRule(name: "Jira", urlPattern: "https://jira.example/browse/{issue}", labelTemplate: "{issue}")
+        ])
+        let custom = try XCTUnwrap(
+            builder.build(
+                try XCTUnwrap(parser.parseText(jira)),
+                source: Payload([Types.text: Data(jira.utf8), Types.html: Data(html(jira).utf8)])))
+        XCTAssertEqual(try readRTF(XCTUnwrap(custom.values[Types.rtf])).string, "TEAM-123")
+    }
     @MainActor func testHTMLAndRTFStylesAgreeAndNamedLinksAreProtected() async throws {
         let (plain, source) = fixture()
         let styled = NSMutableAttributedString(string: plain, attributes: [.font: NSFont.boldSystemFont(ofSize: 14)])

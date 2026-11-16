@@ -138,6 +138,7 @@ private final class FragmentReader: NSObject, XMLParserDelegate {
     private var anchor: (offset: Int, target: String)?
     private let blocks: Set<String> = ["div", "p", "pre", "blockquote", "ul", "ol", "li"]
     private func reject(_ parser: XMLParser) {
+        guard !invalid else { return }
         invalid = true
         parser.abortParsing()
     }
