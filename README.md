@@ -34,8 +34,8 @@ Pink makes long links easier to read in messages, notes and reviews. Copy normal
       <td><a href="https://github.com/acme/widget/releases/tag/v1.2.3"><strong>acme/widget@v1.2.3</strong></a></td>
     </tr>
     <tr>
-      <td><code>https://jira.example/<wbr>browse/TNZ-184273</code></td>
-      <td><a href="https://jira.example/browse/TNZ-184273"><strong>TNZ-184273</strong></a></td>
+      <td><code>https://jira.example/<wbr>browse/ACME-184273</code></td>
+      <td><a href="https://jira.example/browse/ACME-184273"><strong>ACME-184273</strong></a></td>
     </tr>
   </tbody>
 </table>
@@ -150,8 +150,8 @@ For example, choose **Add format → Jira issue**:
 Name:         Jira issue
 URL pattern:  https://jira.example/browse/{issue}
 Link label:   {issue}
-Example URL:  https://jira.example/browse/TNZ-184273
-Preview:      TNZ-184273
+Example URL:  https://jira.example/browse/ACME-184273
+Preview:      ACME-184273
 ```
 
 Replace `jira.example` with your installation's hostname. `{issue}` captures exactly one nonempty path segment. A final `{path...}` captures one or more remaining segments; use `{path}` in the label. Captures occupy whole segments, have unique letter-first names, and cannot appear in the hostname. Matching uses an exact host, scheme and optional port; path literals are case sensitive. Patterns do not use regex and cannot contain queries or fragments. Queries and fragments in copied links remain in the exact destination. Literal pattern paths use unescaped characters; captures can match percent-encoded text, including spaces in filenames. Invalid escapes, encoded separators, dot segments and controls are rejected.

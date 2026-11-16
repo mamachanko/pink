@@ -5,18 +5,12 @@ Capture workflow: https://github.com/mamachanko/pink/actions/runs/43842786076
 Capture source PR head: 01ff3a646b1bd74143abaff4c8e49083f9aaead8
 Visually reviewed on 2026-11-16. Settings shows the actual General/Link formats tabs, opt-in formatted-URL control and persistent Save footer. Settings uses the real native window compositor.
 
-link-formats.png:
-Capture workflow: https://github.com/mamachanko/pink/actions/runs/43830678806
-Capture source PR head: 324860781c40b348b51e37ce2d691f760ab2baca
-Visually reviewed on 2026-11-16. The actual link-format builder shows a reserved-host Jira pattern, label template and live TNZ-184273 preview. This builder UI is unchanged by the formatted-URL feature.
-
 All screenshots are unmodified PNG bytes from their recorded runs. The documentation build displays development version 0.0.0. Demo settings only; no live update check or permission change during capture.
 
 7637557e6fa5b14d0e408c1a58f607a11bb31c1a26c35a2ac1d2bef43fc58491  menu-bar.png
 21a9a62244280d9d8814a1410206b861e8e962f96d064e838d0cb3f41de628ac  settings.png
-3d5f852bc601a132652d904d5338c6c612c2937546bef7f1da33e29ad219dd79  link-formats.png
 
-Status after settings redesign (2026-11-16): settings.png and link-formats.png above are historical captures of the previous UI. They have been removed from the README pending a real macOS recapture. The menu-bar image is unchanged. This Linux workspace cannot produce or visually verify macOS screenshots; no replacement screenshots or checksums are claimed.
+Status after settings redesign (2026-11-16): settings.png above is a historical capture of the previous UI and is omitted from the README pending a real macOS recapture. The obsolete builder capture was removed while standardizing examples on ACME. The menu-bar image is unchanged. This Linux workspace cannot produce or visually verify macOS screenshots; no replacement screenshots or checksums are claimed.
 
 Pending replacement capture: https://github.com/mamachanko/pink/actions/runs/43871951434/artifacts/14228248053
 Source: b2736ebf8bfdf1db51d4b465319d00bc7dd054a6. Native capture job succeeded. PNG retrieval and visual review are blocked by this environment's network policy. No new screenshot bytes, pixel review or checksums are claimed.

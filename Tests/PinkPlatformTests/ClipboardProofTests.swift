@@ -28,12 +28,12 @@ final class ClipboardProofTests: XCTestCase {
             LinkRule(name: "Jira", urlPattern: "https://jira.example/browse/{issue}", labelTemplate: "{issue}")
         ])
         let urls = [
-            "https://jira.example/browse/TNZ-184273?x=a&b=%2F#comment-2",
+            "https://jira.example/browse/ACME-184273?x=a&b=%2F#comment-2",
             "https://github.com/acme/widget",
             "https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20",
             "https://github.com/acme/widget/releases/tag/v1.2.3",
         ]
-        let labels = ["TNZ-184273", "acme/widget", "acme/widget · main/Sources/App.swift:10–20", "acme/widget@v1.2.3"]
+        let labels = ["ACME-184273", "acme/widget", "acme/widget · main/Sources/App.swift:10–20", "acme/widget@v1.2.3"]
         for (url, label) in zip(urls, labels) {
             let formatted = try XCTUnwrap(parser.parseText(url))
             let payload = try XCTUnwrap(NativeRepresentations().build(formatted))

@@ -88,7 +88,7 @@
                 let formats = NSHostingView(
                     rootView: PatternEditor(
                         settings: PinkCore.Settings(), initial: LinkRule.templates[0],
-                        example: "https://jira.example/browse/TNZ-184273", save: { _ in }
+                        example: "https://jira.example/browse/ACME-184273", save: { _ in }
                     ).tint(.pink))
                 let window = NSWindow(
                     contentRect: CGRect(x: 0, y: 0, width: 560, height: 580),

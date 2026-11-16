@@ -9,16 +9,16 @@ final class LinkRuleTests: XCTestCase {
 
     func testCustomLinkAndProseKeepExactTargets() throws {
         let parser = try Parser(linkRules: [jira()])
-        let url = "https://JIRA.EXAMPLE/browse/TNZ-184273/?view=all&x=%2F#comment-2"
+        let url = "https://JIRA.EXAMPLE/browse/ACME-184273/?view=all&x=%2F#comment-2"
         let reference = try XCTUnwrap(parser.parse(url))
-        XCTAssertEqual(reference.label, "TNZ-184273")
+        XCTAssertEqual(reference.label, "ACME-184273")
         XCTAssertEqual(reference.original, url)
         XCTAssertTrue(reference.html.contains("view=all&amp;x=%2F"))
         let prose = "Review \(url) and https://github.com/acme/widget/issues/5 please"
         let formatted = try XCTUnwrap(parser.parseText(prose))
         XCTAssertEqual(formatted.original, prose)
-        XCTAssertEqual(formatted.displayText, "Review TNZ-184273 and acme/widget#5 please")
-        XCTAssertEqual(parser.matches(url).first?.captures, ["issue": "TNZ-184273"])
+        XCTAssertEqual(formatted.displayText, "Review ACME-184273 and acme/widget#5 please")
+        XCTAssertEqual(parser.matches(url).first?.captures, ["issue": "ACME-184273"])
         XCTAssertEqual(parser.matches(url).first?.reference, reference)
     }
 
@@ -107,14 +107,14 @@ final class LinkRuleTests: XCTestCase {
     func testProsePunctuationAndDotSegmentsAreNotCaptured() throws {
         let parser = try Parser(linkRules: [jira()])
         for suffix in [".", ",", ";", ":", "!"] {
-            let text = "Review https://jira.example/browse/TNZ-184273\(suffix)"
-            XCTAssertEqual(parser.parseText(text)?.displayText, "Review TNZ-184273\(suffix)")
+            let text = "Review https://jira.example/browse/ACME-184273\(suffix)"
+            XCTAssertEqual(parser.parseText(text)?.displayText, "Review ACME-184273\(suffix)")
         }
-        let text = "Review https://jira.example/browse/TNZ-184273."
+        let text = "Review https://jira.example/browse/ACME-184273."
         let formatted = try XCTUnwrap(parser.parseText(text))
         XCTAssertEqual(
             formatted.html,
-            "<span style=\"white-space: pre-wrap\">Review <a href=\"https://jira.example/browse/TNZ-184273\">TNZ-184273</a>.</span>"
+            "<span style=\"white-space: pre-wrap\">Review <a href=\"https://jira.example/browse/ACME-184273\">ACME-184273</a>.</span>"
         )
         XCTAssertEqual(parser.parseText("Visit https://github.com/acme/widget.")?.displayText, "Visit acme/widget.")
         for url in [
@@ -131,13 +131,13 @@ final class LinkRuleTests: XCTestCase {
             board: board, builder: Builder(), permission: Permission(), scheduler: clock,
             parser: try Parser(linkRules: [jira()]))
         monitor.enable()
-        let url = "https://jira.example/browse/TNZ-184273?x=%2F#comment-2"
+        let url = "https://jira.example/browse/ACME-184273?x=%2F#comment-2"
         let payload = Payload([Types.text: Data(url.utf8), Types.url: Data(url.utf8)])
         board.external(payload)
         clock.tick?()
         XCTAssertEqual(board.writes, 1)
         XCTAssertEqual(board.payload.string(Types.text), url)
-        XCTAssertEqual(board.payload.string(Types.html), "<a href=\"\(url)\">TNZ-184273</a>")
+        XCTAssertEqual(board.payload.string(Types.html), "<a href=\"\(url)\">ACME-184273</a>")
         XCTAssertTrue(monitor.canRestore)
         clock.tick?()
         XCTAssertEqual(board.writes, 1)
