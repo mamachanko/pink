@@ -1,9 +1,11 @@
 import {createHash} from 'node:crypto';
 import {spawn, spawnSync} from 'node:child_process';
-import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {existsSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
 import {resolve} from 'node:path';
 const output = resolve(process.argv[2] ?? 'build/readme-captures');
 mkdirSync(output, {recursive:true});
+// Retake owned outputs rather than accidentally accepting stale screenshots or handshakes.
+for (const name of ['menu-region.json','menu-captured','settings-window.json','settings-captured','formats-window.json','formats-captured','menu-bar.png','settings.png','link-formats.png','capture.txt','failure.txt']) rmSync(`${output}/${name}`,{force:true});
 function command(program,args) {
  const result=spawnSync(program,args,{stdio:'inherit'});
  if(result.error || result.status!==0) throw new Error(`Capture command failed: ${program}`);
@@ -26,7 +28,16 @@ try {
  // Native region capture; no image generation, compositing, or permission changes.
  command('/usr/sbin/screencapture',['-x','-R',`${b.x},${b.y},${b.width},${b.height}`,`${output}/menu-bar.png`]);
  writeFileSync(`${output}/menu-captured`,'');
- await waitFor('settings.png');
+ for (const [metadata,image,marker] of [
+  ['settings-window.json','settings.png','settings-captured'],
+  ['formats-window.json','link-formats.png','formats-captured']
+ ]) {
+  await waitFor(metadata);
+  const {number}=JSON.parse(readFileSync(`${output}/${metadata}`));
+  if(!Number.isSafeInteger(number)||number<=0)throw new Error('Invalid capture window number');
+  command('/usr/sbin/screencapture',['-x','-l',String(number),'-o',`${output}/${image}`]);
+  writeFileSync(`${output}/${marker}`,'');
+ }
  await waitFor('capture.txt');
 } finally { if(!exited) app.kill('SIGTERM'); }
 
