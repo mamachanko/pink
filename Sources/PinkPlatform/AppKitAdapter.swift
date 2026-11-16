@@ -40,7 +40,7 @@ import PinkCore
         guard !hasNamedLink(source, original: text.original) else { return nil }
         let attributed: NSMutableAttributedString
         if let data = source.values[Types.rtf] {
-            guard let value = readRTF(data), value.string == text.original else { return nil }
+            guard let value = readRTF(data), value.string.utf8.elementsEqual(text.original.utf8) else { return nil }
             attributed = NSMutableAttributedString(attributedString: value)
         } else {
             attributed = NSMutableAttributedString(string: text.original)
@@ -71,7 +71,7 @@ import PinkCore
             for (existing, target) in existingLinks where NSIntersectionRange(range, existing).length > 0 {
                 // An existing raw autolink can provide a narrower boundary than
                 // prose tokenization. Never silently change that known target.
-                guard range == existing, reference.original == target else { return nil }
+                guard range == existing, reference.original.utf8.elementsEqual(target.utf8) else { return nil }
             }
         }
         for (range, reference) in replacements.reversed() {
@@ -103,7 +103,7 @@ import PinkCore
         }
         if let data = payload.values[Types.rtf] {
             guard let value = readRTF(data) else { return true }
-            if value.string != original { return true }
+            if !value.string.utf8.elementsEqual(original.utf8) { return true }
             var conflict = false
             let entire = NSRange(location: 0, length: value.length)
             value.enumerateAttribute(.attachment, in: entire) { attachment, _, _ in
@@ -111,7 +111,7 @@ import PinkCore
             }
             value.enumerateAttribute(.link, in: entire) { link, range, _ in
                 if let link,
-                    (value.string as NSString).substring(with: range) != String(describing: link)
+                    !(value.string as NSString).substring(with: range).utf8.elementsEqual(String(describing: link).utf8)
                 {
                     conflict = true
                 }

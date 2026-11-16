@@ -30,7 +30,7 @@ public enum HTMLClipboard {
                 let last = rich.ends.lastIndex(of: NSMaxRange(link.range)), first <= last
             else { return nil }
             let range = NSRange(location: plain.starts[first], length: plain.ends[last] - plain.starts[first])
-            guard (original as NSString).substring(with: range) == link.target else { return nil }
+            guard (original as NSString).substring(with: range).utf8.elementsEqual(link.target.utf8) else { return nil }
             result.append(SourceLink(range: range, target: link.target))
         }
         return result
@@ -198,7 +198,7 @@ private final class FragmentReader: NSObject, XMLParserDelegate {
                 return
             }
             let range = NSRange(location: anchor.offset, length: text.utf16.count - anchor.offset)
-            guard (text as NSString).substring(with: range) == anchor.target else {
+            guard (text as NSString).substring(with: range).utf8.elementsEqual(anchor.target.utf8) else {
                 reject(parser)
                 return
             }

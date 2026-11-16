@@ -30,6 +30,11 @@ final class HTMLClipboardTests: XCTestCase {
         XCTAssertNotNil(links("<span>Review \(first)</span>", "Review \(first)"))
     }
     func testNamedLinksConflictingTargetsAndDifferentTextAreRejected() {
+        let composed = "https://example.com/\u{E9}"
+        let decomposed = "https://example.com/e\u{301}"
+        XCTAssertEqual(composed, decomposed, "Swift string equality treats canonical Unicode spellings as equal")
+        XCTAssertNil(links("<a href='\(composed)'>\(decomposed)</a>", decomposed))
+        XCTAssertNil(links("<a href='\(decomposed)'>\(composed)</a>", composed))
         for html in [
             "<a href='\(url.replacingOccurrences(of: "&", with: "&amp;"))'>Review</a>",
             "<a href='https://github.com/other/repo/pull/2'>\(url.replacingOccurrences(of: "&", with: "&amp;"))</a>",
