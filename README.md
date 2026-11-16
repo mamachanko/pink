@@ -44,7 +44,7 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
   <tr><th>In the menu bar</th><th>Settings</th></tr>
   <tr>
     <td align="center" valign="top"><a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu-bar icon and menu, with formatting controls, Settings, About and Quit."></a></td>
-    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink Settings showing automatic formatting, GitHub and GitLab host rules, enterprise configuration and opt-in launch at login."></a></td>
+    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink Settings showing the opt-in formatted-URL control, automatic formatting and host rules."></a></td>
   </tr>
 </table>
 

@@ -1,8 +1,8 @@
 Captured from Pink's real UI on macOS Version 15.8.2 (Build 24H232). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
 
-Capture workflow: https://github.com/mamachanko/pink/actions/runs/43688245907
-Capture source PR head: 7b58ef324d1701d0ea83c7d793723f9752b254f2
-The screenshots are unmodified PNG bytes from that run, visually reviewed on 2026-11-15. The menu shows the native Check for Updates action; Settings shows its Updates section and persistent Save footer. Demo settings only; no live update check was requested during capture.
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/43842786076
+Capture source PR head: 01ff3a646b1bd74143abaff4c8e49083f9aaead8
+The screenshots are unmodified PNG bytes from that run, visually reviewed on 2026-11-16. Settings uses the real native window compositor; no pixels were generated, redrawn or composited. Demo settings and a unique named pasteboard only; no update check or permission change during capture.
 
-34ddd6bc785fdd286636f40f709005cd32ae7bcdfbbd299bda5934b16c94d792  menu-bar.png
-4c637f6d2dbbc5c4716bcef0f46029058d84fa1d57d2110b9302042df375f3c1  settings.png
+7637557e6fa5b14d0e408c1a58f607a11bb31c1a26c35a2ac1d2bef43fc58491  menu-bar.png
+21a9a62244280d9d8814a1410206b861e8e962f96d064e838d0cb3f41de628ac  settings.png

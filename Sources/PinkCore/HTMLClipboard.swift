@@ -20,7 +20,7 @@ public enum HTMLClipboard {
         parser.shouldResolveExternalEntities = false
         parser.externalEntityResolvingPolicy = .never
         parser.delegate = reader
-        guard parser.parse(), !reader.invalid else { return nil }
+        guard parser.parse(), !reader.invalid, reader.text.utf8.count <= 32768 else { return nil }
         let rich = MatchingText(reader.text)
         let plain = MatchingText(original)
         guard rich.units == plain.units else { return nil }

@@ -75,6 +75,7 @@ final class HTMLClipboardTests: XCTestCase {
         XCTAssertNil(
             links(String(repeating: "<span>", count: 65) + "text" + String(repeating: "</span>", count: 65), "text"))
         XCTAssertNil(links("<span>" + String(repeating: "x", count: 32769) + "</span>", "text"))
+        XCTAssertNil(links("text" + String(repeating: " ", count: 32764) + "<div></div>", "text"))
     }
     func testPreferenceMigrationDefaultRoundTripAndInvalidValue() throws {
         var settings = Settings()
