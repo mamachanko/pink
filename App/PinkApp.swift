@@ -56,7 +56,7 @@ import SwiftUI
     private func configure(board: any PasteboardPort, permission: any PermissionPort) {
         monitor = ClipboardMonitor(
             board: board, builder: NativeRepresentations(), permission: permission,
-            scheduler: TimerScheduler(), parser: try! Parser(rules: settings.rules))
+            scheduler: TimerScheduler(), parser: try! Parser(rules: settings.rules, linkRules: settings.linkRules))
         monitor.onChange = { [weak self] in self?.refresh() }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.title = "💕"
@@ -106,7 +106,7 @@ import SwiftUI
         let alert = NSAlert()
         alert.messageText = "Enable Pink?"
         alert.informativeText =
-            "Pink checks new clipboard items locally and adds short rich hyperlinks to supported GitHub and GitLab URLs, including links within prose. Plain paste keeps the exact original text. Clipboard contents are never stored or sent. Some unmarked sensitive content cannot be identified."
+            "Pink checks new clipboard items locally and adds short rich hyperlinks to URLs matching your link formats, including links within prose. Plain paste keeps the exact original text. Clipboard contents are never stored or sent. Some unmarked sensitive content cannot be identified."
         alert.addButton(withTitle: "Enable")
         alert.addButton(withTitle: "Not now")
         if alert.runModal() == .alertFirstButtonReturn {
@@ -172,7 +172,7 @@ import SwiftUI
             guard let self else { return }
             self.settings = value
             self.save()
-            self.monitor.parser = try! Parser(rules: value.rules)
+            self.monitor.parser = try! Parser(rules: value.rules, linkRules: value.linkRules)
             if value.automatic && value.consent { self.monitor.enable() } else { self.monitor.pause() }
         }
         let controller = NSHostingController(rootView: view)
@@ -223,6 +223,31 @@ struct SettingsView: View {
         self.apply = apply
     }
     var body: some View {
+        TabView {
+            generalSettings.tabItem { Text("General") }
+            LinkRulesView(hostRules: value.rules, rules: $value.linkRules)
+                .tabItem { Text("Link formats") }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                Divider()
+                HStack {
+                    if !error.isEmpty { Text(error).accessibilityLabel(error) }
+                    Spacer()
+                    Button("Save settings") {
+                        do {
+                            _ = try Parser(rules: value.rules, linkRules: value.linkRules)
+                            apply(value)
+                            error = "Saved"
+                        } catch { self.error = "Invalid link formats or overlapping host rules" }
+                    }.keyboardShortcut(.defaultAction)
+                }.padding()
+            }.background(.background)
+        }
+        .padding().frame(minWidth: 640, minHeight: 760)
+    }
+
+    private var generalSettings: some View {
         Form {
             UpdatesSettings(updates: updates)
             Toggle("Automatic formatting", isOn: $value.automatic).disabled(!value.consent)
@@ -230,7 +255,7 @@ struct SettingsView: View {
                 "Processing is local. Plain paste keeps the exact original text. Immediate paste may beat the watcher."
             ).font(
                 .caption)
-            Section("Host rules") {
+            Section("Service presets and enterprise hosts") {
                 List {
                     ForEach(value.rules.indices, id: \.self) { i in
                         HStack {
@@ -286,23 +311,6 @@ struct SettingsView: View {
                 }
             }
         }.formStyle(.grouped)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 0) {
-                    Divider()
-                    HStack {
-                        if !error.isEmpty { Text(error).accessibilityLabel(error) }
-                        Spacer()
-                        Button("Save settings") {
-                            do {
-                                _ = try Parser(rules: value.rules)
-                                apply(value)
-                                error = "Saved"
-                            } catch { self.error = "Invalid or overlapping host rules" }
-                        }.keyboardShortcut(.defaultAction)
-                    }.padding()
-                }.background(.background)
-            }
-            .padding().frame(minWidth: 640, minHeight: 760)
     }
     private var loginDescription: String {
         switch loginStatus {

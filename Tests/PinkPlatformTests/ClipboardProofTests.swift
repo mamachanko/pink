@@ -5,6 +5,34 @@ import XCTest
 @testable import PinkPlatform
 
 final class ClipboardProofTests: XCTestCase {
+    @MainActor func testCustomAndExpandedGitHubLinksUseNativeRepresentations() async throws {
+        let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
+        defer { board.releaseGlobally() }
+        let parser = try Parser(linkRules: [
+            LinkRule(name: "Jira", urlPattern: "https://jira.example/browse/{issue}", labelTemplate: "{issue}")
+        ])
+        let urls = [
+            "https://jira.example/browse/TNZ-184273?x=a&b=%2F#comment-2",
+            "https://github.com/acme/widget",
+            "https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20",
+            "https://github.com/acme/widget/releases/tag/v1.2.3",
+        ]
+        let labels = ["TNZ-184273", "acme/widget", "acme/widget · main/Sources/App.swift:10–20", "acme/widget@v1.2.3"]
+        for (url, label) in zip(urls, labels) {
+            let formatted = try XCTUnwrap(parser.parseText(url))
+            let payload = try XCTUnwrap(NativeRepresentations().build(formatted))
+            XCTAssertTrue(NativeBoard(board).write(payload))
+            XCTAssertEqual(board.pasteboardItems?.count, 1)
+            XCTAssertEqual(board.string(forType: .string), url)
+            XCTAssertEqual(board.string(forType: .URL), url)
+            let rich = try NSAttributedString(
+                data: XCTUnwrap(board.data(forType: .rtf)),
+                options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+            XCTAssertEqual(rich.string, label)
+            XCTAssertEqual(String(describing: rich.attribute(.link, at: 0, effectiveRange: nil)!), url)
+        }
+    }
+
     @MainActor func testOneItemRichAndPlainRoundTrip() async throws {
         let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
         defer { board.releaseGlobally() }

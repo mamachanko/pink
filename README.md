@@ -4,7 +4,7 @@
   <strong>Copy full URLs. Paste readable references.</strong>
 </p>
 
-Pink makes long GitHub and GitLab references easier to read in messages, notes and reviews. Copy normally; Pink adds short, clickable links alongside your untouched original text.
+Pink makes long links easier to read in messages, notes and reviews. Copy normally; Pink adds short, clickable links alongside your untouched original text.
 
 <table>
   <thead><tr><th>You copy</th><th>Rich-text paste</th></tr></thead>
@@ -108,18 +108,41 @@ Releases configured for signed in-app updates offer **Install Update**, then res
 | --- | --- | --- |
 | GitHub issue | `/owner/repo/issues/123` | `owner/repo#123` |
 | GitHub pull request | `/owner/repo/pull/123` | `owner/repo#123` |
+| GitHub repository | `/owner/repo` | `owner/repo` |
+| GitHub file | `/owner/repo/blob/main/Sources/App.swift#L10-L20` | `owner/repo · main/Sources/App.swift:10–20` |
+| GitHub release | `/owner/repo/releases/tag/v1.2.3` | `owner/repo@v1.2.3` |
 | GitLab issue | `/group/project/-/issues/123` | `group/project#123` |
 | GitLab merge request | `/group/project/-/merge_requests/123` | `group/project!123` |
 
 Nested GitLab namespaces stay in the label. Trailing slashes are supported, along with GitHub `files`, `commits` and `checks` subpages and GitLab merge-request `diffs`, `commits` and `pipelines` subpages. Queries, fragments and display case are preserved.
 
+Files keep the revision and path together because branch names can contain slashes; Pink never looks up repository data. Tagged releases are supported; `/releases/latest` and directory (`tree`) URLs stay unchanged.
+
+### Custom link formats and preview
+
+Open **Settings → Link formats** and choose a starter preset or enter your own pattern and label:
+
+```text
+Name:         Jira issue
+URL pattern:  https://jira.example/browse/{issue}
+Link label:   {issue}
+Example URL:  https://jira.example/browse/TNZ-184273
+Preview:      TNZ-184273
+```
+
+Replace `jira.example` with your installation's hostname. `{issue}` captures exactly one nonempty path segment. A final `{path...}` captures one or more remaining segments; use `{path}` in the label. Captures occupy whole segments, have unique letter-first names, and cannot appear in the hostname. Matching uses an exact host, scheme and optional port; path literals are case sensitive. Patterns do not use regex and cannot contain queries or fragments. Queries and fragments in copied links remain in the exact destination. Literal pattern paths use unescaped characters; captures can match percent-encoded text, including spaces in filenames. Invalid escapes, encoded separators, dot segments and controls are rejected.
+
+The live preview uses the clipboard formatter and shows the winning format, captured values and competing matches. Preview examples stay in memory. Custom rules run in list order, with **Override matching service presets** rules ahead of service presets and other custom rules after them. You can edit, enable, remove and reorder rules. Use **Add to settings** / **Update rule**, then **Save settings** to apply. Starter presets are editable copies, and existing enterprise host settings are preserved. GitLab starter patterns have one group segment; specify additional namespace segments for deeper installations, while the built-in GitLab preset continues to handle arbitrary nesting.
+
+The builder supports at most 64 custom rules. HTTP in a custom pattern explicitly opts that host into HTTP; public GitHub and GitLab hosts require HTTPS. Matching and label generation stay local. Labels are plain text escaped for rich output, and rules never rewrite destinations or run scripts. In prose, trailing sentence punctuation outside a query or fragment stays outside the hyperlink; encode a literal trailing path punctuation character when needed. A whole-URL item always keeps its exact valid target.
+
 ### Enterprise installations
 
-Add a rule in **Settings → Host rules** for your GitHub or GitLab installation. Rules support an exact hostname, optional port, installation base path and enabled state. HTTP requires an explicit opt-in for that particular private host; HTTPS remains the default. Wildcards and overlapping enabled rules are rejected. See [matching rules](docs/architecture.md) for port and path-boundary details.
+Add a rule in **Settings → General → Service presets and enterprise hosts** for your GitHub or GitLab installation. Rules support an exact hostname, optional port, installation base path and enabled state. HTTP requires an explicit opt-in for that particular private host; HTTPS remains the default. Wildcards and overlapping enabled rules are rejected. See [matching rules](docs/architecture.md) for port and path-boundary details.
 
 ## Privacy and permissions
 
-Clipboard processing stays on your Mac. Pink has no accounts, telemetry, repository lookups or clipboard history. Update checks and downloads contact GitHub only after you request them. Clipboard contents and the single temporary restoration snapshot are never logged, persisted or sent. Settings and update preferences are saved locally.
+Clipboard processing stays on your Mac. Pink has no accounts, telemetry, repository lookups or clipboard history. Update checks and downloads contact GitHub only after you request them. Clipboard contents and the single temporary restoration snapshot are never logged, persisted or sent. Settings (including configured patterns and labels) and update preferences are saved locally. Example URLs are never saved.
 
 Pink does not need Accessibility, Input Monitoring or Screen Recording permissions. Its initial **Enable** consent is separate from macOS clipboard policy. On macOS 15.4+, an Ask/Deny policy stops monitoring; review the per-app **Paste from Other Apps** setting where available, then use **Retry**. See [privacy](docs/privacy.md) and [permission guidance](docs/installation.md#clipboard-permissions).
 

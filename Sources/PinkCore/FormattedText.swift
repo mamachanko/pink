@@ -82,6 +82,17 @@ extension Parser {
             {
                 candidate = String(candidate[..<closing])
             }
+            // Generic path captures must not swallow sentence punctuation in prose.
+            // Explicit queries/fragments and whole-URL items retain their exact target.
+            if let url = URLComponents(string: candidate) {
+                guard !url.path.split(separator: "/").contains(where: { $0 == "." || $0 == ".." }) else { continue }
+                if url.query == nil && url.fragment == nil {
+                    for _ in 0..<32 {
+                        guard let last = candidate.last, ".,;:!?".contains(last) else { break }
+                        candidate.removeLast()
+                    }
+                }
+            }
             var reference: Reference?
             // Bound punctuation work as well as input bytes; never repeatedly parse
             // thousands of trailing punctuation characters on the main actor.
