@@ -10,7 +10,8 @@ import {renderCask,caskForDistribution} from './homebrew.mjs';
 import {expectedAssets} from './check-assets.mjs';
 const repository='mamachanko/pink';
 const sha=text=>createHash('sha256').update(text).digest('hex');
-const template=readFileSync('Casks/pink.rb','utf8');
+// Keep the fake remote older than fixture releases, independent of the real tap version.
+const template=readFileSync('Casks/pink.rb','utf8').replace(/^  version "[^"]+"/m,'  version "1.0.3"');
 function distribution(version='1.2.3') {
  const directory=mkdtempSync(join(tmpdir(),'pink-pr-test-'));
  const info={version,signingMode:'adhoc',notarization:'none',commit:'f'.repeat(40)};
