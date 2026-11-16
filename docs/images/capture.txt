@@ -17,3 +17,6 @@ All screenshots are unmodified PNG bytes from their recorded runs. The documenta
 3d5f852bc601a132652d904d5338c6c612c2937546bef7f1da33e29ad219dd79  link-formats.png
 
 Status after settings redesign (2026-11-16): settings.png and link-formats.png above are historical captures of the previous UI. They have been removed from the README pending a real macOS recapture. The menu-bar image is unchanged. This Linux workspace cannot produce or visually verify macOS screenshots; no replacement screenshots or checksums are claimed.
+
+Pending replacement capture: https://github.com/mamachanko/pink/actions/runs/43871951434/artifacts/14228248053
+Source: b2736ebf8bfdf1db51d4b465319d00bc7dd054a6. Native capture job succeeded. PNG retrieval and visual review are blocked by this environment's network policy. No new screenshot bytes, pixel review or checksums are claimed.
