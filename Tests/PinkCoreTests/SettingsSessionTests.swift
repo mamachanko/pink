@@ -7,6 +7,8 @@ final class SettingsSessionTests: XCTestCase {
         var initial = Settings()
         initial.consent = true
         initial.automatic = true
+        initial.rewriteFormattedURLs = true
+        initial.rules.append(HostRule(service: .gitlab, host: "git.example", basePath: "/team"))
         var saved: [Settings] = []
         let session = try SettingsSession(initial: initial) { saved.append($0) }
         var observed: [(Settings, Settings)] = []
@@ -18,6 +20,9 @@ final class SettingsSessionTests: XCTestCase {
         try session.edit { $0.linkRules.append(format) }
         XCTAssertFalse(session.value.automatic)
         XCTAssertEqual(session.value.linkRules, [format])
+        XCTAssertEqual(session.value.rules, initial.rules)
+        XCTAssertTrue(session.value.rewriteFormattedURLs)
+        XCTAssertTrue(session.value.consent)
         XCTAssertEqual(saved.last, session.value)
         XCTAssertEqual(observed.count, 2)
         XCTAssertTrue(observed[0].0.automatic)
@@ -52,6 +57,26 @@ final class SettingsSessionTests: XCTestCase {
         XCTAssertEqual(session.value.linkRules, [format])
         XCTAssertEqual(notifications, 1)
         XCTAssertEqual(saves, 2)
+    }
+
+    @MainActor func testRejectedEditorMutationCannotLeakPartialChanges() async throws {
+        enum EditError: Error { case stale }
+        let initial = Settings()
+        var saves = 0
+        let session = try SettingsSession(initial: initial) { _ in saves += 1 }
+        var notifications = 0
+        session.onChange = { _, _ in notifications += 1 }
+
+        // An editor can discover a conflict after starting to construct its update.
+        XCTAssertThrowsError(
+            try session.edit {
+                $0.rules.removeAll()
+                $0.linkRules.append(LinkRule.templates[0])
+                throw EditError.stale
+            })
+        XCTAssertEqual(session.value, initial)
+        XCTAssertEqual(saves, 0)
+        XCTAssertEqual(notifications, 0)
     }
 
     @MainActor func testInvalidChangeAndNoOpNeverReachPersistence() async throws {
