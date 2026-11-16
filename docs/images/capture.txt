@@ -1,8 +1,9 @@
 Captured from Pink's real UI on macOS Version 15.8.2 (Build 24H232). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
 
-Capture workflow: https://github.com/mamachanko/pink/actions/runs/43688245907
-Capture source PR head: 7b58ef324d1701d0ea83c7d793723f9752b254f2
-The screenshots are unmodified PNG bytes from that run, visually reviewed on 2026-11-15. The menu shows the native Check for Updates action; Settings shows its Updates section and persistent Save footer. Demo settings only; no live update check was requested during capture.
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/43830678806
+Capture source PR head: 324860781c40b348b51e37ce2d691f760ab2baca
+The screenshots are unmodified PNG bytes from that run, visually reviewed on 2026-11-16. The menu shows formatting and update actions; General settings shows the General/Link formats tabs, service presets and Save footer. The link-format builder shows the reserved-host Jira pattern and the live TNZ-184273 preview with its captured value. The documentation capture build displays development version 0.0.0. Demo settings only; no live update check was requested during capture.
 
-34ddd6bc785fdd286636f40f709005cd32ae7bcdfbbd299bda5934b16c94d792  menu-bar.png
-4c637f6d2dbbc5c4716bcef0f46029058d84fa1d57d2110b9302042df375f3c1  settings.png
+260a6529b27b6997c221a7d5880e525e634d3cc5610462e18955d35f5d546795  menu-bar.png
+2539a6c0a17f90e396f4a8fb7b40b9153a7f49e2028ce9f36e8ef5b83829568b  settings.png
+3d5f852bc601a132652d904d5338c6c612c2937546bef7f1da33e29ad219dd79  link-formats.png
