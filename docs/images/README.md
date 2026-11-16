@@ -1,6 +1,6 @@
 # README screenshots
 
-The README shows three real Pink views:
+The README currently shows the unchanged menu capture. The two settings images below are archived captures of the previous interface and are not displayed as the current UI. Retake both on macOS before restoring them to the README:
 
 - `menu-bar.png`: the menu-bar icon and formatting, settings and update actions.
 - `settings.png`: the General settings tab with update controls, the opt-in formatted-URL setting, automatic formatting and service hosts. The form scrolls to additional controls below the visible viewport.

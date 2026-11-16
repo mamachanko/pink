@@ -77,7 +77,7 @@
                         self?.fail("settings-window-failed")
                         return
                     }
-                    window.setContentSize(NSSize(width: 740, height: 900))
+                    window.setContentSize(NSSize(width: 680, height: 640))
                     self.prepare(window)
                 }
             } else if stage == 2, Date() >= readyAt {
@@ -86,11 +86,12 @@
             } else if stage == 3, captured("settings-captured") {
                 // Render the actual builder with a reserved-host example.
                 let formats = NSHostingView(
-                    rootView: LinkRulesView(
-                        hostRules: HostRule.defaults, rules: .constant([]),
-                        example: "https://jira.example/browse/TNZ-184273"))
+                    rootView: PatternEditor(
+                        settings: PinkCore.Settings(), initial: LinkRule.templates[0],
+                        example: "https://jira.example/browse/TNZ-184273", save: { _ in }
+                    ).tint(.pink))
                 let window = NSWindow(
-                    contentRect: CGRect(x: 0, y: 0, width: 740, height: 900),
+                    contentRect: CGRect(x: 0, y: 0, width: 560, height: 580),
                     styleMask: [.titled, .closable], backing: .buffered, defer: false)
                 window.title = "Pink Link Formats"
                 window.contentView = formats
