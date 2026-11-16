@@ -1,6 +1,6 @@
 cask "pink" do
-  version "1.3.0"
-  sha256 "8fffeb45b45abdaf44bc20222811b7e453963df353da236a3c6346a652f9facb"
+  version "1.3.1"
+  sha256 "04155ac16ea3ed51af64cc82875c39de169932046ff2c1983f683b64c9df2414"
 
   url "https://github.com/mamachanko/pink/releases/download/v#{version}/Pink-#{version}-adhoc.dmg"
   name "Pink"
