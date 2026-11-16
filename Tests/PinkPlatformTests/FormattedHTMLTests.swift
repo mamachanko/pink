@@ -1,7 +1,7 @@
 import AppKit
-import PinkCore
 import XCTest
 
+@testable import PinkCore
 @testable import PinkPlatform
 
 @MainActor private final class ObservedBoard: PasteboardPort {
