@@ -34,7 +34,8 @@ import PinkCore
     }
 }
 @MainActor public struct NativeRepresentations: RepresentationBuilder {
-    public init() {}
+    public var rewriteFormattedURLs: Bool
+    public init(rewriteFormattedURLs: Bool = false) { self.rewriteFormattedURLs = rewriteFormattedURLs }
     public func build(_ text: FormattedText, source: Payload = Payload([:])) -> Payload? {
         guard !hasNamedLink(source, original: text.original) else { return nil }
         let attributed: NSMutableAttributedString
@@ -60,6 +61,11 @@ import PinkCore
         var existingLinks: [(NSRange, String)] = []
         attributed.enumerateAttribute(.link, in: NSRange(location: 0, length: attributed.length)) { link, range, _ in
             if let link { existingLinks.append((range, String(describing: link))) }
+        }
+        if let html = source.values[Types.html] {
+            guard rewriteFormattedURLs, let links = HTMLClipboard.rawLinks(in: html, matching: text.original)
+            else { return nil }
+            existingLinks += links.map { ($0.range, $0.target) }
         }
         for (range, reference) in replacements {
             for (existing, target) in existingLinks where NSIntersectionRange(range, existing).length > 0 {
@@ -89,9 +95,12 @@ import PinkCore
             data: data, options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
     }
     public func hasNamedLink(_ payload: Payload, original: String) -> Bool {
-        // HTML import may load external resources. Never import untrusted HTML.
-        // Conservatively skip existing HTML, including named hyperlinks.
-        if payload.values[Types.html] != nil { return true }
+        // Never use native HTML import: it can load external resources.
+        if let html = payload.values[Types.html],
+            !rewriteFormattedURLs || HTMLClipboard.rawLinks(in: html, matching: original) == nil
+        {
+            return true
+        }
         if let data = payload.values[Types.rtf] {
             guard let value = readRTF(data) else { return true }
             if value.string != original { return true }

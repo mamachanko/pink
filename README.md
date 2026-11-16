@@ -94,6 +94,14 @@ A message containing a pull request and a merge request can appear as:
 
 Each label keeps its own destination. Plain paste retains the entire original message, including both full URLs.
 
+### Links copied from chat or a browser
+
+Turn on **Settings → General → Rewrite already-formatted URLs**, then **Save settings**. Copy the message again, or choose **Format current clipboard**.
+
+For example, a clickable `https://github.com/acme/widget/pull/123` can become [acme/widget#123](https://github.com/acme/widget/pull/123), even when copied from another message. The visible URL must match its destination. Messages containing deliberately named links stay unchanged, and plain paste always keeps the exact original text.
+
+This option is off by default. It can simplify rich formatting and accepts only a conservative set of HTML fragments. Images, attachments, unknown clipboard types and conflicting representations remain ineligible. It never opens or fetches copied HTML resources.
+
 ### Updating Pink
 
 Open **Settings → Check for Updates…**, or use the same action in the menu. Pink reports when you’re up to date and lets you retry if the check fails. Checks contact GitHub only when you ask; they never send clipboard contents.
@@ -150,7 +158,7 @@ Pink does not need Accessibility, Input Monitoring or Screen Recording permissio
 
 - **Paste behavior depends on the app.** An app can select plain text or strip links. App-specific compatibility has not yet been manually verified; see the [compatibility record](docs/compatibility.md).
 - **An immediate paste can beat the watcher.** Pink checks about every 200 ms. The safe fallback is your original text. It never intercepts paste, simulates keys or inspects the destination app.
-- **Some clipboard items are deliberately skipped.** These include files, images, multiple items, unknown types, protected/temporary/generated/remote markers, existing HTML and named hyperlinks. Unmarked sensitive content cannot always be identified.
+- **Some clipboard items are deliberately skipped.** These include files, images, multiple items, unknown types, protected/temporary/generated/remote markers and named hyperlinks. Existing HTML is skipped unless the optional formatted-URL setting can safely validate it. Unmarked sensitive content cannot always be identified.
 - **Text is limited to 8 KiB per item.** Bare URLs need clear boundaries. Named Markdown destinations and HTML source are not reformatted; ambiguous adjacent URLs are left unchanged. Existing raw RTF links must agree with the proposed targets.
 
 Clipboard writes also have a small, unavoidable race with other applications. Pink checks for changes before writing and before offering restoration. The [architecture notes](docs/architecture.md) describe that boundary.

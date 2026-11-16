@@ -13,7 +13,8 @@ final class ClipboardProofTests: XCTestCase {
             Types.html: Data("<meta charset='utf-8'><span>Review <a href='\(url)'>\(url)</a> please</span>".utf8),
         ])
         let text = try XCTUnwrap(Parser().parseText(original))
-        let output = try XCTUnwrap(NativeRepresentations().build(text, source: source))
+        XCTAssertNil(NativeRepresentations().build(text, source: source))
+        let output = try XCTUnwrap(NativeRepresentations(rewriteFormattedURLs: true).build(text, source: source))
         XCTAssertEqual(output.string(Types.text), original)
         let rich = try NSAttributedString(
             data: XCTUnwrap(output.values[Types.rtf]),
