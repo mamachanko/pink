@@ -41,7 +41,15 @@ public struct Reference: Equatable, Sendable {
 
 public struct Parser: Sendable {
     public let rules: [HostRule]
-    public init(rules: [HostRule] = HostRule.defaults) throws {
+    public let linkRules: [LinkRule]
+    private let compiledRules: [CompiledLinkRule]
+
+    public init(rules: [HostRule] = HostRule.defaults, linkRules: [LinkRule] = []) throws {
+        guard linkRules.count <= 64, Set(linkRules.map(\.id)).count == linkRules.count else {
+            throw LinkRuleError.tooManyRules
+        }
+        self.linkRules = linkRules
+        self.compiledRules = try linkRules.map(CompiledLinkRule.init)
         for (i, r) in rules.enumerated() {
             let labels = r.host.split(separator: ".", omittingEmptySubsequences: false)
             guard r.host.utf8.count <= 253, !labels.isEmpty,
@@ -69,94 +77,87 @@ public struct Parser: Sendable {
         }
         self.rules = rules
     }
-    private static func segment(_ s: String) -> Bool {
+    static func segment(_ s: String) -> Bool {
         !s.isEmpty && s != "." && s != ".."
             && s.unicodeScalars.allSatisfy {
                 CharacterSet.alphanumerics.contains($0) || CharacterSet.nonBaseCharacters.contains($0)
                     || [45, 46, 95, 126].contains($0.value)
             }
     }
-    public func parse(_ input: String) -> Reference? {
-        guard input.utf8.count <= 8192, !input.isEmpty,
-            !input.unicodeScalars.contains(where: {
-                CharacterSet.whitespacesAndNewlines.contains($0) || CharacterSet.controlCharacters.contains($0)
-                    || (0x202A...0x202E).contains($0.value) || (0x2066...0x2069).contains($0.value)
-                    || [0x200E, 0x200F, 0x061C].contains($0.value)
-            }),
-            !input.contains("\\"), !input.contains("<"), !input.contains(">"),
-            let url = URLComponents(string: input), let scheme = url.scheme?.lowercased(),
-            ["https", "http"].contains(scheme), url.user == nil, url.password == nil,
-            let host = url.host, let authorityStart = input.range(of: "://")
-        else { return nil }
-        // Validate escapes ourselves: Foundation may repair malformed percent sequences.
-        let bytes = Array(input.utf8)
-        for i in bytes.indices where bytes[i] == 37 {
-            guard i + 2 < bytes.count,
-                bytes[(i + 1)...(i + 2)].allSatisfy({
-                    (48...57).contains($0) || (65...70).contains($0) || (97...102).contains($0)
-                })
-            else { return nil }
-            let hex = String(bytes: bytes[(i + 1)...(i + 2)], encoding: .utf8)!
-            let value = UInt8(hex, radix: 16)!
-            if value < 32 || value == 127 { return nil }
+    public func parse(_ input: String) -> Reference? { matches(input).first?.reference }
+
+    /// Ordered candidates: explicit overrides, the service preset, then remaining custom rules.
+    public func matches(_ input: String) -> [LinkMatch] {
+        guard let url = LinkURL(input) else { return [] }
+        let custom = compiledRules.compactMap { $0.match(url, original: input) }
+        var matches = custom.filter { $0.overridesBuiltIns }.map(\.match)
+        if let reference = preset(url, original: input) {
+            matches.append(LinkMatch(ruleName: "\(url.host) preset", reference: reference, captures: [:]))
         }
-        let authority = input[authorityStart.upperBound...].prefix { !"/?#".contains($0) }
-        if authority.contains(":") {
-            guard let p = authority.split(separator: ":", omittingEmptySubsequences: false).last,
-                !p.isEmpty, p.utf8.allSatisfy({ (48...57).contains($0) }), let n = Int(p), (1...65535).contains(n)
-            else { return nil }
-        }
-        guard let decoded = input.removingPercentEncoding,
-            !decoded.unicodeScalars.contains(where: {
-                CharacterSet.controlCharacters.contains($0) || (0x202A...0x202E).contains($0.value)
-                    || (0x2066...0x2069).contains($0.value) || [0x200E, 0x200F, 0x061C].contains($0.value)
+        matches += custom.filter { !$0.overridesBuiltIns }.map(\.match)
+        return matches
+    }
+
+    private func preset(_ url: LinkURL, original: String) -> Reference? {
+        let path = url.path
+        guard
+            let rule = rules.first(where: {
+                $0.enabled && $0.host.lowercased() == url.host.lowercased() && $0.port == url.components.port
+                    && (url.scheme == "https" || $0.allowHTTP) && path.hasPrefix($0.basePath + "/")
             })
         else { return nil }
-        let encodedPath = url.percentEncodedPath
-        // Decode only RFC 3986 unreserved escapes. Separators and reserved bytes
-        // remain rejected rather than changing route boundaries.
-        let encodedBytes = Array(encodedPath.utf8)
-        for i in encodedBytes.indices where encodedBytes[i] == 37 {
-            let value = UInt8(String(bytes: encodedBytes[(i + 1)...(i + 2)], encoding: .utf8)!, radix: 16)!
-            guard
-                (48...57).contains(value) || (65...90).contains(value) || (97...122).contains(value)
-                    || [45, 46, 95, 126].contains(value) || value >= 128
-            else { return nil }
-        }
-        guard let path = encodedPath.removingPercentEncoding, !path.contains("//"),
-            let r = rules.first(where: {
-                $0.enabled && $0.host.lowercased() == host.lowercased() && $0.port == url.port
-                    && (scheme == "https" || $0.allowHTTP) && (path.hasPrefix($0.basePath + "/"))
-            })
-        else { return nil }
-        var parts = String(path.dropFirst(r.basePath.count + 1)).split(separator: "/", omittingEmptySubsequences: false)
-            .map(String.init)
-        if parts.last == "" { parts.removeLast() }
-        let namespace: [String]
-        let number: String
-        let symbol: String
-        switch r.service {
+        let parts = Array(url.parts.dropFirst(rule.basePath.split(separator: "/").count))
+        switch rule.service {
         case .github:
-            guard (4...5).contains(parts.count), ["pull", "issues"].contains(parts[2]),
-                parts.count == 4 || ["files", "commits", "checks"].contains(parts[4])
+            guard parts.count >= 2, parts.prefix(2).allSatisfy(Self.segment),
+                !parts[1].hasSuffix("."), !Self.githubReservedOwners.contains(parts[0].lowercased())
             else { return nil }
-            namespace = Array(parts.prefix(2))
-            number = parts[3]
-            symbol = "#"
+            let repository = parts.prefix(2).joined(separator: "/")
+            if parts.count == 2 { return Reference(original: original, label: repository) }
+            if (4...5).contains(parts.count), ["pull", "issues"].contains(parts[2]),
+                parts.count == 4 || ["files", "commits", "checks"].contains(parts[4]), Self.number(parts[3])
+            {
+                return Reference(original: original, label: repository + "#" + parts[3])
+            }
+            if parts.count >= 5, parts[2] == "blob" {
+                // Keep revision/path together: slash-containing refs cannot be resolved offline.
+                var label = repository + " · " + parts.dropFirst(3).joined(separator: "/")
+                if let fragment = url.components.fragment,
+                    fragment.range(of: #"^L[0-9]+(?:-L[0-9]+)?$"#, options: .regularExpression) != nil
+                {
+                    label += ":" + fragment.replacingOccurrences(of: "-L", with: "–").dropFirst()
+                }
+                return Reference(original: original, label: label)
+            }
+            if parts.count >= 5, parts[2] == "releases", parts[3] == "tag" {
+                return Reference(
+                    original: original, label: repository + "@" + parts.dropFirst(4).joined(separator: "/"))
+            }
+            return nil
         case .gitlab:
             guard let dash = parts.firstIndex(of: "-"), dash >= 2, (dash + 3...dash + 4).contains(parts.count),
                 ["merge_requests", "issues"].contains(parts[dash + 1]),
                 parts.count == dash + 3
                     || (parts[dash + 1] == "merge_requests"
-                        && ["diffs", "commits", "pipelines"].contains(parts[dash + 3]))
+                        && ["diffs", "commits", "pipelines"].contains(parts[dash + 3])),
+                parts.prefix(dash).allSatisfy(Self.segment), Self.number(parts[dash + 2])
             else { return nil }
-            namespace = Array(parts.prefix(dash))
-            number = parts[dash + 2]
-            symbol = parts[dash + 1] == "issues" ? "#" : "!"
+            let symbol = parts[dash + 1] == "issues" ? "#" : "!"
+            return Reference(
+                original: original, label: parts.prefix(dash).joined(separator: "/") + symbol + parts[dash + 2])
         }
-        guard namespace.allSatisfy(Self.segment), !number.isEmpty,
-            number.utf8.allSatisfy({ (48...57).contains($0) }), number.contains(where: { $0 != "0" })
-        else { return nil }
-        return Reference(original: input, label: namespace.joined(separator: "/") + symbol + number)
     }
+
+    private static func number(_ value: String) -> Bool {
+        !value.isEmpty && value.utf8.allSatisfy { (48...57).contains($0) } && value.contains { $0 != "0" }
+    }
+
+    // These are site routes, not repository owners. Favor leaving uncertain URLs untouched.
+    private static let githubReservedOwners: Set<String> = [
+        "about", "account", "apps", "collections", "contact", "customer-stories", "enterprise", "events", "explore",
+        "features", "issues", "login", "logout", "marketplace", "new", "notifications", "organizations", "orgs",
+        "pricing", "pulls", "search", "security", "sessions", "settings", "signup", "site", "sponsors", "topics",
+        "trending",
+        "users",
+    ]
 }

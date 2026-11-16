@@ -2,6 +2,7 @@
     import AppKit
     import CoreGraphics
     import PinkCore
+    import SwiftUI
 
     // This code is compiled only into the separate documentation capture target.
     @MainActor struct ReadmeCapturePermission: PermissionPort { var canRead: Bool { true } }
@@ -90,6 +91,30 @@
                     }
                     do {
                         try png.write(to: self.output.appendingPathComponent("settings.png"), options: .atomic)
+                        // Exercise and capture the real builder with a reserved-host example.
+                        let formats = NSHostingView(
+                            rootView: LinkRulesView(
+                                hostRules: HostRule.defaults, rules: .constant([]),
+                                example: "https://jira.example/browse/TNZ-184273"))
+                        formats.frame = CGRect(x: 0, y: 0, width: 740, height: 900)
+                        let formatWindow = NSWindow(
+                            contentRect: formats.frame, styleMask: [.titled], backing: .buffered, defer: false)
+                        formatWindow.title = "Pink Link Formats"
+                        formatWindow.contentView = formats
+                        formatWindow.makeKeyAndOrderFront(nil)
+                        formats.layoutSubtreeIfNeeded()
+                        formatWindow.displayIfNeeded()
+                        guard let formatBitmap = formats.bitmapImageRepForCachingDisplay(in: formats.bounds) else {
+                            self.fail("formats-bitmap-failed")
+                            return
+                        }
+                        formats.cacheDisplay(in: formats.bounds, to: formatBitmap)
+                        guard let formatPNG = formatBitmap.representation(using: .png, properties: [:]) else {
+                            self.fail("formats-encoding-failed")
+                            return
+                        }
+                        try formatPNG.write(
+                            to: self.output.appendingPathComponent("link-formats.png"), options: .atomic)
                         let evidence =
                             "Captured from Pink's real UI on macOS \(ProcessInfo.processInfo.operatingSystemVersionString). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.\n"
                         try evidence.write(
