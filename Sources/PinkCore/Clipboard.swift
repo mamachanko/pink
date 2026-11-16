@@ -45,7 +45,7 @@ public enum MonitorState: String, Sendable {
     public var parser: Parser
     public var onChange: (() -> Void)?
     private let board: any PasteboardPort
-    private let builder: any RepresentationBuilder
+    public var builder: any RepresentationBuilder
     private let permission: any PermissionPort
     private let scheduler: any SchedulerPort
     private var seen: Int

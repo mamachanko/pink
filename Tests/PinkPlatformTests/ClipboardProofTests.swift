@@ -5,6 +5,22 @@ import XCTest
 @testable import PinkPlatform
 
 final class ClipboardProofTests: XCTestCase {
+    @MainActor func testCopiedHTMLAutolinkCanBeShortened() async throws {
+        let url = "https://github.com/acme/widget/pull/123"
+        let original = "Review \(url) please"
+        let source = Payload([
+            Types.text: Data(original.utf8),
+            Types.html: Data("<meta charset='utf-8'><span>Review <a href='\(url)'>\(url)</a> please</span>".utf8),
+        ])
+        let text = try XCTUnwrap(Parser().parseText(original))
+        XCTAssertNil(NativeRepresentations().build(text, source: source))
+        let output = try XCTUnwrap(NativeRepresentations(rewriteFormattedURLs: true).build(text, source: source))
+        XCTAssertEqual(output.string(Types.text), original)
+        let rich = try NSAttributedString(
+            data: XCTUnwrap(output.values[Types.rtf]),
+            options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+        XCTAssertEqual(rich.string, "Review acme/widget#123 please")
+    }
     @MainActor func testCustomAndExpandedGitHubLinksUseNativeRepresentations() async throws {
         let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
         defer { board.releaseGlobally() }
