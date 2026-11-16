@@ -10,7 +10,8 @@ import {renderCask,caskForDistribution} from './homebrew.mjs';
 import {expectedAssets} from './check-assets.mjs';
 const repository='mamachanko/pink';
 const sha=text=>createHash('sha256').update(text).digest('hex');
-const template=readFileSync('Casks/pink.rb','utf8');
+// The fixture must remain older than the simulated 1.2.3 release as real releases advance.
+const template=renderCask({version:'1.0.0',sha256:'a'.repeat(64),signingMode:'adhoc'});
 function distribution(version='1.2.3') {
  const directory=mkdtempSync(join(tmpdir(),'pink-pr-test-'));
  const info={version,signingMode:'adhoc',notarization:'none',commit:'f'.repeat(40)};
