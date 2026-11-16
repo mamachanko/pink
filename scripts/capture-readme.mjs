@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {spawn, spawnSync} from 'node:child_process';
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -28,3 +29,11 @@ try {
  await waitFor('settings.png');
  await waitFor('capture.txt');
 } finally { if(!exited) app.kill('SIGTERM'); }
+
+for (const name of ['menu-bar.png','settings.png','link-formats.png','capture.txt']) {
+ const bytes = readFileSync(`${output}/${name}`);
+ const encoded = bytes.toString('base64');
+ console.log(`PINK_CAPTURE_BEGIN ${name} ${createHash('sha256').update(bytes).digest('hex')}`);
+ for (let offset=0; offset<encoded.length; offset+=4096) console.log(`PINK_CAPTURE_DATA ${encoded.slice(offset,offset+4096)}`);
+ console.log(`PINK_CAPTURE_END ${name}`);
+}
