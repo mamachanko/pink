@@ -58,11 +58,19 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
   <a href="#development">Development</a>
 </p>
 
+<table align="center">
+  <tr><th>In the menu bar</th><th>Your link formats</th></tr>
+  <tr>
+    <td align="center" valign="top"><a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu with formatting, restore, settings and update actions."></a></td>
+    <td align="center" valign="top"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink’s unified link format collection with GitHub, GitLab and Jira formats, Add format and a shared preview."></a></td>
+  </tr>
+</table>
+
 <p align="center">
-  <a href="docs/images/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu-bar icon and menu, with formatting controls, Settings, About and Quit."></a>
+  <a href="docs/images/link-formats.png"><img src="docs/images/link-formats.png" width="620" alt="Pink’s paste-first builder automatically selects ACME-184273 from a Jira URL and shows its hyperlink preview, optional context and Use for Jira links action. Advanced pattern is collapsed."></a>
 </p>
 
-<p align="center"><sub>Actual Pink menu on macOS, using demo settings. Settings screenshots are awaiting a new macOS capture. <a href="docs/images/README.md">Capture details</a>.</sub></p>
+<p align="center"><sub>Actual Pink UI on macOS with demo settings. <a href="docs/images/README.md">Capture details</a>.</sub></p>
 
 ## Installation
 
