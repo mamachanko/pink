@@ -11,7 +11,7 @@ Review repository Settings:
 - Actions default token: read-only. Permit only pinned/reviewed actions. Release publishing explicitly escalates contents:write. Trusted Homebrew maintenance separately uses contents/pull-requests/actions write scopes; dispatched CI remains read-only. Fork workflows must never receive release secrets.
 - Create `release` environment restricted to main; optionally require a reviewer and prevent self-review. Default SIGNING_MODE adhoc, or configure complete Developer ID contract in docs/release.md. GitHub environment protections availability depends on plan and repository visibility; don't change visibility to acquire them.
 - Protect v* tags from unauthorized creation/update/deletion while allowing the authorized release workflow identity to create them. Check ruleset bypass implications before applying. Never give general write tokens to fork workflows.
-- Install/activate Renovate with least repository access. renovate.json alone doesn't activate it. Review pinned Xcode/runner changes and tool checksum updates together; verify official upstream release sources. Configure code scanning or advisory reporting separately if wanted.
+- Configure the nightly Renovate Action as described below. renovate.json alone does not activate it. Review pinned Xcode/runner changes and tool checksum updates together; verify official upstream release sources. Configure code scanning or advisory reporting separately if wanted.
 - Enable private vulnerability reporting under Security if supported; SECURITY.md does not activate it.
 - Ensure Actions macos-15 arm64 and macos-15-intel runners are available within account quota. Large/xlarge labels aren't silently substituted because they may incur costs.
 
@@ -66,3 +66,15 @@ The unique `Required checks` job is the merge requirement. It rejects failures, 
 The screenshot workflow is now reusable and runs within verification for every PR and release, so path-filtered jobs cannot silently escape the gate. Release publication and Homebrew maintenance are post-merge workflows, not PR checks; requiring those names would block PRs permanently. Release publication still waits for full reusable verification of its exact commit.
 
 Homebrew uses one refreshed PR and explicit CI dispatch with GITHUB_TOKEN, without a PAT or extra App. See [Homebrew maintenance](homebrew.md) for activation, permission boundaries, strict-base refresh, safe legacy PR retirement and recovery. All action implementations remain pinned Node 24 actions; hosted runner versions are printed by CI.
+
+## Nightly Renovate
+
+[Renovate](../.github/workflows/renovate.yml) runs nightly at **02:17 UTC** and supports **Actions → Renovate → Run workflow**. GitHub schedules run from the default branch and may be delayed; merge the workflow to `main` before expecting scheduled runs or the manual trigger. Logs are available in each Actions run. The job targets only `mamachanko/pink`, reads the existing `renovate.json` from the repository, and skips the onboarding PR. The recommended preset enables the Dependency Dashboard issue. Action code and the Renovate container version are pinned; Renovate proposes updates to both.
+
+Before the first run:
+
+1. Create a fine-grained personal access token restricted to `mamachanko/pink`, with **Contents**, **Issues**, **Pull requests**, and **Workflows** set to **Read and write** (Metadata read access is automatic). Store it as the repository Actions secret **`RENOVATE_TOKEN`** under Settings → Secrets and variables → Actions. Choose an expiry and rotate the secret before it expires. Alternatively, a classic token for this public repository needs `public_repo` and `workflow` scopes.
+2. Remove `pink` from the hosted Renovate GitHub App's repository access, or uninstall that app if it serves no other repositories. Run only one Renovate service against the repository to avoid competing updates.
+3. Ensure repository Issues and GitHub Actions are enabled and the action policy permits `renovatebot/github-action`. Run the workflow manually after merging, inspect its logs, and confirm the Dependency Dashboard appears. No update PRs are expected when all detected dependencies are current.
+
+The job's built-in `GITHUB_TOKEN` stays read-only. The separate token lets Renovate update `.github/workflows` and lets its PRs trigger normal CI. A missing secret fails with a setup message. The token cannot be provisioned by committing workflow files; the hosted app installation does not supply this secret. Review pinned Xcode/runner changes and tool checksum updates together; CI still requires matching verified tool checksums.

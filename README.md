@@ -205,6 +205,8 @@ Builds go to `build/` and packages to `dist/`; these commands do not install the
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), then see the [architecture](docs/architecture.md), [requirements](docs/spec.md) and [verification results](docs/verification.md). Report vulnerabilities using [SECURITY.md](SECURITY.md).
 
+Dependency updates run nightly at 02:17 UTC through the [Renovate workflow](.github/workflows/renovate.yml), with a manual run option; see [credential setup and migration](docs/repository-setup.md#nightly-renovate).
+
 Releases are automated with semantic-release after verification. [GitHub Releases](https://github.com/mamachanko/pink/releases) are the changelog. Maintainers can find the [release process](docs/release.md), [Homebrew maintenance](docs/homebrew.md) and [repository setup](docs/repository-setup.md) in `docs/`.
 
 ## Uninstall

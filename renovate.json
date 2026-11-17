@@ -12,8 +12,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/tools/sparkle\\.json$/"],
-      "matchStrings": ["\"version\": \"(?<currentValue>[^\"]+)\""],
+      "managerFilePatterns": [
+        "/tools/sparkle\\.json$/"
+      ],
+      "matchStrings": [
+        "\"version\": \"(?<currentValue>[^\"]+)\""
+      ],
       "depNameTemplate": "sparkle-project/Sparkle",
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
@@ -39,6 +43,15 @@
       ],
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/.github/workflows/renovate\\.yml$/"
+      ],
+      "matchStrings": [
+        "renovate-version: (?<currentValue>\\S+) # renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)"
+      ]
     }
   ]
 }
