@@ -100,7 +100,9 @@ struct CompiledLinkRule: Sendable {
         } catch { throw LinkRuleError.invalidPattern }
         // URLComponents may repair invalid authorities; validate the literal endpoint independently.
         let authority = rule.urlPattern[rule.urlPattern.range(of: "://")!.upperBound...].prefix { $0 != "/" }
-        guard LinkURL("\(scheme)://\(authority)/") != nil else { throw LinkRuleError.invalidPattern }
+        guard !authority.contains("%"), LinkURL("\(scheme)://\(authority)/") != nil else {
+            throw LinkRuleError.invalidPattern
+        }
         let rawPath = rule.urlPattern[authority.endIndex...]
         var path = rawPath.split(separator: "/", omittingEmptySubsequences: false).dropFirst().map(String.init)
         if path.last == "" { path.removeLast() }

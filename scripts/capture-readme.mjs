@@ -10,8 +10,10 @@ function command(program,args) {
  const result=spawnSync(program,args,{stdio:'inherit'});
  if(result.error || result.status!==0) throw new Error(`Capture command failed: ${program}`);
 }
+const architecture = {arm64:'arm64',x64:'x86_64'}[process.arch];
+if (!architecture) throw new Error('Unsupported native capture architecture');
 command('.tools/xcodegen',['generate']);
-command('xcodebuild',['-project','Pink.xcodeproj','-scheme','PinkReadmeCapture','-configuration','Release','-derivedDataPath','build/ReadmeDerivedData','ARCHS=arm64','ONLY_ACTIVE_ARCH=YES','CODE_SIGN_IDENTITY=-','build']);
+command('xcodebuild',['-project','Pink.xcodeproj','-scheme','PinkReadmeCapture','-configuration','Release','-derivedDataPath','build/ReadmeDerivedData',`ARCHS=${architecture}`,'ONLY_ACTIVE_ARCH=YES','CODE_SIGN_IDENTITY=-','build']);
 const app=spawn('build/ReadmeDerivedData/Build/Products/Release/PinkReadmeCapture.app/Contents/MacOS/PinkReadmeCapture',[output],{stdio:'inherit'});
 let exited=false;
 app.on('exit',()=>{exited=true;});

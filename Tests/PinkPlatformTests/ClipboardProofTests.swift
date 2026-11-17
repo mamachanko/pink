@@ -10,7 +10,10 @@ final class ClipboardProofTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain) }
         let store = SettingsStore(defaults: defaults, legacyDomain: nil)
-        let session = try SettingsSession(initial: store.load(), persist: store.save)
+        var enabled = try store.load()
+        enabled.consent = true
+        enabled.automatic = true
+        let session = try SettingsSession(initial: enabled, persist: store.save)
         let suggestion = try LinkSuggestion("https://jira.example/browse/ACME-184273")
         let rule = try suggestion.rule(selection: suggestion.defaultSelection, includeContext: false)
         try session.edit { $0.linkRules.insert(rule, at: 0) }
