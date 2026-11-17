@@ -31,6 +31,10 @@ final class LinkSuggestionTests: XCTestCase {
         XCTAssertThrowsError(try suggestion.rule(selection: -1, includeContext: false))
         XCTAssertThrowsError(try suggestion.rule(selection: nil, includeContext: false))
         XCTAssertThrowsError(try suggestion.rule(selection: 999, includeContext: false))
+        let ordinary = try LinkSuggestion("https://docs.example/browse/overview")
+        XCTAssertEqual(ordinary.siteName, "docs.example")
+        let generic = try ordinary.rule(selection: ordinary.defaultSelection, includeContext: true)
+        XCTAssertEqual(try Parser(linkRules: [generic]).parse(ordinary.original)?.label, "docs.example · overview")
     }
 
     func testGitHubSuggestionsGeneralizeOwnersRepositoriesAndOpaquePaths() throws {
@@ -41,6 +45,7 @@ final class LinkSuggestionTests: XCTestCase {
             ),
             ("https://github.com/acme/widget/issues/123", "https://github.com/other/repo/issues/9", "other/repo#9"),
             ("https://github.com/acme/widget", "https://github.com/other/repo", "other/repo"),
+            ("https://github.com/browse/ACME-1", "https://github.com/other/repo", "other/repo"),
             (
                 "https://github.com/acme/widget/blob/feature/topic/App.swift",
                 "https://github.com/other/repo/blob/main/Code.swift#L2", "other/repo · main/Code.swift"
