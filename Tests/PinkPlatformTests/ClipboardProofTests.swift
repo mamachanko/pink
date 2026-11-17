@@ -14,8 +14,9 @@ final class ClipboardProofTests: XCTestCase {
         enabled.consent = true
         enabled.automatic = true
         let session = try SettingsSession(initial: enabled, persist: store.save)
-        let suggestion = try LinkSuggestion("https://jira.example/browse/ACME-184273")
-        let rule = try suggestion.rule(selection: suggestion.defaultSelection, includeContext: false)
+        let draft = LinkBuilderDraft(example: "https://jira.example/browse/ACME-184273", settings: enabled)
+        XCTAssertTrue(draft.canFinish(in: enabled))
+        let rule = try XCTUnwrap(draft.candidate)
         try session.edit { $0.linkRules.insert(rule, at: 0) }
 
         let saved = try store.load()
