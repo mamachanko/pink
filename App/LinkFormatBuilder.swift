@@ -5,27 +5,23 @@ import SwiftUI
 struct LinkFormatBuilder: View {
     let settings: PinkCore.Settings
     let save: (LinkRule) throws -> Void
-    @State private var example: String
-    @State private var selection: Int?
-    @State private var includeContext = false
-    @State private var customizing = false
-    @State private var manual: LinkRule?
+    @State private var draft: LinkBuilderDraft
     @State private var saveError = ""
-    @State private var allowHTTP = false
-    @State private var ruleID = UUID()
     @FocusState private var exampleFocused: Bool
     @Environment(\.dismiss) private var dismiss
 
     init(settings: PinkCore.Settings, example: String = "", save: @escaping (LinkRule) throws -> Void) {
         self.settings = settings
         self.save = save
-        _example = State(initialValue: example)
-        let suggestion = try? LinkSuggestion(example)
-        _selection = State(initialValue: suggestion?.defaultSelection)
-        _includeContext = State(initialValue: suggestion?.defaultIncludesContext ?? false)
+        _draft = State(initialValue: LinkBuilderDraft(example: example, settings: settings))
     }
 
-    private var suggestion: LinkSuggestion? { try? LinkSuggestion(example) }
+    private var example: String { draft.example }
+    private var suggestion: LinkSuggestion? { draft.suggestion }
+    private var candidate: LinkRule? { draft.candidate }
+    private var alreadyWorks: Bool { draft.alreadyWorks(in: settings) }
+    private var validation: String? { draft.validation(in: settings) }
+    private var preview: Reference? { draft.preview(in: settings) }
     private var suggestionError: String {
         do {
             _ = try LinkSuggestion(example)
@@ -33,47 +29,6 @@ struct LinkFormatBuilder: View {
         } catch let error as LocalizedError { return error.errorDescription ?? "Check this link." } catch {
             return "Check this link’s hostname and path."
         }
-    }
-    private var existing: Reference? {
-        (try? Parser(rules: settings.rules, linkRules: settings.linkRules))?.parse(example)
-    }
-    private var alreadyWorks: Bool { existing != nil && !customizing }
-    private var candidate: LinkRule? {
-        if let manual { return manual }
-        guard var rule = try? suggestion?.rule(selection: selection, includeContext: includeContext, id: ruleID) else {
-            return nil
-        }
-        rule.overridesBuiltIns = customizing
-        if let previous = settings.linkRules.first(where: { $0.urlPattern == rule.urlPattern && $0.enabled }) {
-            rule.id = previous.id
-            rule.name = previous.name
-            rule.overridesBuiltIns = previous.overridesBuiltIns || customizing
-        }
-        return rule
-    }
-    private var proposed: [LinkRule] {
-        var rules = settings.linkRules
-        guard let candidate else { return rules }
-        rules.removeAll { $0.id == candidate.id }
-        rules.insert(candidate, at: 0)
-        return rules
-    }
-    private var validation: String? {
-        guard candidate != nil else { return "Paste a complete web link to get started." }
-        do {
-            _ = try Parser(rules: settings.rules, linkRules: proposed)
-            if let candidate, try Parser(rules: [], linkRules: [candidate]).parse(example) == nil {
-                return "This pattern doesn’t match the example link yet."
-            }
-            return nil
-        } catch let error as LocalizedError { return error.errorDescription } catch {
-            return "Check this format’s hostname and pattern."
-        }
-    }
-    private var preview: Reference? {
-        if alreadyWorks { return existing }
-        guard validation == nil else { return nil }
-        return (try? Parser(rules: settings.rules, linkRules: proposed))?.parse(example)
     }
     private var actionTitle: String {
         if alreadyWorks { return "Done" }
@@ -90,9 +45,12 @@ struct LinkFormatBuilder: View {
                     }
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Example link").font(.callout.weight(.medium))
-                        TextField("https://…", text: $example)
-                            .textContentType(.URL).autocorrectionDisabled().textFieldStyle(.roundedBorder)
-                            .focused($exampleFocused).accessibilityIdentifier("builder-example")
+                        TextField(
+                            "https://…",
+                            text: Binding(get: { example }, set: { draft.updateExample($0, settings: settings) })
+                        )
+                        .textContentType(.URL).autocorrectionDisabled().textFieldStyle(.roundedBorder)
+                        .focused($exampleFocused).accessibilityIdentifier("builder-example")
                         HStack(spacing: 12) {
                             Text("Try").foregroundStyle(.secondary)
                             exampleButton("Jira ticket", "https://jira.example/browse/ACME-184273")
@@ -104,13 +62,29 @@ struct LinkFormatBuilder: View {
                     if alreadyWorks {
                         Label("This link is already ready to paste.", systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.secondary)
-                        Button("Choose a different look") { customizing = true }
+                        Button("Choose a different look") { draft.customize() }
                             .buttonStyle(.link)
+                    } else if draft.usesCustomPattern {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Using your custom pattern").font(.callout.weight(.medium))
+                            Text("Try another link without changing your pattern or label.")
+                                .font(.caption).foregroundStyle(.secondary)
+                            if suggestion != nil {
+                                Button("Suggest from this link") { draft.useSuggestion(settings: settings) }
+                                    .buttonStyle(.link)
+                            }
+                        }
                     } else if let suggestion {
                         choices(suggestion)
                     } else if !example.isEmpty {
                         Label(suggestionError, systemImage: "link")
                             .font(.callout).foregroundStyle(.secondary)
+                    }
+                    if draft.usesHTTP, !alreadyWorks {
+                        Toggle(
+                            "Allow unencrypted HTTP for \(URL(string: example)?.host ?? "this host")",
+                            isOn: Binding(get: { draft.allowHTTP }, set: { draft.approveHTTP($0) })
+                        ).font(.callout)
                     }
                     if let preview {
                         previewCard(preview)
@@ -142,24 +116,13 @@ struct LinkFormatBuilder: View {
                     } catch { saveError = "Couldn’t save this format. Your draft is still here. Try again." }
                 }
                 .keyboardShortcut(.defaultAction).buttonStyle(.borderedProminent)
-                .disabled(
-                    !alreadyWorks
-                        && (validation != nil || preview == nil || (suggestion?.usesHTTP == true && !allowHTTP))
-                )
+                .disabled(!draft.canFinish(in: settings))
                 .accessibilityIdentifier("builder-use-format")
             }.padding(20)
         }
         .tint(.pink)
         .frame(minWidth: 580, idealWidth: 620, minHeight: 600, idealHeight: 660)
         .defaultFocus($exampleFocused, true)
-        .onChange(of: example) { _, _ in
-            let suggestion = try? LinkSuggestion(example)
-            selection = suggestion?.defaultSelection
-            includeContext = suggestion?.defaultIncludesContext ?? false
-            manual = nil
-            customizing = false
-            allowHTTP = false
-        }
         .alert(
             "Couldn’t save format",
             isPresented: Binding(
@@ -173,7 +136,7 @@ struct LinkFormatBuilder: View {
     }
 
     private func exampleButton(_ title: String, _ value: String) -> some View {
-        Button(title) { example = value }.buttonStyle(.link)
+        Button(title) { draft.updateExample(value, settings: settings) }.buttonStyle(.link)
     }
 
     private func choices(_ suggestion: LinkSuggestion) -> some View {
@@ -186,26 +149,25 @@ struct LinkFormatBuilder: View {
             ) {
                 ForEach(suggestion.parts.indices, id: \.self) { index in
                     Button {
-                        selection = index
-                        regenerateAppearance()
+                        draft.choosePart(index, settings: settings)
                     } label: {
                         Text(suggestion.parts[index]).lineLimit(2).truncationMode(.middle)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 6).padding(.horizontal, 10)
                             .background(
-                                selection == index ? Color.pink.opacity(0.1) : Color.secondary.opacity(0.06),
+                                draft.selection == index ? Color.pink.opacity(0.1) : Color.secondary.opacity(0.06),
                                 in: RoundedRectangle(cornerRadius: 8)
                             )
-                            .foregroundStyle(selection == index ? Color.pink : Color.primary)
+                            .foregroundStyle(draft.selection == index ? Color.pink : Color.primary)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Use \(suggestion.parts[index]) as link text")
-                    .accessibilityAddTraits(selection == index ? .isSelected : [])
+                    .accessibilityAddTraits(draft.selection == index ? .isSelected : [])
                 }
             }
             if !suggestion.parts.isEmpty {
                 Text(
-                    suggestion.siteName == "GitHub" && selection == suggestion.defaultSelection
+                    suggestion.siteName == "GitHub" && draft.selection == suggestion.defaultSelection
                         ? "Future links can use different owners and repositories."
                         : "The highlighted part can change. Other path parts stay fixed."
                 )
@@ -213,25 +175,10 @@ struct LinkFormatBuilder: View {
                 Toggle(
                     suggestion.siteName == "Jira"
                         ? "Include ‘Jira’ in the label" : "Include website or repository context",
-                    isOn: $includeContext
+                    isOn: Binding(get: { draft.includeContext }, set: { draft.setContext($0, settings: settings) })
                 )
-                .onChange(of: includeContext) { _, _ in regenerateAppearance() }
                 .font(.callout)
             }
-            if suggestion.usesHTTP {
-                Toggle("Allow unencrypted HTTP for \(suggestion.host)", isOn: $allowHTTP)
-                    .font(.callout)
-            }
-        }
-    }
-
-    private func regenerateAppearance() {
-        let previous = manual
-        manual = nil
-        if let previous, var updated = candidate {
-            updated.name = previous.name
-            updated.overridesBuiltIns = previous.overridesBuiltIns
-            manual = updated
         }
     }
 
@@ -270,9 +217,7 @@ struct LinkFormatBuilder: View {
         Binding(
             get: { candidate?[keyPath: keyPath] ?? fallback },
             set: { value in
-                guard var updated = candidate else { return }
-                updated[keyPath: keyPath] = value
-                manual = updated
+                draft.edit(keyPath, to: value)
             })
     }
 }

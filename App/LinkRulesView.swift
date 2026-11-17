@@ -38,7 +38,7 @@ struct LinkRulesView: View {
                         value.linkRules.insert(updated, at: 0)
                         applied = value.linkRules
                     }
-                    added = AddedFormat(rule: updated, previous: previous, applied: applied)
+                    added = previous == applied ? nil : AddedFormat(rule: updated, previous: previous, applied: applied)
                 }
             case .pattern(let rule):
                 PatternEditor(settings: settings, initial: rule) { updated in
