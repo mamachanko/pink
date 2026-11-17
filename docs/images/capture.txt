@@ -1,16 +1,10 @@
-Captured from Pink's real UI on macOS Version 15.8.2 (Build 24H232). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
+Captured from Pink's real UI on macOS Version 15.7.9 (Build 24G830). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
 
-menu-bar.png and settings.png:
-Capture workflow: https://github.com/mamachanko/pink/actions/runs/43842786076
-Capture source PR head: 01ff3a646b1bd74143abaff4c8e49083f9aaead8
-Visually reviewed on 2026-11-16. Settings shows the actual General/Link formats tabs, opt-in formatted-URL control and persistent Save footer. Settings uses the real native window compositor.
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/44073191189
+Capture source PR head: 4db4566c09bd3cd126524ab42cb71a55a6caabd9
+Native architecture: x86_64 (Intel); Xcode 26.2.
+Visually reviewed on 2026-11-17. All PNGs are unmodified native captures. Settings shows the unified format collection and primary Add format action. The builder receives only a reserved-host Jira example URL and generates the selected issue key, preview and Use for Jira links action without a supplied pattern. Advanced pattern remains collapsed. The menu uses a real neutral backdrop. Development version 0.0.0; no live update check, preference writes, login registration or general clipboard access.
 
-All screenshots are unmodified PNG bytes from their recorded runs. The documentation build displays development version 0.0.0. Demo settings only; no live update check or permission change during capture.
-
-7637557e6fa5b14d0e408c1a58f607a11bb31c1a26c35a2ac1d2bef43fc58491  menu-bar.png
-21a9a62244280d9d8814a1410206b861e8e962f96d064e838d0cb3f41de628ac  settings.png
-
-Status after settings redesign (2026-11-16): settings.png above is a historical capture of the previous UI and is omitted from the README pending a real macOS recapture. The obsolete builder capture was removed while standardizing examples on ACME. The menu-bar image is unchanged. This Linux workspace cannot produce or visually verify macOS screenshots; no replacement screenshots or checksums are claimed.
-
-Pending replacement capture: https://github.com/mamachanko/pink/actions/runs/43871951434/artifacts/14228248053
-Source: b2736ebf8bfdf1db51d4b465319d00bc7dd054a6. Native capture job succeeded. PNG retrieval and visual review are blocked by this environment's network policy. No new screenshot bytes, pixel review or checksums are claimed.
+697c28b53ffbae2a7d69bb111052297948bd79b562a8dcb5dcf4b804005e1ddb  menu-bar.png
+42ec711dfff815a3f1757562f6567dbebdfb3c1afd49efa0baa558a58fca3c77  settings.png
+62805e497ef83c8f0d10938e9ae46ee9e7c04dab538f5c7382de80f98ba2d6ab  link-formats.png
