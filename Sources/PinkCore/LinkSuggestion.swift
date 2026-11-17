@@ -4,6 +4,7 @@ import Foundation
 public struct LinkSuggestion: Equatable, Sendable {
     public let original: String
     public let host: String
+    public let usesHTTP: Bool
     public let parts: [String]
     public let siteName: String
     public let defaultSelection: Int?
@@ -22,6 +23,7 @@ public struct LinkSuggestion: Equatable, Sendable {
         }
         let authority = example[example.range(of: "://")!.upperBound...].prefix { !"/?#".contains($0) }
         original = example
+        usesHTTP = url.scheme == "http"
         host = String(authority)
         origin = url.scheme + "://" + authority
         path = url.parts

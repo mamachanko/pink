@@ -71,6 +71,7 @@ final class LinkSuggestionTests: XCTestCase {
             "https://docs.example",
         ] {
             let suggestion = try LinkSuggestion(input)
+            XCTAssertEqual(suggestion.usesHTTP, input.hasPrefix("http:"))
             let rule = try suggestion.rule(selection: suggestion.defaultSelection, includeContext: false)
             let reference = try XCTUnwrap(Parser(rules: [], linkRules: [rule]).parse(input))
             XCTAssertEqual(reference.original, input)
@@ -91,7 +92,7 @@ final class LinkSuggestionTests: XCTestCase {
             "https://docs.example/" + String(repeating: "a", count: 2100) + "/ABC-1",
         ] { XCTAssertThrowsError(try LinkSuggestion(input), input) }
         for pattern in [
-            "https://docs.example/%2f/{id}", "https://docs.example/%5c/{id}",
+            "https://%64ocs.example/{id}", "https://docs.example/%2f/{id}", "https://docs.example/%5c/{id}",
             "https://docs.example/%7bid%7d/{id}", "https://docs.example/%2e%2e/{id}",
             "https://docs.example/%xx/{id}", "https://docs.example/%0a/{id}", "https://docs.example/%FF/{id}",
         ] {

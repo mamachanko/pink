@@ -24,22 +24,21 @@ struct LinkRulesView: View {
         }
         .formStyle(.grouped)
         .onChange(of: settings.linkRules) { _, rules in
-            if let added, !rules.contains(added.rule) { self.added = nil }
+            if let added, rules != added.applied { self.added = nil }
         }
         .sheet(item: $editor) { selection in
             switch selection {
             case .builder(let example):
                 LinkFormatBuilder(settings: settings, example: example) { updated in
-                    var previous: LinkRule?
+                    var previous: [LinkRule] = []
+                    var applied: [LinkRule] = []
                     try preferences.edit { value in
-                        if let index = value.linkRules.firstIndex(where: { $0.id == updated.id }) {
-                            previous = value.linkRules[index]
-                            value.linkRules[index] = updated
-                        } else {
-                            value.linkRules.insert(updated, at: 0)
-                        }
+                        previous = value.linkRules
+                        value.linkRules.removeAll { $0.id == updated.id }
+                        value.linkRules.insert(updated, at: 0)
+                        applied = value.linkRules
                     }
-                    added = AddedFormat(rule: updated, previous: previous)
+                    added = AddedFormat(rule: updated, previous: previous, applied: applied)
                 }
             case .pattern(let rule):
                 PatternEditor(settings: settings, initial: rule) { updated in
@@ -136,12 +135,8 @@ struct LinkRulesView: View {
                     Spacer()
                     Button("Undo") {
                         change { value in
-                            guard let index = value.linkRules.firstIndex(of: added.rule) else { return }
-                            if let previous = added.previous {
-                                value.linkRules[index] = previous
-                            } else {
-                                value.linkRules.remove(at: index)
-                            }
+                            guard value.linkRules == added.applied else { return }
+                            value.linkRules = added.previous
                         }
                     }.buttonStyle(.link)
                 }.font(.callout)
@@ -278,7 +273,8 @@ struct LinkRulesView: View {
 
 private struct AddedFormat {
     let rule: LinkRule
-    let previous: LinkRule?
+    let previous: [LinkRule]
+    let applied: [LinkRule]
 }
 
 private enum FormatEditError: Error { case changed }

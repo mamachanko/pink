@@ -11,6 +11,7 @@ struct LinkFormatBuilder: View {
     @State private var customizing = false
     @State private var manual: LinkRule?
     @State private var saveError = ""
+    @State private var allowHTTP = false
     @State private var ruleID = UUID()
     @FocusState private var exampleFocused: Bool
     @Environment(\.dismiss) private var dismiss
@@ -53,17 +54,17 @@ struct LinkFormatBuilder: View {
     private var proposed: [LinkRule] {
         var rules = settings.linkRules
         guard let candidate else { return rules }
-        if let index = rules.firstIndex(where: { $0.id == candidate.id }) {
-            rules[index] = candidate
-        } else {
-            rules.insert(candidate, at: 0)
-        }
+        rules.removeAll { $0.id == candidate.id }
+        rules.insert(candidate, at: 0)
         return rules
     }
     private var validation: String? {
         guard candidate != nil else { return "Paste a complete web link to get started." }
         do {
             _ = try Parser(rules: settings.rules, linkRules: proposed)
+            if let candidate, try Parser(rules: [], linkRules: [candidate]).parse(example) == nil {
+                return "This pattern doesn’t match the example link yet."
+            }
             return nil
         } catch let error as LocalizedError { return error.errorDescription } catch {
             return "Check this format’s hostname and pattern."
@@ -141,7 +142,10 @@ struct LinkFormatBuilder: View {
                     } catch { saveError = "Couldn’t save this format. Your draft is still here. Try again." }
                 }
                 .keyboardShortcut(.defaultAction).buttonStyle(.borderedProminent)
-                .disabled(!alreadyWorks && (validation != nil || preview == nil))
+                .disabled(
+                    !alreadyWorks
+                        && (validation != nil || preview == nil || (suggestion?.usesHTTP == true && !allowHTTP))
+                )
                 .accessibilityIdentifier("builder-use-format")
             }.padding(20)
         }
@@ -154,6 +158,7 @@ struct LinkFormatBuilder: View {
             includeContext = suggestion?.defaultIncludesContext ?? false
             manual = nil
             customizing = false
+            allowHTTP = false
         }
         .alert(
             "Couldn’t save format",
@@ -182,7 +187,7 @@ struct LinkFormatBuilder: View {
                 ForEach(suggestion.parts.indices, id: \.self) { index in
                     Button {
                         selection = index
-                        manual = nil
+                        regenerateAppearance()
                     } label: {
                         Text(suggestion.parts[index]).lineLimit(2).truncationMode(.middle)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -210,9 +215,23 @@ struct LinkFormatBuilder: View {
                         ? "Include ‘Jira’ in the label" : "Include website or repository context",
                     isOn: $includeContext
                 )
-                .onChange(of: includeContext) { _, _ in manual = nil }
+                .onChange(of: includeContext) { _, _ in regenerateAppearance() }
                 .font(.callout)
             }
+            if suggestion.usesHTTP {
+                Toggle("Allow unencrypted HTTP for \(suggestion.host)", isOn: $allowHTTP)
+                    .font(.callout)
+            }
+        }
+    }
+
+    private func regenerateAppearance() {
+        let previous = manual
+        manual = nil
+        if let previous, var updated = candidate {
+            updated.name = previous.name
+            updated.overridesBuiltIns = previous.overridesBuiltIns
+            manual = updated
         }
     }
 
