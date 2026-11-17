@@ -1,11 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests"
+    "config:recommended"
   ],
   "enabledManagers": [
-    "github-actions",
     "npm",
     "custom.regex"
   ],
@@ -43,15 +41,6 @@
       ],
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/.github/workflows/renovate\\.yml$/"
-      ],
-      "matchStrings": [
-        "renovate-version: (?<currentValue>\\S+) # renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)"
-      ]
     }
   ]
 }
