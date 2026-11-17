@@ -19,4 +19,4 @@ Review the PNGs under `build/readme-captures/` before copying affected images he
 
 CI sets `PINK_CAPTURE_TEXT_EXPORT=1` to emit checksum-tagged base64 copies of the four fixed synthetic demo outputs. This lets review tools inspect the original PNG bytes when artifact downloads are unavailable. Export is bounded to 1 MiB per file and never reads the general clipboard or user examples. Normal local captures omit this export.
 
-The committed images were captured on macOS 15.7.9 (24G830), Intel, with Xcode 26.2 in [CI run 123](https://github.com/mamachanko/pink/actions/runs/44073191189) at source PR head `4db4566c09bd3cd126524ab42cb71a55a6caabd9`, then visually reviewed on 2026-11-17. See `capture.txt` for checksums and provenance.
+The committed images were captured on macOS 15.7.9 (24G830), Intel, with Xcode 26.2 in [CI run 132](https://github.com/mamachanko/pink/actions/runs/44127980161) at source PR head `166f1fd0c1efcb84f5be2a8708178f4e5123b565`, then visually reviewed on 2026-11-17. See `capture.txt` for checksums and provenance.

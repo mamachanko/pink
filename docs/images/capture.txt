@@ -1,10 +1,10 @@
 Captured from Pink's real UI on macOS Version 15.7.9 (Build 24G830). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
 
-Capture workflow: https://github.com/mamachanko/pink/actions/runs/44073191189
-Capture source PR head: 4db4566c09bd3cd126524ab42cb71a55a6caabd9
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/44127980161
+Capture source PR head: 166f1fd0c1efcb84f5be2a8708178f4e5123b565
 Native architecture: x86_64 (Intel); Xcode 26.2.
-Visually reviewed on 2026-11-17. All PNGs are unmodified native captures. Settings shows the unified format collection and primary Add format action. The builder receives only a reserved-host Jira example URL and generates the selected issue key, preview and Use for Jira links action without a supplied pattern. Advanced pattern remains collapsed. The menu uses a real neutral backdrop. Development version 0.0.0; no live update check, preference writes, login registration or general clipboard access.
+Visually reviewed on 2026-11-17. All PNGs are unmodified native captures. Settings shows the unified format collection and primary Add format action. The builder receives only a reserved-host Jira example URL and generates the selected issue key, preview and Use for Jira links action without a supplied pattern. Advanced pattern remains collapsed. Revalidation after the draft-state fixes produced byte-identical Settings and builder images; the menu capture is refreshed too. The menu uses a real neutral backdrop. Development version 0.0.0; no live update check, preference writes, login registration or general clipboard access.
 
-697c28b53ffbae2a7d69bb111052297948bd79b562a8dcb5dcf4b804005e1ddb  menu-bar.png
+1ffd80b41a5e565199a236411d70becc2563e548cdfaeb05a8c5ddae918d9ebe  menu-bar.png
 42ec711dfff815a3f1757562f6567dbebdfb3c1afd49efa0baa558a58fca3c77  settings.png
 62805e497ef83c8f0d10938e9ae46ee9e7c04dab538f5c7382de80f98ba2d6ab  link-formats.png
