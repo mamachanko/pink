@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {spawn, spawnSync} from 'node:child_process';
 import {existsSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -39,3 +40,15 @@ try {
  }
  await waitFor('capture.txt');
 } finally { if(!exited) app.kill('SIGTERM'); }
+
+// Fixed synthetic demo outputs can be reviewed through connectors without artifact downloads.
+if (process.env.PINK_CAPTURE_TEXT_EXPORT === '1') {
+ for (const name of ['menu-bar.png','settings.png','link-formats.png','capture.txt']) {
+  const bytes = readFileSync(`${output}/${name}`);
+  if (bytes.length > 1024 * 1024) throw new Error('Capture is too large for inline review');
+  const encoded = bytes.toString('base64');
+  console.log(`PINK_CAPTURE_BEGIN ${name} ${createHash('sha256').update(bytes).digest('hex')}`);
+  for (let offset=0; offset<encoded.length; offset+=4096) console.log(`PINK_CAPTURE_DATA ${encoded.slice(offset,offset+4096)}`);
+  console.log(`PINK_CAPTURE_END ${name}`);
+ }
+}

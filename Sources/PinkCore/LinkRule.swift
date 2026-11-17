@@ -93,19 +93,21 @@ struct CompiledLinkRule: Sendable {
             url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
             rule.urlPattern.contains("://"), !rule.urlPattern.contains("\\"),
             Self.safeText(rule.urlPattern), !rule.urlPattern.contains(where: { $0.isWhitespace }),
-            !host.contains("{"), !host.contains("}"), !rule.urlPattern.contains("%")
+            !host.contains("{"), !host.contains("}")
         else { throw LinkRuleError.invalidPattern }
         do {
             _ = try Parser(rules: [.init(service: .github, host: host, port: url.port, allowHTTP: scheme == "http")])
         } catch { throw LinkRuleError.invalidPattern }
         // URLComponents may repair invalid authorities; validate the literal endpoint independently.
-        let authority = rule.urlPattern.components(separatedBy: "://")[1].prefix { $0 != "/" }
+        let authority = rule.urlPattern[rule.urlPattern.range(of: "://")!.upperBound...].prefix { $0 != "/" }
         guard LinkURL("\(scheme)://\(authority)/") != nil else { throw LinkRuleError.invalidPattern }
-        var path = url.path.split(separator: "/", omittingEmptySubsequences: false).dropFirst().map(String.init)
+        let rawPath = rule.urlPattern[authority.endIndex...]
+        var path = rawPath.split(separator: "/", omittingEmptySubsequences: false).dropFirst().map(String.init)
         if path.last == "" { path.removeLast() }
         guard path.count <= 64 else { throw LinkRuleError.invalidPattern }
         var names: Set<String> = []
         var segments: [Segment] = []
+        var validationPath: [String] = []
         for (index, component) in path.enumerated() {
             if component.hasPrefix("{"), component.hasSuffix("}") {
                 var name = String(component.dropFirst().dropLast())
@@ -115,12 +117,19 @@ struct CompiledLinkRule: Sendable {
                     !remainder || index == path.count - 1
                 else { throw LinkRuleError.invalidCapture }
                 segments.append(remainder ? .remainder(name) : .capture(name))
+                validationPath.append("capture")
             } else {
-                guard !component.contains("{"), !component.contains("}"), LinkURL.segment(component) else {
+                guard !component.contains("{"), !component.contains("}"),
+                    let literal = component.removingPercentEncoding, LinkURL.segment(literal)
+                else {
                     throw LinkRuleError.invalidCapture
                 }
-                segments.append(.literal(component))
+                segments.append(.literal(literal))
+                validationPath.append(component)
             }
+        }
+        guard LinkURL("\(scheme)://\(authority)/" + validationPath.joined(separator: "/")) != nil else {
+            throw LinkRuleError.invalidPattern
         }
         guard !rule.labelTemplate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
             rule.labelTemplate.count <= 512, Self.safeText(rule.labelTemplate)

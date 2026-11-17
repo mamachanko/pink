@@ -86,12 +86,12 @@
             } else if stage == 3, captured("settings-captured") {
                 // Render the actual builder with a reserved-host example.
                 let formats = NSHostingView(
-                    rootView: PatternEditor(
-                        settings: PinkCore.Settings(), initial: LinkRule.templates[0],
-                        example: "https://jira.example/browse/ACME-184273", save: { _ in }
+                    rootView: LinkFormatBuilder(
+                        settings: PinkCore.Settings(), example: "https://jira.example/browse/ACME-184273",
+                        save: { _ in }
                     ).tint(.pink))
                 let window = NSWindow(
-                    contentRect: CGRect(x: 0, y: 0, width: 560, height: 580),
+                    contentRect: CGRect(x: 0, y: 0, width: 620, height: 660),
                     styleMask: [.titled, .closable], backing: .buffered, defer: false)
                 window.title = "Pink Link Formats"
                 window.contentView = formats

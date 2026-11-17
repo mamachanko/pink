@@ -10,18 +10,37 @@ struct LinkRulesView: View {
     @State private var example = ""
     @State private var removing: FormatEditor?
     @State private var error = ""
+    @State private var added: AddedFormat?
 
     var body: some View {
         Form {
             introduction
             formats
             Section("Try a link") {
-                LinkPreview(hostRules: settings.rules, rules: settings.linkRules, example: $example)
+                LinkPreview(
+                    hostRules: settings.rules, rules: settings.linkRules, example: $example,
+                    createFormat: { editor = .builder($0) })
             }
         }
         .formStyle(.grouped)
+        .onChange(of: settings.linkRules) { _, rules in
+            if let added, !rules.contains(added.rule) { self.added = nil }
+        }
         .sheet(item: $editor) { selection in
             switch selection {
+            case .builder(let example):
+                LinkFormatBuilder(settings: settings, example: example) { updated in
+                    var previous: LinkRule?
+                    try preferences.edit { value in
+                        if let index = value.linkRules.firstIndex(where: { $0.id == updated.id }) {
+                            previous = value.linkRules[index]
+                            value.linkRules[index] = updated
+                        } else {
+                            value.linkRules.insert(updated, at: 0)
+                        }
+                    }
+                    added = AddedFormat(rule: updated, previous: previous)
+                }
             case .pattern(let rule):
                 PatternEditor(settings: settings, initial: rule) { updated in
                     try preferences.edit { value in
@@ -64,6 +83,7 @@ struct LinkRulesView: View {
             Button("Remove format", role: .destructive) {
                 change { value in
                     switch selection {
+                    case .builder: break
                     case .pattern(let rule): value.linkRules.removeAll { $0.id == rule.id }
                     case .host(let index, let rule):
                         if let index {
@@ -89,6 +109,8 @@ struct LinkRulesView: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
+                Button("Add format", systemImage: "plus") { editor = .builder("") }
+                    .buttonStyle(.borderedProminent).fixedSize()
                 Menu {
                     ForEach(LinkRule.templates) { template in
                         Button(template.name) { editor = .pattern(template) }
@@ -101,11 +123,29 @@ struct LinkRulesView: View {
                         editor = .host(nil, HostRule(service: .github, host: ""))
                     }
                 } label: {
-                    Label("Add format", systemImage: "plus")
+                    Image(systemName: "ellipsis")
                 }
-                .fixedSize()
+                .menuStyle(.borderlessButton).fixedSize()
+                .accessibilityLabel("Advanced formats and installations")
             }
             .padding(.vertical, 8)
+            if let added {
+                HStack {
+                    Label("\(added.rule.name) ready for future copies", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Undo") {
+                        change { value in
+                            guard let index = value.linkRules.firstIndex(of: added.rule) else { return }
+                            if let previous = added.previous {
+                                value.linkRules[index] = previous
+                            } else {
+                                value.linkRules.remove(at: index)
+                            }
+                        }
+                    }.buttonStyle(.link)
+                }.font(.callout)
+            }
         }
     }
 
@@ -236,19 +276,27 @@ struct LinkRulesView: View {
     }
 }
 
+private struct AddedFormat {
+    let rule: LinkRule
+    let previous: LinkRule?
+}
+
 private enum FormatEditError: Error { case changed }
 
 private enum FormatEditor: Identifiable {
+    case builder(String)
     case pattern(LinkRule)
     case host(Int?, HostRule)
     var name: String {
         switch self {
+        case .builder: "New format"
         case .pattern(let rule): rule.name
         case .host(_, let rule): "\(rule.service.displayName) at \(rule.host)"
         }
     }
     var id: String {
         switch self {
+        case .builder: "builder"
         case .pattern(let rule): "pattern-\(rule.id)"
         case .host(let index, _): "host-\(index ?? -1)"
         }
@@ -264,6 +312,7 @@ struct LinkPreview: View {
     let rules: [LinkRule]
     @Binding var example: String
     var isValid = true
+    var createFormat: ((String) -> Void)?
     private var matches: [LinkMatch] {
         (try? Parser(rules: hostRules, linkRules: rules))?.matches(example) ?? []
     }
@@ -293,8 +342,12 @@ struct LinkPreview: View {
                 }
             }
         } else if !example.isEmpty {
-            Label("No enabled format matches this URL.", systemImage: "link")
+            Label("This link doesn’t have a format yet.", systemImage: "link")
                 .foregroundStyle(.secondary)
+            if let createFormat, (try? LinkSuggestion(example)) != nil {
+                Button("Make a format for this link") { createFormat(example) }
+                    .buttonStyle(.link)
+            }
         }
         Text("Only used for this preview. Never saved.").font(.caption).foregroundStyle(.secondary)
     }

@@ -142,27 +142,28 @@ Files keep the revision and path together because branch names can contain slash
 
 ### Custom link formats and preview
 
-Open **Settings → Link formats** to manage every supported website together. Click a format to edit it, use its switch to enable or disable it, or choose **Add format** to start from a template or add another website. Changes apply immediately. The shared **Try a link** preview works with all enabled formats.
+Open **Settings → Link formats → Add format** and paste a link you already use. Pink suggests the useful part and shows the resulting hyperlink immediately.
 
-For example, choose **Add format → Jira issue**:
+For a Jira issue:
 
-```text
-Name:         Jira issue
-URL pattern:  https://jira.example/browse/{issue}
-Link label:   {issue}
-Example URL:  https://jira.example/browse/ACME-184273
-Preview:      ACME-184273
-```
+1. Paste `https://jira.example/browse/ACME-184273` (using your installation’s hostname).
+2. Pink highlights `ACME-184273` and previews it as a short, clickable link.
+3. Optionally select a different part or include “Jira” in the label.
+4. Choose **Use for Jira links**. The format applies immediately; **Undo** is available in the formats list.
 
-Replace `jira.example` with your installation's hostname. `{issue}` captures exactly one nonempty path segment. A final `{path...}` captures one or more remaining segments; use `{path}` in the label. Captures occupy whole segments, have unique letter-first names, and cannot appear in the hostname. Matching uses an exact host, scheme and optional port; path literals are case sensitive. Patterns do not use regex and cannot contain queries or fragments. Queries and fragments in copied links remain in the exact destination. Literal pattern paths use unescaped characters; captures can match percent-encoded text, including spaces in filenames. Invalid escapes, encoded separators, dot segments and controls are rejected.
+There is no second Save step. A link that already works, including built-in GitHub references, shows its current result and offers **Done** without adding another rule. Choose **Choose a different look** to customize it. You can also paste into the shared **Try a link** preview and choose **Make a format for this link** when it has no match.
 
-The live preview uses the clipboard formatter. Expand the match details to see captured values and competing matches. Preview examples stay in memory. Pattern formats run in list order; **Advanced → Prefer over matching website formats** places a pattern before website formats. Other patterns run after website formats. Each row’s options menu lets you edit or remove a format, or move a pattern earlier or later. Removing a format asks for confirmation; switching it off keeps its configuration for later. Editors offer **Add format** or **Done** to apply changes, and **Cancel** to discard the draft. Starter templates are editable copies, and existing enterprise host settings are preserved. GitLab starter patterns have one group segment; specify additional namespace segments for deeper installations, while the built-in GitLab preset continues to handle arbitrary nesting.
+The preview uses the clipboard matcher, including existing rules and priority. The highlighted part becomes variable; other path parts remain fixed. Known GitHub suggestions also generalize owner/repository fields and keep file revision/path or release tags together. Only the confirmed format is saved; the example is not kept as a separate record. Queries, fragments, display case and the original destination remain exact.
+
+**Advanced pattern** exposes the name, URL pattern, label and priority for unusual cases. `{issue}` captures one path segment; a final `{path...}` captures one or more remaining segments and appears as `{path}` in the label. Captures occupy whole segments and have unique letter-first names. Matching uses an exact host, scheme and optional port with case-sensitive path literals. Pattern literals support valid unreserved escapes, UTF-8 and encoded filename spaces; encoded separators, dot segments, malformed escapes and controls are rejected. Patterns cannot contain queries, fragments or user regex.
+
+Click a format in the list to edit it, use its switch to enable or disable it, or open its options menu to remove it or move a pattern earlier/later. Removing a format asks for confirmation. The menu beside **Add format** keeps advanced starter templates and GitHub/GitLab installation settings available. Existing settings, enterprise hosts and disabled rules are preserved. Customizing an existing look explicitly gives the new pattern priority; exact-pattern edits reuse the existing rule, and Undo restores its earlier value. If saving fails, the draft stays open and previous settings remain active.
 
 The builder supports at most 64 custom rules. HTTP in a custom pattern explicitly opts that host into HTTP; public GitHub and GitLab hosts require HTTPS. Matching and label generation stay local. Labels are plain text escaped for rich output, and rules never rewrite destinations or run scripts. In prose, trailing sentence punctuation outside a query or fragment stays outside the hyperlink; encode a literal trailing path punctuation character when needed. A whole-URL item always keeps its exact valid target.
 
 ### Enterprise installations
 
-Choose **Settings → Link formats → Add format → GitHub or GitLab installation…** for your installation. Website formats support an exact hostname and enabled state, with an optional port, installation base path and HTTP opt-in under **Advanced**. They appear alongside every other format in the same collection. HTTP requires an explicit opt-in for that particular private host; HTTPS remains the default. Wildcards and overlapping enabled rules are rejected. See [matching rules](docs/architecture.md) for port and path-boundary details.
+Choose **Settings → Link formats → the options menu beside Add format → GitHub or GitLab installation…** for your installation. Website formats support an exact hostname and enabled state, with an optional port, installation base path and HTTP opt-in under **Advanced**. They appear alongside every other format in the same collection. HTTP requires an explicit opt-in for that particular private host; HTTPS remains the default. Wildcards and overlapping enabled rules are rejected. See [matching rules](docs/architecture.md) for port and path-boundary details.
 
 ## Privacy and permissions
 

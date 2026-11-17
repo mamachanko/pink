@@ -5,6 +5,42 @@ import XCTest
 @testable import PinkPlatform
 
 final class ClipboardProofTests: XCTestCase {
+    @MainActor func testSuggestedJiraFormatSavesOnceAndFormatsANewTicketNatively() async throws {
+        let domain = "Pink.tests.builder.\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
+        defer { defaults.removePersistentDomain(forName: domain) }
+        let store = SettingsStore(defaults: defaults, legacyDomain: nil)
+        let session = try SettingsSession(initial: store.load(), persist: store.save)
+        let suggestion = try LinkSuggestion("https://jira.example/browse/ACME-184273")
+        let rule = try suggestion.rule(selection: suggestion.defaultSelection, includeContext: false)
+        try session.edit { $0.linkRules.insert(rule, at: 0) }
+
+        let saved = try store.load()
+        let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
+        defer { board.releaseGlobally() }
+        let adapter = NativeBoard(board)
+        let monitor = ClipboardMonitor(
+            board: adapter, builder: NativeRepresentations(), permission: AllowedPermission(),
+            scheduler: ManualScheduler(), parser: try Parser(rules: saved.rules, linkRules: saved.linkRules))
+        monitor.enable()
+        let url = "https://jira.example/browse/OTHER-52?x=a&b=%2F#comment-9"
+        let source = Payload([Types.text: Data(url.utf8), Types.url: Data(url.utf8)])
+        XCTAssertTrue(adapter.write(source))
+        monitor.tick()
+        XCTAssertEqual(board.pasteboardItems?.count, 1)
+        XCTAssertEqual(board.string(forType: .string), url)
+        XCTAssertEqual(board.string(forType: .URL), url)
+        let rich = try NSAttributedString(
+            data: XCTUnwrap(board.data(forType: .rtf)),
+            options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+        XCTAssertEqual(rich.string, "OTHER-52")
+        XCTAssertEqual(String(describing: rich.attribute(.link, at: 0, effectiveRange: nil)!), url)
+        XCTAssertTrue(monitor.canRestore)
+        monitor.restore()
+        XCTAssertEqual(adapter.read(), source)
+        monitor.pause()
+    }
+
     @MainActor func testCopiedHTMLAutolinkCanBeShortened() async throws {
         let url = "https://github.com/acme/widget/pull/123"
         let original = "Review \(url) please"
