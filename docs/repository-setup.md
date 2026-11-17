@@ -69,12 +69,16 @@ Homebrew uses one refreshed PR and explicit CI dispatch with GITHUB_TOKEN, witho
 
 ## Nightly Renovate
 
-[Renovate](../.github/workflows/renovate.yml) runs nightly at **02:17 UTC** and supports **Actions → Renovate → Run workflow**. GitHub schedules run from the default branch and may be delayed; merge the workflow to `main` before expecting scheduled runs or the manual trigger. Logs are available in each Actions run. The job targets only `mamachanko/pink`, reads the existing `renovate.json` from the repository, and skips the onboarding PR. The recommended preset enables the Dependency Dashboard issue. Action code and the Renovate container version are pinned; Renovate proposes updates to both.
+[Renovate](../.github/workflows/renovate.yml) runs the pinned `ghcr.io/renovatebot/renovate:44.247.2` Docker image directly, nightly at **02:17 UTC** or through **Actions → Renovate → Run workflow**. It uses GitHub's automatically supplied `GITHUB_TOKEN`; no personal token, Renovate account, or repository secret is needed. `RENOVATE_TOKEN` inside the container is simply Renovate's environment variable for that GitHub token.
+
+The job grants Contents, Issues and Pull requests write permissions, targets only `mamachanko/pink`, reads the existing `renovate.json`, and skips onboarding. The recommended preset enables the Dependency Dashboard issue. Logs and failures appear in Actions.
 
 Before the first run:
 
-1. Create a fine-grained personal access token restricted to `mamachanko/pink`, with **Contents**, **Issues**, **Pull requests**, and **Workflows** set to **Read and write** (Metadata read access is automatic). Store it as the repository Actions secret **`RENOVATE_TOKEN`** under Settings → Secrets and variables → Actions. Choose an expiry and rotate the secret before it expires. Alternatively, a classic token for this public repository needs `public_repo` and `workflow` scopes.
-2. Remove `pink` from the hosted Renovate GitHub App's repository access, or uninstall that app if it serves no other repositories. Run only one Renovate service against the repository to avoid competing updates.
-3. Ensure repository Issues and GitHub Actions are enabled and the action policy permits `renovatebot/github-action`. Run the workflow manually after merging, inspect its logs, and confirm the Dependency Dashboard appears. No update PRs are expected when all detected dependencies are current.
+1. In Settings → Actions → General → Workflow permissions, enable **Allow GitHub Actions to create and approve pull requests**. An organization policy may need to permit this setting. Issues and Actions must also be enabled.
+2. Remove `pink` from the hosted Renovate GitHub App's repository access, or uninstall that app if it serves no other repositories, to avoid competing updates.
+3. Merge the workflow to `main`, then run it manually and inspect the logs and Dependency Dashboard. Scheduled runs use the default branch and may be delayed by GitHub. No update PRs are expected when dependencies are current.
 
-The job's built-in `GITHUB_TOKEN` stays read-only. The separate token lets Renovate update `.github/workflows` and lets its PRs trigger normal CI. A missing secret fails with a setup message. The token cannot be provisioned by committing workflow files; the hosted app installation does not supply this secret. Review pinned Xcode/runner changes and tool checksum updates together; CI still requires matching verified tool checksums.
+GitHub's built-in token cannot update workflow files. The GitHub Actions manager and the custom workflow-version manager are therefore excluded: npm, Sparkle, XcodeGen, actionlint and ShellCheck updates remain enabled. Review workflow action pins and the Renovate image version manually. Tool update PRs still require verified checksums and matching supporting files.
+
+PRs created with `GITHUB_TOKEN` may require maintainer approval before their workflows run. Review the PR's Actions status and approve the pending run when GitHub offers it; if no run is created, use the existing CI workflow's manual trigger on the PR branch with its PR number to verify that exact head. Do not bypass required checks. No automatic merge is configured.
