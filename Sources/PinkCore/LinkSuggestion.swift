@@ -32,7 +32,9 @@ public struct LinkSuggestion: Equatable, Sendable {
         let kind: Kind
         let selected: Int?
         let site: String
-        if choices.count >= 2, choices[choices.count - 2] == "browse" {
+        if !["github.com", "gitlab.com"].contains(url.host.lowercased()),
+            choices.count >= 2, choices[choices.count - 2] == "browse", Self.isIssueKey(choices.last!)
+        {
             kind = .jira
             selected = choices.count - 1
             site = "Jira"
@@ -125,6 +127,16 @@ public struct LinkSuggestion: Equatable, Sendable {
             throw LinkSuggestionError.invalidURL
         }
         return rule
+    }
+
+    private static func isIssueKey(_ value: String) -> Bool {
+        let pieces = value.split(separator: "-", omittingEmptySubsequences: false)
+        guard pieces.count == 2, let first = pieces[0].utf8.first,
+            (65...90).contains(first) || (97...122).contains(first), !pieces[1].isEmpty
+        else { return false }
+        return pieces[0].utf8.allSatisfy {
+            (65...90).contains($0) || (97...122).contains($0) || (48...57).contains($0) || $0 == 95
+        } && pieces[1].utf8.allSatisfy { (48...57).contains($0) }
     }
 
     private static func encode(_ part: String) -> String {
