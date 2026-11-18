@@ -101,15 +101,15 @@ struct LinkRulesView: View {
 
     private var introduction: some View {
         Section {
-            HStack(alignment: .top) {
+            HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Link formats").font(.title2.bold())
+                    Text("Link formats").font(.title2.weight(.semibold))
                     Text("Choose how your links look when you paste.")
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button("Add format", systemImage: "plus") { editor = .builder("") }
-                    .buttonStyle(.borderedProminent).fixedSize()
+                    .buttonStyle(.borderedProminent).tint(PinkStyle.actionAccent).fixedSize()
                 Menu {
                     ForEach(LinkRule.templates) { template in
                         Button(template.name) { editor = .pattern(template) }
@@ -122,10 +122,11 @@ struct LinkRulesView: View {
                         editor = .host(nil, HostRule(service: .github, host: ""))
                     }
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Text("More")
                 }
-                .menuStyle(.borderlessButton).fixedSize()
-                .accessibilityLabel("Advanced formats and installations")
+                .menuStyle(.borderedButton).fixedSize()
+                .help("Starter templates and website installations")
+                .accessibilityLabel("More formats and installations")
             }
             .padding(.vertical, 8)
             if let added {
@@ -241,9 +242,9 @@ struct LinkRulesView: View {
     ) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "link")
-                .font(.title3).foregroundStyle(.tint)
+                .font(.title3).foregroundStyle(.secondary)
                 .frame(width: 32, height: 32)
-                .background(.tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.secondary.opacity(0.07), in: RoundedRectangle(cornerRadius: 8))
                 .accessibilityHidden(true)
             Button(action: edit) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -262,9 +263,10 @@ struct LinkRulesView: View {
                 Button("Edit…", action: edit)
                 actions()
             } label: {
-                Image(systemName: "ellipsis")
+                Image(systemName: "ellipsis").frame(width: 18)
             }
-            .menuStyle(.borderlessButton).fixedSize()
+            .menuStyle(.borderedButton).menuIndicator(.hidden).fixedSize()
+            .help("Edit, reorder or remove this format")
             .accessibilityLabel("Options for \(title), \(detail)")
         }
         .padding(.vertical, 4)
@@ -558,7 +560,7 @@ private struct HostFormatEditor: View {
         HStack {
             Spacer()
             Button("Cancel", action: cancel).keyboardShortcut(.cancelAction)
-            Button(title, action: save).keyboardShortcut(.defaultAction).disabled(disabled)
+            Button(title, action: save).keyboardShortcut(.defaultAction).tint(PinkStyle.actionAccent).disabled(disabled)
         }.padding()
     }
 }

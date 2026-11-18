@@ -26,7 +26,8 @@
             do { try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true) } catch {
                 fatalError("Cannot create screenshot output directory")
             }
-            NSApp.appearance = NSAppearance(named: .aqua)
+            NSApp.appearance = NSAppearance(
+                named: ProcessInfo.processInfo.environment["PINK_CAPTURE_APPEARANCE"] == "dark" ? .darkAqua : .aqua)
         }
 
         func start(statusItem: NSStatusItem, openSettings: @escaping @MainActor () -> NSWindow?) {
@@ -89,7 +90,7 @@
                     rootView: LinkFormatBuilder(
                         settings: PinkCore.Settings(), example: "https://jira.example/browse/ACME-184273",
                         save: { _ in }
-                    ).tint(.pink))
+                    ))
                 let window = NSWindow(
                     contentRect: CGRect(x: 0, y: 0, width: 620, height: 660),
                     styleMask: [.titled, .closable], backing: .buffered, defer: false)
