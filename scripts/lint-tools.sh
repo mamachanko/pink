@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 actionlint_version=1.7.12 # renovate: depName=rhysd/actionlint
-shellcheck_version=0.10.0 # renovate: depName=koalaman/shellcheck
+shellcheck_version=0.11.0 # renovate: depName=koalaman/shellcheck
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
 arch=$(uname -m)
 case $arch in
