@@ -138,3 +138,12 @@ The pre-rebase application passed every required check in [run 127](https://gith
 Rebase review found and fixed discarded Advanced edits and label choices when testing another example, plus a misleading Undo notice after a no-op save. The in-memory draft is now exercised directly, including exact preview destinations, manual pattern retention through invalid/nonmatching input, explicit regeneration, format identity and HTTP endpoint approval. Default builder layout remains unchanged; the fresh captures confirm byte-identical builder and Settings views after these state fixes. The obsolete checksum fix was dropped because main already contains it.
 
 Final-head native/required-check results are recorded by PR #30 checks. Earlier successful jobs do not attest later heads. Interactive keyboard/VoiceOver/dark-mode, real receiver paste and release-install acceptance remain NOT RUN; synthetic pasteboard tests and screenshots do not establish those results. This PR does not merge or publish a release.
+
+
+## Settings visual polish — 2026-11-18
+
+Local PASS: `make lint test` (55 portable Swift tests, 45 tooling tests), App syntax parsing, all seven README demo rows against the real formatter and all 52 README link/image sources including dark variants. The muted action color has a 5.71:1 contrast ratio against white before native control rendering. No matcher, persistence or clipboard behavior changes.
+
+Real native light/dark captures PASS in [run 139](https://github.com/mamachanko/pink/actions/runs/44262618716), source `3b87775925771bfdeed8e9f5e4bec9252acd8ba7`. All six PNGs were checksum-verified, visually reviewed and copied byte-for-byte into docs/images with source provenance. Review caught a remaining background seam and a split menu bezel in the first pass; the committed captures show a continuous settings surface and complete More button. The selected builder part has a checkmark as well as a subtle tint. Captures use the app's aqua/darkAqua appearance, synthetic settings and a named pasteboard; system preferences remain unchanged.
+
+PR #33 required checks record exact-head verification on both native architectures, packaging and both appearance captures. Screenshot review establishes these rendered states; interactive keyboard/VoiceOver and released-build acceptance were not performed in this Linux workspace.
