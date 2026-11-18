@@ -237,16 +237,35 @@ struct SettingsView: View {
     @ObservedObject var preferences: SettingsModel
     @State private var error = ""
     @State private var loginStatus = SMAppService.mainApp.status
+    @State private var section = SettingsSection.formats
+    private enum SettingsSection: Hashable { case formats, general }
     let updates: UpdateController
 
     var body: some View {
-        TabView {
-            LinkRulesView(preferences: preferences)
-                .tabItem { Label("Link formats", systemImage: "link") }
-            generalSettings
-                .tabItem { Label("General", systemImage: "gearshape") }
+        VStack(spacing: 0) {
+            Picker("Settings section", selection: $section) {
+                Text("Link formats").tag(SettingsSection.formats)
+                Text("General").tag(SettingsSection.general)
+            }
+            .pickerStyle(.segmented).labelsHidden()
+            .frame(width: 260).padding(.vertical, 14)
+            .accessibilityIdentifier("settings-section")
+
+            // Keep each pane's draft and scroll position when switching sections.
+            ZStack {
+                LinkRulesView(preferences: preferences)
+                    .opacity(section == .formats ? 1 : 0)
+                    .disabled(section != .formats)
+                    .allowsHitTesting(section == .formats)
+                    .accessibilityHidden(section != .formats)
+                generalSettings
+                    .opacity(section == .general ? 1 : 0)
+                    .disabled(section != .general)
+                    .allowsHitTesting(section == .general)
+                    .accessibilityHidden(section != .general)
+            }
         }
-        .tint(.pink)
+        .background(Color(nsColor: .windowBackgroundColor))
         .frame(minWidth: 680, minHeight: 640)
         .alert(
             "Couldn’t apply change",

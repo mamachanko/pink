@@ -115,12 +115,11 @@ struct LinkFormatBuilder: View {
                         dismiss()
                     } catch { saveError = "Couldn’t save this format. Your draft is still here. Try again." }
                 }
-                .keyboardShortcut(.defaultAction).buttonStyle(.borderedProminent)
+                .keyboardShortcut(.defaultAction).buttonStyle(.borderedProminent).tint(PinkStyle.actionAccent)
                 .disabled(!draft.canFinish(in: settings))
                 .accessibilityIdentifier("builder-use-format")
             }.padding(20)
         }
-        .tint(.pink)
         .frame(minWidth: 580, idealWidth: 620, minHeight: 600, idealHeight: 660)
         .defaultFocus($exampleFocused, true)
         .alert(
@@ -151,14 +150,22 @@ struct LinkFormatBuilder: View {
                     Button {
                         draft.choosePart(index, settings: settings)
                     } label: {
-                        Text(suggestion.parts[index]).lineLimit(2).truncationMode(.middle)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 6).padding(.horizontal, 10)
-                            .background(
-                                draft.selection == index ? Color.pink.opacity(0.1) : Color.secondary.opacity(0.06),
-                                in: RoundedRectangle(cornerRadius: 8)
-                            )
-                            .foregroundStyle(draft.selection == index ? Color.pink : Color.primary)
+                        HStack(spacing: 6) {
+                            Text(suggestion.parts[index]).lineLimit(2).truncationMode(.middle)
+                            Spacer(minLength: 0)
+                            if draft.selection == index {
+                                Image(systemName: "checkmark").font(.caption.weight(.semibold))
+                                    .accessibilityHidden(true)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 6).padding(.horizontal, 10)
+                        .background(
+                            draft.selection == index
+                                ? PinkStyle.actionAccent.opacity(0.10) : Color.secondary.opacity(0.06),
+                            in: RoundedRectangle(cornerRadius: 8)
+                        )
+                        .foregroundStyle(.primary)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Use \(suggestion.parts[index]) as link text")
@@ -195,7 +202,8 @@ struct LinkFormatBuilder: View {
                 .lineLimit(3).truncationMode(.middle)
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(20)
-        .background(Color.pink.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.quaternary, lineWidth: 1))
     }
 
     private var advanced: some View {
