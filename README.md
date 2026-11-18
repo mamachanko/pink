@@ -30,6 +30,14 @@ Pink makes long links easier to read in messages, notes and reviews. Copy normal
       <td><a href="https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20"><strong>acme/widget · main/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
+      <td><code>https://github.com/<wbr>acme/widget/blob/<wbr>0123456789abcdef0123456789abcdef01234567/<wbr>Sources/App.swift#L10-L20</code></td>
+      <td><a href="https://github.com/acme/widget/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10-L20"><strong>acme/widget · 0123456789ab/Sources/App.swift:10–20</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://gitlab.com/<wbr>team/platform/api/-/blob/<wbr>main/Sources/App.swift#L10-20</code></td>
+      <td><a href="https://gitlab.com/team/platform/api/-/blob/main/Sources/App.swift#L10-20"><strong>team/platform/api · main/Sources/App.swift:10–20</strong></a></td>
+    </tr>
+    <tr>
       <td><code>https://github.com/<wbr>acme/widget/<wbr>releases/tag/v1.2.3</code></td>
       <td><a href="https://github.com/acme/widget/releases/tag/v1.2.3"><strong>acme/widget@v1.2.3</strong></a></td>
     </tr>
@@ -132,7 +140,7 @@ Releases configured for signed in-app updates offer **Install Update**, then res
 
 ## Supported links
 
-`github.com` and `gitlab.com` are enabled by default over HTTPS.
+`github.com` and `gitlab.com` are enabled by default over HTTPS. The GitHub bundle includes repositories, issues, pull requests, files, file permalinks and releases together; no per-kind setup is needed. Each website row lists its included formats. **More → Customize built-in styles** changes their appearance. Existing disabled website rules and custom choices are preserved.
 
 | Service | URL path | Short label |
 | --- | --- | --- |
@@ -140,17 +148,21 @@ Releases configured for signed in-app updates offer **Install Update**, then res
 | GitHub pull request | `/owner/repo/pull/123` | `owner/repo#123` |
 | GitHub repository | `/owner/repo` | `owner/repo` |
 | GitHub file | `/owner/repo/blob/main/Sources/App.swift#L10-L20` | `owner/repo · main/Sources/App.swift:10–20` |
+| GitHub file permalink | `/owner/repo/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10` | `owner/repo · 0123456789ab/Sources/App.swift:10` |
 | GitHub release | `/owner/repo/releases/tag/v1.2.3` | `owner/repo@v1.2.3` |
+| GitLab file / permalink | `/group/project/-/blob/main/Sources/App.swift#L10-20` | `group/project · main/Sources/App.swift:10–20` |
 | GitLab issue | `/group/project/-/issues/123` | `group/project#123` |
 | GitLab merge request | `/group/project/-/merge_requests/123` | `group/project!123` |
 
 Nested GitLab namespaces stay in the label. Trailing slashes are supported, along with GitHub `files`, `commits` and `checks` subpages and GitLab merge-request `diffs`, `commits` and `pipelines` subpages. Queries, fragments and display case are preserved.
 
-Files keep the revision and path together because branch names can contain slashes; Pink never looks up repository data. Tagged releases are supported; `/releases/latest` and directory (`tree`) URLs stay unchanged.
+File links work on GitHub.com, configured GitHub Enterprise installations, GitLab.com and configured GitLab installations. GitHub line anchors (`#L10`, `#L10-L20`) and GitLab anchors (`#L10`, `#L10-20`, `#L10-L20`) appear as `:10` or `:10–20`. Positive, ordered ASCII line numbers are recognized. Other fragments stay in the destination without a line suffix.
+
+Files keep the revision and path together because branch names can contain slashes. Full 40- or 64-character hexadecimal revisions are displayed with their first 12 characters; the complete URL, revision, query and fragment remain the link destination. Pink never looks up repository data. Tagged releases are supported; `/releases/latest` and directory (`tree`) URLs stay unchanged.
 
 ### Custom link formats and preview
 
-Settings follows your Mac’s light or dark appearance. It uses a quiet rose accent for primary actions, native switches, and bordered options buttons. Use the **Link formats / General** selector at the top to switch sections.
+Settings follows your Mac’s light or dark appearance. It uses a rose accent for primary actions, native switches, and bordered options buttons. Use the **Link formats / General** selector at the top to switch sections.
 
 Open **Settings → Link formats → Add format** and paste a link you already use. Pink suggests the useful part and shows the resulting hyperlink immediately.
 
@@ -169,7 +181,7 @@ Try another example to check the same format: Pink keeps your chosen part and co
 
 **Advanced pattern** exposes the name, URL pattern, label and priority for unusual cases. `{issue}` captures one path segment; a final `{path...}` captures one or more remaining segments and appears as `{path}` in the label. Captures occupy whole segments and have unique letter-first names. Matching uses an exact host, scheme and optional port with case-sensitive path literals. Pattern literals support valid unreserved escapes, UTF-8 and encoded filename spaces; encoded separators, dot segments, malformed escapes and controls are rejected. Patterns cannot contain queries, fragments or user regex.
 
-Click a format in the list to edit it, use its switch to enable or disable it, or open its options menu to remove it or move a pattern earlier/later. Removing a format asks for confirmation. The **More** menu beside **Add format** keeps advanced starter templates and GitHub/GitLab installation settings available. Existing settings, enterprise hosts and disabled rules are preserved. Customizing an existing look explicitly gives the new pattern priority; exact-pattern edits reuse the existing rule, and Undo restores its earlier value and priority. Undo remains available until another format changes. If saving fails, the draft stays open and previous settings remain active.
+Click a format in the list to edit it, use its switch to enable or disable it, or open its options menu to remove it or move a pattern earlier/later. Removing a format asks for confirmation. The **More** menu beside **Add format** keeps custom starter templates and GitHub/GitLab installation settings available. Existing settings, enterprise hosts and disabled rules are preserved. Customizing an existing look explicitly gives the new pattern priority; exact-pattern edits reuse the existing rule, and Undo restores its earlier value and priority. Undo remains available until another format changes. If saving fails, the draft stays open and previous settings remain active.
 
 The builder supports at most 64 custom rules. The visual builder asks for a per-host confirmation before saving an HTTP format; an HTTP pattern entered in the advanced editor also explicitly opts that host into HTTP; public GitHub and GitLab hosts require HTTPS. Matching and label generation stay local. Labels are plain text escaped for rich output, and rules never rewrite destinations or run scripts. In prose, trailing sentence punctuation outside a query or fragment stays outside the hyperlink; encode a literal trailing path punctuation character when needed. A whole-URL item always keeps its exact valid target.
 

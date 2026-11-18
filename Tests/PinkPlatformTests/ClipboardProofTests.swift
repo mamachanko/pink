@@ -5,6 +5,52 @@ import XCTest
 @testable import PinkPlatform
 
 final class ClipboardProofTests: XCTestCase {
+    @MainActor func testFilePermalinksAndLinesHaveExactNativeTargetsAndRestore() async throws {
+        let sha = "0123456789abcdef0123456789abcdef01234567"
+        var settings = Settings()
+        settings.rules.append(.init(service: .github, host: "github.example", port: 8443, basePath: "/code"))
+        let parser = try Parser(rules: settings.rules, linkRules: settings.linkRules)
+        for (url, label) in [
+            (
+                "https://github.com/acme/widget/blob/\(sha)/App.swift?plain=1#L2-L4",
+                "acme/widget · 0123456789ab/App.swift:2–4"
+            ),
+            (
+                "https://github.example:8443/code/acme/widget/blob/\(sha)/App.swift?x=%2F#L2-L4",
+                "acme/widget · 0123456789ab/App.swift:2–4"
+            ),
+            (
+                "https://gitlab.com/team/sub/widget/-/blob/\(sha)/App.swift?ref_type=heads#L2-4",
+                "team/sub/widget · 0123456789ab/App.swift:2–4"
+            ),
+        ] {
+            let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
+            defer { board.releaseGlobally() }
+            let adapter = NativeBoard(board)
+            let monitor = ClipboardMonitor(
+                board: adapter, builder: NativeRepresentations(), permission: AllowedPermission(),
+                scheduler: ManualScheduler(), parser: parser)
+            monitor.enable()
+            let text = "Review \(url) please"
+            let source = Payload([Types.text: Data(text.utf8)])
+            XCTAssertTrue(adapter.write(source))
+            monitor.tick()
+            XCTAssertEqual(board.pasteboardItems?.count, 1)
+            XCTAssertEqual(board.string(forType: .string), text)
+            let rich = try NSAttributedString(
+                data: XCTUnwrap(board.data(forType: .rtf)),
+                options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+            XCTAssertEqual(rich.string, "Review \(label) please")
+            let range = (rich.string as NSString).range(of: label)
+            let location = try XCTUnwrap(range.location == NSNotFound ? nil : range.location)
+            let target = try XCTUnwrap(rich.attribute(.link, at: location, effectiveRange: nil))
+            XCTAssertEqual(String(describing: target), url)
+            monitor.restore()
+            XCTAssertEqual(adapter.read(), source)
+            monitor.pause()
+        }
+    }
+
     @MainActor func testSuggestedJiraFormatSavesOnceAndFormatsANewTicketNatively() async throws {
         let domain = "Pink.tests.builder.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))

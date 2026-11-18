@@ -120,14 +120,8 @@ public struct Parser: Sendable {
                 return Reference(original: original, label: repository + "#" + parts[3])
             }
             if parts.count >= 5, parts[2] == "blob" {
-                // Keep revision/path together: slash-containing refs cannot be resolved offline.
-                var label = repository + " · " + parts.dropFirst(3).joined(separator: "/")
-                if let fragment = url.components.fragment,
-                    fragment.range(of: #"^L[0-9]+(?:-L[0-9]+)?$"#, options: .regularExpression) != nil
-                {
-                    label += ":" + fragment.replacingOccurrences(of: "-L", with: "–").dropFirst()
-                }
-                return Reference(original: original, label: label)
+                return Self.fileReference(
+                    repository: repository, path: parts.dropFirst(3), url: url, original: original, service: .github)
             }
             if parts.count >= 5, parts[2] == "releases", parts[3] == "tag" {
                 return Reference(
@@ -135,17 +129,59 @@ public struct Parser: Sendable {
             }
             return nil
         case .gitlab:
-            guard let dash = parts.firstIndex(of: "-"), dash >= 2, (dash + 3...dash + 4).contains(parts.count),
+            guard let dash = parts.firstIndex(of: "-"), dash >= 2,
+                parts.prefix(dash).allSatisfy(Self.segment), parts.count >= dash + 3
+            else { return nil }
+            let repository = parts.prefix(dash).joined(separator: "/")
+            if parts[dash + 1] == "blob", parts.count >= dash + 4 {
+                return Self.fileReference(
+                    repository: repository, path: parts.dropFirst(dash + 2), url: url, original: original,
+                    service: .gitlab)
+            }
+            guard (dash + 3...dash + 4).contains(parts.count),
                 ["merge_requests", "issues"].contains(parts[dash + 1]),
                 parts.count == dash + 3
                     || (parts[dash + 1] == "merge_requests"
                         && ["diffs", "commits", "pipelines"].contains(parts[dash + 3])),
-                parts.prefix(dash).allSatisfy(Self.segment), Self.number(parts[dash + 2])
+                Self.number(parts[dash + 2])
             else { return nil }
             let symbol = parts[dash + 1] == "issues" ? "#" : "!"
             return Reference(
                 original: original, label: parts.prefix(dash).joined(separator: "/") + symbol + parts[dash + 2])
         }
+    }
+
+    private static func fileReference(
+        repository: String, path: ArraySlice<String>, url: LinkURL, original: String, service: Service
+    ) -> Reference {
+        // Only full SHA-like revisions are shortened; slash-containing refs stay opaque.
+        var components = Array(path)
+        if [40, 64].contains(components[0].utf8.count),
+            components[0].utf8.allSatisfy({
+                (48...57).contains($0) || (65...70).contains($0) || (97...102).contains($0)
+            })
+        {
+            components[0] = String(components[0].prefix(12))
+        }
+        let label =
+            repository + " · " + components.joined(separator: "/")
+            + lineSuffix(url.components.fragment, service: service)
+        return Reference(original: original, label: label)
+    }
+
+    private static func lineSuffix(_ fragment: String?, service: Service) -> String {
+        guard let fragment, fragment.hasPrefix("L") else { return "" }
+        let parts = fragment.dropFirst().split(separator: "-", omittingEmptySubsequences: false)
+        guard (1...2).contains(parts.count), number(String(parts[0])) else { return "" }
+        let start = String(parts[0])
+        guard parts.count == 2 else { return ":" + start }
+        let end = String(parts[1].hasPrefix("L") ? parts[1].dropFirst() : parts[1][...])
+        guard service == .gitlab || parts[1].hasPrefix("L"), number(end) else { return "" }
+        // Compare decimal strings without overflowing on a large but valid anchor.
+        let lower = start.drop(while: { $0 == "0" })
+        let upper = end.drop(while: { $0 == "0" })
+        guard lower.count < upper.count || (lower.count == upper.count && lower <= upper) else { return "" }
+        return ":" + start + "–" + end
     }
 
     private static func number(_ value: String) -> Bool {
