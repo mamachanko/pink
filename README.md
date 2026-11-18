@@ -30,11 +30,11 @@ Pink makes long links easier to read in messages, notes and reviews. Copy normal
       <td><a href="https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20"><strong>acme/widget · main/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
-      <td><code>https://github.com/<wbr>acme/widget/blob/<wbr>0123456789abcdef0123456789abcdef01234567/<wbr>Sources/App.swift#L10-L20</code></td>
+      <td><code>https://github.com/<wbr>acme/widget/blob/<wbr>0123456789ab<wbr>cdef01234567<wbr>89abcdef01234567/<wbr>Sources/App.swift#L10-L20</code></td>
       <td><a href="https://github.com/acme/widget/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10-L20"><strong>acme/widget · 0123456789ab/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
-      <td><code>https://gitlab.com/<wbr>team/platform/api/-/blob/<wbr>main/Sources/App.swift#L10-20</code></td>
+      <td><code>https://gitlab.com/<wbr>team/platform/api/<wbr>-/blob/<wbr>main/Sources/App.swift#L10-20</code></td>
       <td><a href="https://gitlab.com/team/platform/api/-/blob/main/Sources/App.swift#L10-20"><strong>team/platform/api · main/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
@@ -70,7 +70,7 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
   <tr><th>In the menu bar</th><th>Your link formats</th></tr>
   <tr>
     <td align="center" valign="top"><a href="docs/images/menu-bar.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu with formatting, restore, settings and update actions."></picture></a></td>
-    <td align="center" valign="top"><a href="docs/images/settings.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink’s unified link format collection with GitHub, GitLab and Jira formats, Add format, a visible More menu, bordered row options and a shared preview."></picture></a></td>
+    <td align="center" valign="top"><a href="docs/images/settings.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink’s unified link format collection with GitHub and GitLab included-format summaries, Jira, Add format, a visible More menu, bordered row options and a shared preview."></picture></a></td>
   </tr>
 </table>
 
@@ -140,7 +140,7 @@ Releases configured for signed in-app updates offer **Install Update**, then res
 
 ## Supported links
 
-`github.com` and `gitlab.com` are enabled by default over HTTPS. The GitHub bundle includes repositories, issues, pull requests, files, file permalinks and releases together; no per-kind setup is needed. Each website row lists its included formats. **More → Customize built-in styles** changes their appearance. Existing disabled website rules and custom choices are preserved.
+`github.com` and `gitlab.com` are enabled by default over HTTPS. The GitHub bundle includes repositories, issues, pull requests, files, file permalinks and releases together; no per-kind setup is needed. Each website row lists its included formats. **More → Customize built-in styles** changes their appearance. Existing disabled website rules and saved custom rules are retained. Explicitly preferred custom patterns still take priority.
 
 | Service | URL path | Short label |
 | --- | --- | --- |
