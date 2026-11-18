@@ -111,8 +111,11 @@ struct LinkRulesView: View {
                 Button("Add format", systemImage: "plus") { editor = .builder("") }
                     .buttonStyle(.borderedProminent).tint(PinkStyle.actionAccent).fixedSize()
                 Menu {
-                    ForEach(LinkRule.templates) { template in
-                        Button(template.name) { editor = .pattern(template) }
+                    Button("Jira issue…") { editor = .pattern(LinkRule.templates[0]) }
+                    Section("Customize built-in styles") {
+                        ForEach(LinkRule.templates.dropFirst()) { template in
+                            Button(template.name + "…") { editor = .pattern(template) }
+                        }
                     }
                     Divider()
                     Button("Other website…") {
@@ -155,6 +158,7 @@ struct LinkRulesView: View {
                 formatRow(
                     title: rule.service.displayName,
                     detail: rule.host + (rule.port.map { ":\($0)" } ?? "") + rule.basePath,
+                    summary: rule.service.formatSummary,
                     enabled: Binding(
                         get: {
                             preferences.value.rules.indices.contains(index)
@@ -240,7 +244,7 @@ struct LinkRulesView: View {
     }
 
     private func formatRow<Actions: View>(
-        title: String, detail: String, enabled: Binding<Bool>, edit: @escaping () -> Void,
+        title: String, detail: String, summary: String? = nil, enabled: Binding<Bool>, edit: @escaping () -> Void,
         @ViewBuilder actions: @escaping () -> Actions
     ) -> some View {
         HStack(spacing: 12) {
@@ -254,12 +258,15 @@ struct LinkRulesView: View {
                     Text(title).fontWeight(.medium).foregroundStyle(.primary)
                     Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                         .truncationMode(.middle)
+                    if let summary {
+                        Text(summary).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Edit \(title), \(detail)")
+            .accessibilityLabel("Edit \(title), \(detail)\(summary.map { ", includes " + $0 } ?? "")")
             Toggle("Enable \(title), \(detail)", isOn: enabled)
                 .labelsHidden().toggleStyle(.switch).controlSize(.small)
             Menu {
@@ -306,6 +313,11 @@ private enum FormatEditor: Identifiable {
 
 extension Service {
     var displayName: String { self == .github ? "GitHub" : "GitLab" }
+    var formatSummary: String {
+        self == .github
+            ? "Repositories, issues, pull requests, files, permalinks and releases"
+            : "Issues, merge requests, files and permalinks"
+    }
 }
 
 struct LinkPreview: View {
@@ -505,8 +517,8 @@ private struct HostFormatEditor: View {
                         .focused($primaryFieldFocused)
                     Text(
                         draft.service == .github
-                            ? "Formats repositories, issues, pull requests, files and releases."
-                            : "Formats issues and merge requests, including nested groups."
+                            ? "Formats repositories, issues, pull requests, files, permalinks and releases."
+                            : "Formats issues, merge requests, files and permalinks, including nested groups."
                     )
                     .font(.caption).foregroundStyle(.secondary)
                 } header: {

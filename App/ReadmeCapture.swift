@@ -78,7 +78,7 @@
                         self?.fail("settings-window-failed")
                         return
                     }
-                    window.setContentSize(NSSize(width: 680, height: 640))
+                    window.setContentSize(NSSize(width: 680, height: 680))
                     self.prepare(window)
                 }
             } else if stage == 2, Date() >= readyAt {

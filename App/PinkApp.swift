@@ -205,8 +205,8 @@ import SwiftUI
         let controller = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: controller)
         window.title = "Pink Settings"
-        window.setContentSize(NSSize(width: 680, height: 640))
-        window.contentMinSize = NSSize(width: 680, height: 640)
+        window.setContentSize(NSSize(width: 680, height: 680))
+        window.contentMinSize = NSSize(width: 680, height: 680)
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
@@ -268,7 +268,7 @@ struct SettingsView: View {
             }
         }
         .background(Color(nsColor: .controlBackgroundColor))
-        .frame(minWidth: 680, minHeight: 640)
+        .frame(minWidth: 680, minHeight: 680)
         .alert(
             "Couldn’t apply change",
             isPresented: Binding(
