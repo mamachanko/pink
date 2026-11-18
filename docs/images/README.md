@@ -3,7 +3,7 @@
 The README shows three real Pink views:
 
 - `menu-bar.png`: the menu-bar icon and formatting, settings and update actions.
-- `settings.png`: the unified Link formats collection, muted Add format action, visible More menu, bordered row options and shared preview.
+- `settings.png`: the unified Link formats collection, rose Add format action and included website formats, visible More menu, bordered row options and shared preview.
 - `link-formats.png`: the paste-first builder with a reserved-host Jira example. The issue key is selected automatically, the paste preview is visible, and the primary action is Use for Jira links. The selected part also has a checkmark. No pattern is supplied to the capture view.
 
 With Xcode 26.2 selected and the normal build prerequisites installed, run:
@@ -22,4 +22,4 @@ The README uses matching light and dark image sources. The dark capture sets onl
 
 CI sets `PINK_CAPTURE_TEXT_EXPORT=1` to emit checksum-tagged base64 copies of the four fixed synthetic demo outputs per appearance. This lets review tools inspect the original PNG bytes when artifact downloads are unavailable. Export is bounded to 1 MiB per file and never reads the general clipboard or user examples. Normal local captures omit this export.
 
-The committed images were captured on macOS 15.7.9 (24G830), Intel, with Xcode 26.2 in [CI run 139](https://github.com/mamachanko/pink/actions/runs/44262618716) at source PR head `3b87775925771bfdeed8e9f5e4bec9252acd8ba7`, then visually reviewed in light and dark appearance on 2026-11-18. See `capture.txt` for checksums and provenance.
+The committed images were captured on macOS 15.7.9 (24G830), Intel, with Xcode 26.2 in [CI run 153](https://github.com/mamachanko/pink/actions/runs/44348759753) at source PR head `f8e5640b150006861d31a53eef1ef45c15a99e3f`, then visually reviewed in light and dark appearance on 2026-11-18. See `capture.txt` for checksums and provenance.
