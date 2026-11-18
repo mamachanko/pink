@@ -122,9 +122,12 @@ struct LinkRulesView: View {
                         editor = .host(nil, HostRule(service: .github, host: ""))
                     }
                 } label: {
-                    Text("More")
+                    HStack(spacing: 6) {
+                        Text("More")
+                        Image(systemName: "chevron.down").font(.caption2.weight(.semibold))
+                    }
                 }
-                .menuStyle(.borderedButton).fixedSize()
+                .menuStyle(.borderedButton).menuIndicator(.hidden).fixedSize()
                 .help("Starter templates and website installations")
                 .accessibilityLabel("More formats and installations")
             }

@@ -254,18 +254,20 @@ struct SettingsView: View {
             // Keep each pane's draft and scroll position when switching sections.
             ZStack {
                 LinkRulesView(preferences: preferences)
+                    .scrollContentBackground(.hidden)
                     .opacity(section == .formats ? 1 : 0)
                     .disabled(section != .formats)
                     .allowsHitTesting(section == .formats)
                     .accessibilityHidden(section != .formats)
                 generalSettings
+                    .scrollContentBackground(.hidden)
                     .opacity(section == .general ? 1 : 0)
                     .disabled(section != .general)
                     .allowsHitTesting(section == .general)
                     .accessibilityHidden(section != .general)
             }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color(nsColor: .controlBackgroundColor))
         .frame(minWidth: 680, minHeight: 640)
         .alert(
             "Couldn’t apply change",
