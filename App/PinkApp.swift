@@ -64,11 +64,13 @@ import SwiftUI
         monitor = ClipboardMonitor(
             board: board, builder: NativeRepresentations(rewriteFormattedURLs: settings.rewriteFormattedURLs),
             permission: permission,
-            scheduler: TimerScheduler(), parser: try! Parser(rules: settings.rules, linkRules: settings.linkRules))
+            scheduler: TimerScheduler(), parser: try! Parser(settings: settings))
         preferences.onChange = { [weak self] previous, current in
             guard let self else { return }
-            if previous.rules != current.rules || previous.linkRules != current.linkRules {
-                self.monitor.parser = try! Parser(rules: current.rules, linkRules: current.linkRules)
+            if previous.rules != current.rules || previous.linkRules != current.linkRules
+                || previous.showLinkIcons != current.showLinkIcons
+            {
+                self.monitor.parser = try! Parser(settings: current)
             }
             if previous.rewriteFormattedURLs != current.rewriteFormattedURLs {
                 self.monitor.builder = NativeRepresentations(rewriteFormattedURLs: current.rewriteFormattedURLs)
@@ -306,6 +308,20 @@ struct SettingsView: View {
                 }
             } header: {
                 Text("General").font(.title2.bold())
+            }
+            Section("Link labels") {
+                Toggle(
+                    "Show link icons",
+                    isOn: Binding(
+                        get: { preferences.value.showLinkIcons },
+                        set: { enabled in
+                            do { try preferences.edit { $0.showLinkIcons = enabled } } catch {
+                                self.error = "Your previous settings are still active. Try again."
+                            }
+                        }
+                    ))
+                Text("Add emoji to known links, including pull requests, issues, files, releases and tickets.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
             Section("Copied rich text") {
                 Toggle(

@@ -42,12 +42,15 @@ public struct Reference: Equatable, Sendable {
 public struct Parser: Sendable {
     public let rules: [HostRule]
     public let linkRules: [LinkRule]
+    public let showLinkIcons: Bool
     private let compiledRules: [CompiledLinkRule]
 
-    public init(rules: [HostRule] = HostRule.defaults, linkRules: [LinkRule] = []) throws {
+    /// Low-level parsing keeps plain labels unless presentation is explicitly requested.
+    public init(rules: [HostRule] = HostRule.defaults, linkRules: [LinkRule] = [], showLinkIcons: Bool = false) throws {
         guard linkRules.count <= 64, Set(linkRules.map(\.id)).count == linkRules.count else {
             throw LinkRuleError.tooManyRules
         }
+        self.showLinkIcons = showLinkIcons
         self.linkRules = linkRules
         self.compiledRules = try linkRules.map(CompiledLinkRule.init)
         for (i, r) in rules.enumerated() {
@@ -77,6 +80,22 @@ public struct Parser: Sendable {
         }
         self.rules = rules
     }
+    /// Application formatting and previews share the same presentation preferences.
+    public init(settings: Settings) throws {
+        try self.init(rules: settings.rules, linkRules: settings.linkRules, showLinkIcons: settings.showLinkIcons)
+    }
+
+    private struct PresetReference {
+        let reference: Reference
+        let kind: LinkKind
+        let revision: String?
+        init(original: String, label: String, kind: LinkKind, revision: String? = nil) {
+            reference = Reference(original: original, label: label)
+            self.kind = kind
+            self.revision = revision
+        }
+    }
+
     static func segment(_ s: String) -> Bool {
         !s.isEmpty && s != "." && s != ".."
             && s.unicodeScalars.allSatisfy {
@@ -91,14 +110,31 @@ public struct Parser: Sendable {
         guard let url = LinkURL(input) else { return [] }
         let custom = compiledRules.compactMap { $0.match(url, original: input) }
         var matches = custom.filter { $0.overridesBuiltIns }.map(\.match)
-        if let reference = preset(url, original: input) {
-            matches.append(LinkMatch(ruleName: "\(url.host) preset", reference: reference, captures: [:]))
+        let preset = preset(url, original: input)
+        if let preset {
+            matches.append(LinkMatch(ruleName: "\(url.host) preset", reference: preset.reference, captures: [:]))
         }
         matches += custom.filter { !$0.overridesBuiltIns }.map(\.match)
+        if let revision = preset?.revision, revision.count > 8 {
+            // Keep conventional revisions short even when an older custom file style wins.
+            let pattern = "(?<!\\w)" + revision + "(?!\\w)"
+            matches = matches.map {
+                let label = $0.reference.label.replacingOccurrences(
+                    of: pattern, with: String(revision.prefix(8)), options: .regularExpression)
+                return LinkMatch(
+                    ruleName: $0.ruleName,
+                    reference: Reference(original: $0.reference.original, label: label), captures: $0.captures)
+            }
+        }
+        if showLinkIcons, let kind = preset?.kind ?? LinkKind.jira(in: url) {
+            matches = matches.map {
+                LinkMatch(ruleName: $0.ruleName, reference: kind.decorate($0.reference), captures: $0.captures)
+            }
+        }
         return matches
     }
 
-    private func preset(_ url: LinkURL, original: String) -> Reference? {
+    private func preset(_ url: LinkURL, original: String) -> PresetReference? {
         let path = url.path
         guard
             let rule = rules.first(where: {
@@ -113,19 +149,45 @@ public struct Parser: Sendable {
                 !parts[1].hasSuffix("."), !Self.githubReservedOwners.contains(parts[0].lowercased())
             else { return nil }
             let repository = parts.prefix(2).joined(separator: "/")
-            if parts.count == 2 { return Reference(original: original, label: repository) }
+            if parts.count == 2 { return PresetReference(original: original, label: repository, kind: .repository) }
             if (4...5).contains(parts.count), ["pull", "issues"].contains(parts[2]),
                 parts.count == 4 || ["files", "commits", "checks"].contains(parts[4]), Self.number(parts[3])
             {
-                return Reference(original: original, label: repository + "#" + parts[3])
+                return PresetReference(
+                    original: original, label: repository + "#" + parts[3], kind: parts[2] == "pull" ? .review : .issue)
+            }
+            if parts.count == 4, parts[2] == "commit", Self.commitID(parts[3]) {
+                return PresetReference(
+                    original: original, label: repository + "@" + parts[3].prefix(8), kind: .commit, revision: parts[3])
+            }
+            if parts.count >= 5, parts[2] == "actions" {
+                if parts.count == 5, parts[3] == "workflows",
+                    Self.number(parts[4]) || parts[4].hasSuffix(".yml") || parts[4].hasSuffix(".yaml")
+                {
+                    return PresetReference(original: original, label: repository + " · " + parts[4], kind: .workflow)
+                }
+                if parts[3] == "runs", Self.number(parts[4]) {
+                    if parts.count == 5 {
+                        return PresetReference(original: original, label: repository + " · run " + parts[4], kind: .run)
+                    }
+                    if parts.count == 7, parts[5] == "job", Self.number(parts[6]) {
+                        return PresetReference(original: original, label: repository + " · job " + parts[6], kind: .job)
+                    }
+                    if parts.count == 7, parts[5] == "attempts", Self.number(parts[6]) {
+                        return PresetReference(
+                            original: original,
+                            label: repository + " · run " + parts[4] + " (attempt " + parts[6] + ")", kind: .run)
+                    }
+                }
             }
             if parts.count >= 5, parts[2] == "blob" {
                 return Self.fileReference(
                     repository: repository, path: parts.dropFirst(3), url: url, original: original, service: .github)
             }
             if parts.count >= 5, parts[2] == "releases", parts[3] == "tag" {
-                return Reference(
-                    original: original, label: repository + "@" + parts.dropFirst(4).joined(separator: "/"))
+                return PresetReference(
+                    original: original, label: repository + "@" + parts.dropFirst(4).joined(separator: "/"),
+                    kind: .release)
             }
             return nil
         case .gitlab:
@@ -133,6 +195,11 @@ public struct Parser: Sendable {
                 parts.prefix(dash).allSatisfy(Self.segment), parts.count >= dash + 3
             else { return nil }
             let repository = parts.prefix(dash).joined(separator: "/")
+            if parts.count == dash + 3, parts[dash + 1] == "commit", Self.commitID(parts[dash + 2]) {
+                return PresetReference(
+                    original: original, label: repository + "@" + parts[dash + 2].prefix(8), kind: .commit,
+                    revision: parts[dash + 2])
+            }
             if parts[dash + 1] == "blob", parts.count >= dash + 4 {
                 return Self.fileReference(
                     repository: repository, path: parts.dropFirst(dash + 2), url: url, original: original,
@@ -146,27 +213,30 @@ public struct Parser: Sendable {
                 Self.number(parts[dash + 2])
             else { return nil }
             let symbol = parts[dash + 1] == "issues" ? "#" : "!"
-            return Reference(
-                original: original, label: parts.prefix(dash).joined(separator: "/") + symbol + parts[dash + 2])
+            return PresetReference(
+                original: original, label: repository + symbol + parts[dash + 2], kind: symbol == "#" ? .issue : .review
+            )
         }
     }
 
     private static func fileReference(
         repository: String, path: ArraySlice<String>, url: LinkURL, original: String, service: Service
-    ) -> Reference {
+    ) -> PresetReference {
         // Only full SHA-like revisions are shortened; slash-containing refs stay opaque.
         var components = Array(path)
+        var revision: String?
         if [40, 64].contains(components[0].utf8.count),
             components[0].utf8.allSatisfy({
                 (48...57).contains($0) || (65...70).contains($0) || (97...102).contains($0)
             })
         {
-            components[0] = String(components[0].prefix(12))
+            revision = components[0]
+            components[0] = String(components[0].prefix(8))
         }
         let label =
             repository + " · " + components.joined(separator: "/")
             + lineSuffix(url.components.fragment, service: service)
-        return Reference(original: original, label: label)
+        return PresetReference(original: original, label: label, kind: .file, revision: revision)
     }
 
     private static func lineSuffix(_ fragment: String?, service: Service) -> String {
@@ -182,6 +252,13 @@ public struct Parser: Sendable {
         let upper = end.drop(while: { $0 == "0" })
         guard lower.count < upper.count || (lower.count == upper.count && lower <= upper) else { return "" }
         return ":" + start + "–" + end
+    }
+
+    private static func commitID(_ value: String) -> Bool {
+        (7...64).contains(value.utf8.count)
+            && value.utf8.allSatisfy {
+                (48...57).contains($0) || (65...70).contains($0) || (97...102).contains($0)
+            }
     }
 
     private static func number(_ value: String) -> Bool {

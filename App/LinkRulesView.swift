@@ -19,6 +19,7 @@ struct LinkRulesView: View {
             Section("Try a link") {
                 LinkPreview(
                     hostRules: settings.rules, rules: settings.linkRules, example: $example,
+                    showLinkIcons: settings.showLinkIcons,
                     createFormat: { editor = .builder($0) })
             }
         }
@@ -315,8 +316,8 @@ extension Service {
     var displayName: String { self == .github ? "GitHub" : "GitLab" }
     var formatSummary: String {
         self == .github
-            ? "Repositories, issues, pull requests, files, permalinks and releases"
-            : "Issues, merge requests, files and permalinks"
+            ? "Repositories, issues, PRs, files, releases, commits and Actions"
+            : "Issues, merge requests, files, permalinks and commits"
     }
 }
 
@@ -325,9 +326,10 @@ struct LinkPreview: View {
     let rules: [LinkRule]
     @Binding var example: String
     var isValid = true
+    var showLinkIcons = true
     var createFormat: ((String) -> Void)?
     private var matches: [LinkMatch] {
-        (try? Parser(rules: hostRules, linkRules: rules))?.matches(example) ?? []
+        (try? Parser(rules: hostRules, linkRules: rules, showLinkIcons: showLinkIcons))?.matches(example) ?? []
     }
 
     var body: some View {
@@ -423,7 +425,8 @@ struct PatternEditor: View {
                 }
                 Section("Try a link") {
                     LinkPreview(
-                        hostRules: settings.rules, rules: proposed, example: $example, isValid: validation == nil)
+                        hostRules: settings.rules, rules: proposed, example: $example, isValid: validation == nil,
+                        showLinkIcons: settings.showLinkIcons)
                 }
                 DisclosureGroup("Advanced") {
                     Toggle("Prefer over matching website formats", isOn: $draft.overridesBuiltIns)
@@ -517,8 +520,8 @@ private struct HostFormatEditor: View {
                         .focused($primaryFieldFocused)
                     Text(
                         draft.service == .github
-                            ? "Formats repositories, issues, pull requests, files, permalinks and releases."
-                            : "Formats issues, merge requests, files and permalinks, including nested groups."
+                            ? "Formats repositories, issues, pull requests, files, releases, commits and Actions."
+                            : "Formats issues, merge requests, files, permalinks and commits, including nested groups."
                     )
                     .font(.caption).foregroundStyle(.secondary)
                 } header: {
@@ -526,7 +529,8 @@ private struct HostFormatEditor: View {
                 }
                 Section("Try a link") {
                     LinkPreview(
-                        hostRules: proposed, rules: settings.linkRules, example: $example, isValid: validation == nil)
+                        hostRules: proposed, rules: settings.linkRules, example: $example, isValid: validation == nil,
+                        showLinkIcons: settings.showLinkIcons)
                 }
                 DisclosureGroup("Advanced") {
                     TextField("Port (optional)", text: $port)

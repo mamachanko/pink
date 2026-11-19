@@ -11,39 +11,55 @@ Pink makes long links easier to read in messages, notes and reviews. Copy normal
   <tbody>
     <tr>
       <td><code>https://github.com/<wbr>acme/widget/<wbr>pull/123</code></td>
-      <td><a href="https://github.com/acme/widget/pull/123"><strong>acme/widget#123</strong></a></td>
+      <td><a href="https://github.com/acme/widget/pull/123"><strong>🔀 acme/widget#123</strong></a></td>
     </tr>
     <tr>
       <td><code>https://gitlab.com/<wbr>team/platform/api/<wbr>-/merge_requests/<wbr>45</code></td>
-      <td><a href="https://gitlab.com/team/platform/api/-/merge_requests/45"><strong>team/platform/api!45</strong></a></td>
+      <td><a href="https://gitlab.com/team/platform/api/-/merge_requests/45"><strong>🔀 team/platform/api!45</strong></a></td>
     </tr>
     <tr>
       <td><code>Please review https://github.com/<wbr>acme/widget/<wbr>pull/123 and https://gitlab.com/<wbr>team/project/<wbr>-/issues/7. Thanks!</code></td>
-      <td>Please review <a href="https://github.com/acme/widget/pull/123"><strong>acme/widget#123</strong></a> and <a href="https://gitlab.com/team/project/-/issues/7"><strong>team/project#7</strong></a>. Thanks!</td>
+      <td>Please review <a href="https://github.com/acme/widget/pull/123"><strong>🔀 acme/widget#123</strong></a> and <a href="https://gitlab.com/team/project/-/issues/7"><strong>📋 team/project#7</strong></a>. Thanks!</td>
     </tr>
     <tr>
       <td><code>https://github.com/<wbr>acme/widget</code></td>
-      <td><a href="https://github.com/acme/widget"><strong>acme/widget</strong></a></td>
+      <td><a href="https://github.com/acme/widget"><strong>📦 acme/widget</strong></a></td>
     </tr>
     <tr>
       <td><code>https://github.com/<wbr>acme/widget/blob/<wbr>main/Sources/App.swift#L10-L20</code></td>
-      <td><a href="https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20"><strong>acme/widget · main/Sources/App.swift:10–20</strong></a></td>
+      <td><a href="https://github.com/acme/widget/blob/main/Sources/App.swift#L10-L20"><strong>📄 acme/widget · main/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
       <td><code>https://github.com/<wbr>acme/widget/blob/<wbr>0123456789ab<wbr>cdef01234567<wbr>89abcdef01234567/<wbr>Sources/App.swift#L10-L20</code></td>
-      <td><a href="https://github.com/acme/widget/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10-L20"><strong>acme/widget · 0123456789ab/Sources/App.swift:10–20</strong></a></td>
+      <td><a href="https://github.com/acme/widget/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10-L20"><strong>📄 acme/widget · 01234567/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
       <td><code>https://gitlab.com/<wbr>team/platform/api/<wbr>-/blob/<wbr>main/Sources/App.swift#L10-20</code></td>
-      <td><a href="https://gitlab.com/team/platform/api/-/blob/main/Sources/App.swift#L10-20"><strong>team/platform/api · main/Sources/App.swift:10–20</strong></a></td>
+      <td><a href="https://gitlab.com/team/platform/api/-/blob/main/Sources/App.swift#L10-20"><strong>📄 team/platform/api · main/Sources/App.swift:10–20</strong></a></td>
     </tr>
     <tr>
       <td><code>https://github.com/<wbr>acme/widget/<wbr>releases/tag/v1.2.3</code></td>
-      <td><a href="https://github.com/acme/widget/releases/tag/v1.2.3"><strong>acme/widget@v1.2.3</strong></a></td>
+      <td><a href="https://github.com/acme/widget/releases/tag/v1.2.3"><strong>🏷️ acme/widget@v1.2.3</strong></a></td>
     </tr>
     <tr>
       <td><code>https://jira.example/<wbr>browse/ACME-184273</code></td>
-      <td><a href="https://jira.example/browse/ACME-184273"><strong>ACME-184273</strong></a></td>
+      <td><a href="https://jira.example/browse/ACME-184273"><strong>🎫 ACME-184273</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/commit/<wbr>0123456789ab<wbr>cdef01234567<wbr>89abcdef01234567</code></td>
+      <td><a href="https://github.com/acme/widget/commit/0123456789abcdef0123456789abcdef01234567"><strong>🔖 acme/widget@01234567</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/actions/<wbr>workflows/ci.yml</code></td>
+      <td><a href="https://github.com/acme/widget/actions/workflows/ci.yml"><strong>⚙️ acme/widget · ci.yml</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/actions/<wbr>runs/123456789</code></td>
+      <td><a href="https://github.com/acme/widget/actions/runs/123456789"><strong>▶️ acme/widget · run 123456789</strong></a></td>
+    </tr>
+    <tr>
+      <td><code>https://github.com/<wbr>acme/widget/actions/<wbr>runs/123456789/<wbr>job/987654321</code></td>
+      <td><a href="https://github.com/acme/widget/actions/runs/123456789/job/987654321"><strong>🛠️ acme/widget · job 987654321</strong></a></td>
     </tr>
   </tbody>
 </table>
@@ -75,7 +91,7 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
 </table>
 
 <p align="center">
-  <a href="docs/images/link-formats.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/link-formats.png"><img src="docs/images/link-formats.png" width="620" alt="Pink’s paste-first builder automatically selects ACME-184273 from a Jira URL and shows its hyperlink preview, a checkmark on the selected part, optional context and Use for Jira links action. Advanced pattern is collapsed."></picture></a>
+  <a href="docs/images/link-formats.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/link-formats.png"><img src="docs/images/link-formats.png" width="620" alt="Pink’s paste-first builder automatically selects ACME-184273 from a Jira URL and shows its ticket-icon hyperlink preview, a checkmark on the selected part, optional context and Use for Jira links action. Advanced pattern is collapsed."></picture></a>
 </p>
 
 <p align="center"><sub>Actual Pink UI on macOS with demo settings. <a href="docs/images/README.md">Capture details</a>.</sub></p>
@@ -120,15 +136,15 @@ Enabling or resuming Pink leaves existing clipboard content alone. Use **Format 
 
 A message containing a pull request and a merge request can appear as:
 
-> Please review [acme/widget#123](https://github.com/acme/widget/pull/123) and [team/project!45](https://gitlab.com/team/project/-/merge_requests/45).
+> Please review [🔀 acme/widget#123](https://github.com/acme/widget/pull/123) and [🔀 team/project!45](https://gitlab.com/team/project/-/merge_requests/45).
 
 Each label keeps its own destination. Plain paste retains the entire original message, including both full URLs.
 
 ### Links copied from chat or a browser
 
-Turn on **Settings → General → Rewrite already-formatted URLs**, then **Save settings**. Copy the message again, or choose **Format current clipboard**.
+Turn on **Settings → General → Rewrite already-formatted URLs**. Copy the message again, or choose **Format current clipboard**.
 
-For example, a clickable `https://github.com/acme/widget/pull/123` can become [acme/widget#123](https://github.com/acme/widget/pull/123), even when copied from another message. The visible URL must match its destination. Messages containing deliberately named links stay unchanged, and plain paste always keeps the exact original text.
+For example, a clickable `https://github.com/acme/widget/pull/123` can become [🔀 acme/widget#123](https://github.com/acme/widget/pull/123), even when copied from another message. The visible URL must match its destination. Messages containing deliberately named links stay unchanged, and plain paste always keeps the exact original text.
 
 This option is off by default. It can simplify rich formatting and accepts only a conservative set of HTML fragments. Images, attachments, unknown clipboard types and conflicting representations remain ineligible. It never opens or fetches copied HTML resources.
 
@@ -140,25 +156,34 @@ Releases configured for signed in-app updates offer **Install Update**, then res
 
 ## Supported links
 
-`github.com` and `gitlab.com` are enabled by default over HTTPS. The GitHub bundle includes repositories, issues, pull requests, files, file permalinks and releases together; no per-kind setup is needed. Each website row lists its included formats. **More → Customize built-in styles** changes their appearance. Existing disabled website rules and saved custom rules are retained. Explicitly preferred custom patterns still take priority.
+`github.com` and `gitlab.com` are enabled by default over HTTPS. The GitHub bundle includes repositories, issues, pull requests, files, file permalinks, releases, commits and Actions together; no per-kind setup is needed. Each website row lists its included formats. **More → Customize built-in styles** changes their appearance. Existing disabled website rules and saved custom rules are retained. Explicitly preferred custom patterns still take priority.
 
 | Service | URL path | Short label |
 | --- | --- | --- |
-| GitHub issue | `/owner/repo/issues/123` | `owner/repo#123` |
-| GitHub pull request | `/owner/repo/pull/123` | `owner/repo#123` |
-| GitHub repository | `/owner/repo` | `owner/repo` |
-| GitHub file | `/owner/repo/blob/main/Sources/App.swift#L10-L20` | `owner/repo · main/Sources/App.swift:10–20` |
-| GitHub file permalink | `/owner/repo/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10` | `owner/repo · 0123456789ab/Sources/App.swift:10` |
-| GitHub release | `/owner/repo/releases/tag/v1.2.3` | `owner/repo@v1.2.3` |
-| GitLab file / permalink | `/group/project/-/blob/main/Sources/App.swift#L10-20` | `group/project · main/Sources/App.swift:10–20` |
-| GitLab issue | `/group/project/-/issues/123` | `group/project#123` |
-| GitLab merge request | `/group/project/-/merge_requests/123` | `group/project!123` |
+| GitHub issue | `/owner/repo/issues/123` | 📋 `owner/repo#123` |
+| GitHub pull request | `/owner/repo/pull/123` | 🔀 `owner/repo#123` |
+| GitHub repository | `/owner/repo` | 📦 `owner/repo` |
+| GitHub file | `/owner/repo/blob/main/Sources/App.swift#L10-L20` | 📄 `owner/repo · main/Sources/App.swift:10–20` |
+| GitHub file permalink | `/owner/repo/blob/0123456789abcdef0123456789abcdef01234567/Sources/App.swift#L10` | 📄 `owner/repo · 01234567/Sources/App.swift:10` |
+| GitHub release | `/owner/repo/releases/tag/v1.2.3` | 🏷️ `owner/repo@v1.2.3` |
+| GitLab file / permalink | `/group/project/-/blob/main/Sources/App.swift#L10-20` | 📄 `group/project · main/Sources/App.swift:10–20` |
+| GitHub commit | `/owner/repo/commit/0123456789abcdef0123456789abcdef01234567` | 🔖 `owner/repo@01234567` |
+| GitHub workflow | `/owner/repo/actions/workflows/ci.yml` | ⚙️ `owner/repo · ci.yml` |
+| GitHub Actions run | `/owner/repo/actions/runs/123456789` | ▶️ `owner/repo · run 123456789` |
+| GitHub Actions job | `/owner/repo/actions/runs/123456789/job/987654321` | 🛠️ `owner/repo · job 987654321` |
+| GitLab commit | `/group/project/-/commit/0123456789abcdef0123456789abcdef01234567` | 🔖 `group/project@01234567` |
+| GitLab issue | `/group/project/-/issues/123` | 📋 `group/project#123` |
+| GitLab merge request | `/group/project/-/merge_requests/123` | 🔀 `group/project!123` |
 
 Nested GitLab namespaces stay in the label. Trailing slashes are supported, along with GitHub `files`, `commits` and `checks` subpages and GitLab merge-request `diffs`, `commits` and `pipelines` subpages. Queries, fragments and display case are preserved.
 
 File links work on GitHub.com, configured GitHub Enterprise installations, GitLab.com and configured GitLab installations. GitHub line anchors (`#L10`, `#L10-L20`) and GitLab anchors (`#L10`, `#L10-20`, `#L10-L20`) appear as `:10` or `:10–20`. Positive, ordered ASCII line numbers are recognized. Other fragments stay in the destination without a line suffix.
 
-Files keep the revision and path together because branch names can contain slashes. Full 40- or 64-character hexadecimal revisions are displayed with their first 12 characters; the complete URL, revision, query and fragment remain the link destination. Pink never looks up repository data. Tagged releases are supported; `/releases/latest` and directory (`tree`) URLs stay unchanged.
+Files keep the revision and path together because branch names can contain slashes. Full 40- or 64-character hexadecimal revisions are displayed with their first eight characters; the complete URL, revision, query and fragment remain the link destination. Pink never looks up repository data. Tagged releases are supported; `/releases/latest` and directory (`tree`) URLs stay unchanged.
+
+Known links have icons by default: 🔀 pull/merge requests, 📋 issues, 📦 repositories, 📄 files, 🏷️ releases, 🔖 commits, ⚙️ workflows, ▶️ runs, 🛠️ jobs and 🎫 Jira tickets. Icons identify the link type; workflow/run names, numbers and status are not fetched. Run/job labels use the IDs in the URL. Actions run retry links (`/actions/runs/123/attempts/2`) are also supported. Standalone commit links accept 7–64 hexadecimal characters and display at most the first eight.
+
+Turn icons off under **Settings → General → Link labels → Show link icons**. This affects future copies and live previews; existing clipboard items keep Restore available. Custom wording and deliberately authored leading emoji are retained. Full revision tokens in recognized file/commit labels also shorten to eight characters when an older custom style wins. Generic custom links get no automatic icon; a configured Jira-style `/browse/KEY-123` link gets the ticket icon. Queries, fragments and plain-text paste stay exact in either mode.
 
 ### Custom link formats and preview
 
@@ -169,7 +194,7 @@ Open **Settings → Link formats → Add format** and paste a link you already u
 For a Jira issue:
 
 1. Paste `https://jira.example/browse/ACME-184273` (using your installation’s hostname).
-2. Pink highlights `ACME-184273` and previews it as a short, clickable link.
+2. Pink highlights `ACME-184273` and previews it as a short, clickable 🎫 ticket link.
 3. Optionally select a different part or include “Jira” in the label.
 4. Choose **Use for Jira links**. The format applies immediately; **Undo** is available in the formats list.
 

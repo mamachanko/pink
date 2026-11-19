@@ -85,6 +85,18 @@
                 writeWindowNumber("settings-window.json")
                 stage = 3
             } else if stage == 3, captured("settings-captured") {
+                guard let window = captureWindow, let content = window.contentView,
+                    selectGeneral(in: content)
+                else {
+                    fail("settings-section-control-missing")
+                    return
+                }
+                prepare(window)
+                stage = 4
+            } else if stage == 4, Date() >= readyAt {
+                writeWindowNumber("general-window.json")
+                stage = 5
+            } else if stage == 5, captured("general-captured") {
                 // Render the actual builder with a reserved-host example.
                 let formats = NSHostingView(
                     rootView: LinkFormatBuilder(
@@ -99,20 +111,31 @@
                 window.center()
                 window.makeKeyAndOrderFront(nil)
                 prepare(window)
-                stage = 4
-            } else if stage == 4, Date() >= readyAt {
+                stage = 6
+            } else if stage == 6, Date() >= readyAt {
                 writeWindowNumber("formats-window.json")
-                stage = 5
-            } else if stage == 5, captured("formats-captured") {
+                stage = 7
+            } else if stage == 7, captured("formats-captured") {
                 do {
                     let evidence =
                         "Captured from Pink's real UI on macOS \(ProcessInfo.processInfo.operatingSystemVersionString). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.\n"
                     try evidence.write(
                         to: output.appendingPathComponent("capture.txt"), atomically: true, encoding: .utf8)
-                    stage = 6
+                    stage = 8
                     NSApp.terminate(nil)
                 } catch { fail("capture-evidence-failed") }
             }
+        }
+
+        // Operate only the documentation window's native picker, without Accessibility automation.
+        private func selectGeneral(in view: NSView) -> Bool {
+            if let picker = view as? NSSegmentedControl, picker.segmentCount == 2,
+                picker.label(forSegment: 1) == "General"
+            {
+                picker.selectedSegment = 1
+                return picker.sendAction(picker.action, to: picker.target)
+            }
+            return view.subviews.contains { selectGeneral(in: $0) }
         }
 
         private func prepare(_ window: NSWindow) {

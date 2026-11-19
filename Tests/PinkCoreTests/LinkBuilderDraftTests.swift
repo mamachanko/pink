@@ -5,8 +5,14 @@ import XCTest
 final class LinkBuilderDraftTests: XCTestCase {
     private let jira = "https://jira.example/browse/ACME-184273"
 
+    private var plainSettings: Settings {
+        var settings = Settings()
+        settings.showLinkIcons = false
+        return settings
+    }
+
     func testSecondExampleKeepsChosenContextAndExactDestination() throws {
-        let settings = Settings()
+        let settings = plainSettings
         var draft = LinkBuilderDraft(example: jira, settings: settings)
         draft.setContext(true, settings: settings)
         let rule = try XCTUnwrap(draft.candidate)
@@ -19,7 +25,7 @@ final class LinkBuilderDraftTests: XCTestCase {
     }
 
     func testSelectedPathPartStaysSelectedForAnotherMatchingLink() {
-        let settings = Settings()
+        let settings = plainSettings
         var draft = LinkBuilderDraft(example: "https://docs.example/team/guide", settings: settings)
         draft.choosePart(0, settings: settings)
         draft.updateExample("https://docs.example/other/guide#section", settings: settings)
@@ -29,7 +35,7 @@ final class LinkBuilderDraftTests: XCTestCase {
     }
 
     func testAdvancedEditsSurviveMatchingNonmatchingAndIncompleteExamples() throws {
-        let settings = Settings()
+        let settings = plainSettings
         var draft = LinkBuilderDraft(example: jira, settings: settings)
         draft.edit(\.urlPattern, to: "https://jira.example/browse/{ticket}")
         draft.edit(\.labelTemplate, to: "Review {ticket}")
@@ -51,7 +57,7 @@ final class LinkBuilderDraftTests: XCTestCase {
     func testChoicesKeepExplicitMetadataAndDoNotLeakAnOldRuleIdentity() throws {
         let existing = LinkRule(
             name: "Saved Jira", urlPattern: "https://jira.example/browse/{issue}", labelTemplate: "{issue}")
-        var settings = Settings()
+        var settings = plainSettings
         settings.linkRules = [existing]
         var draft = LinkBuilderDraft(example: jira, settings: settings)
         XCTAssertTrue(draft.alreadyWorks(in: settings))
@@ -68,7 +74,7 @@ final class LinkBuilderDraftTests: XCTestCase {
     }
 
     func testActualWinnerIsPreviewedAndKnownLinksNeedNoSave() throws {
-        let settings = Settings()
+        let settings = plainSettings
         var draft = LinkBuilderDraft(example: "https://github.com/acme/widget/pull/123", settings: settings)
         XCTAssertTrue(draft.alreadyWorks(in: settings))
         XCTAssertEqual(draft.preview(in: settings)?.label, "acme/widget#123")
@@ -81,7 +87,7 @@ final class LinkBuilderDraftTests: XCTestCase {
     }
 
     func testHTTPApprovalIsScopedToAnEndpointAndCannotBeBypassedByAdvancedEdits() {
-        let settings = Settings()
+        let settings = plainSettings
         var draft = LinkBuilderDraft(example: "http://jira.example:8080/browse/ACME-1", settings: settings)
         XCTAssertFalse(draft.canFinish(in: settings))
         draft.approveHTTP(true)
@@ -98,7 +104,7 @@ final class LinkBuilderDraftTests: XCTestCase {
     }
 
     func testInvalidCustomPatternRetainsTheDraftAndBlocksSave() {
-        let settings = Settings()
+        let settings = plainSettings
         var draft = LinkBuilderDraft(example: jira, settings: settings)
         draft.edit(\.labelTemplate, to: "{unknown}")
         XCTAssertNotNil(draft.validation(in: settings))

@@ -10,12 +10,12 @@ final class FileReferenceTests: XCTestCase {
         for (url, label) in [
             (
                 "https://github.com/acme/widget/blob/\(sha)/Sources/App.swift?plain=1#L10-L20",
-                "acme/widget · 0123456789ab/Sources/App.swift:10–20"
+                "acme/widget · 01234567/Sources/App.swift:10–20"
             ),
             ("https://github.com/acme/widget/blob/main/Read%20me.md#L5", "acme/widget · main/Read me.md:5"),
             (
                 "https://gitlab.com/team/sub/widget/-/blob/\(sha)/Sources/App.swift?ref_type=heads#L10-20",
-                "team/sub/widget · 0123456789ab/Sources/App.swift:10–20"
+                "team/sub/widget · 01234567/Sources/App.swift:10–20"
             ),
             ("https://gitlab.com/team/widget/-/blob/main/Read%20me.md#L5", "team/widget · main/Read me.md:5"),
             (
@@ -36,8 +36,8 @@ final class FileReferenceTests: XCTestCase {
         ])
         let github = "https://github.example:8443/code/acme/widget/blob/\(sha)/App.swift#L2-L4"
         let gitlab = "https://gitlab.example/git/team/sub/widget/-/blob/\(sha)/App.swift#L2-4"
-        XCTAssertEqual(parser.parse(github)?.label, "acme/widget · 0123456789ab/App.swift:2–4")
-        XCTAssertEqual(parser.parse(gitlab)?.label, "team/sub/widget · 0123456789ab/App.swift:2–4")
+        XCTAssertEqual(parser.parse(github)?.label, "acme/widget · 01234567/App.swift:2–4")
+        XCTAssertEqual(parser.parse(gitlab)?.label, "team/sub/widget · 01234567/App.swift:2–4")
         XCTAssertEqual(parser.parse(github)?.original, github)
         XCTAssertEqual(parser.parse(gitlab)?.original, gitlab)
         for url in [
@@ -56,7 +56,7 @@ final class FileReferenceTests: XCTestCase {
         let sha256 = String(repeating: "A1", count: 32)
         XCTAssertEqual(
             parser.parse("https://gitlab.com/team/widget/-/blob/\(sha256)/App.swift")?.label,
-            "team/widget · A1A1A1A1A1A1/App.swift")
+            "team/widget · A1A1A1A1/App.swift")
     }
 
     func testLineNumbersArePositiveOrderedASCIIAndBoundedByInputRatherThanIntegerSize() throws {
