@@ -42,5 +42,14 @@
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
     }
+  ],
+  "packageRules": [
+    {
+      "description": "The installed semantic-release notes generator uses writer v8; preset v10 requires writer v9.",
+      "matchPackageNames": [
+        "conventional-changelog-conventionalcommits"
+      ],
+      "allowedVersions": "<10"
+    }
   ]
 }
