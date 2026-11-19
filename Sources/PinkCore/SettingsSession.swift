@@ -9,7 +9,7 @@ import Foundation
 
     public init(initial: Settings, persist: @escaping (Settings) throws -> Void) throws {
         guard initial.schema == 1 else { throw ValidationError.invalidRules }
-        _ = try Parser(rules: initial.rules, linkRules: initial.linkRules)
+        _ = try Parser(settings: initial)
         value = initial
         self.persist = persist
     }
@@ -17,7 +17,7 @@ import Foundation
     public func update(_ next: Settings) throws {
         guard next != value else { return }
         guard next.schema == 1 else { throw ValidationError.invalidRules }
-        _ = try Parser(rules: next.rules, linkRules: next.linkRules)
+        _ = try Parser(settings: next)
         try persist(next)
         let previous = value
         value = next

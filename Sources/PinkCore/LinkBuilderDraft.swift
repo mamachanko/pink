@@ -28,13 +28,17 @@ public struct LinkBuilderDraft {
     public func preview(in settings: Settings) -> Reference? {
         if alreadyWorks(in: settings) { return existing(in: settings) }
         guard validation(in: settings) == nil else { return nil }
-        return (try? Parser(rules: settings.rules, linkRules: proposed(in: settings)))?.parse(example)
+        return
+            (try? Parser(
+                rules: settings.rules, linkRules: proposed(in: settings), showLinkIcons: settings.showLinkIcons))?
+            .parse(example)
     }
 
     public func validation(in settings: Settings) -> String? {
         guard let candidate else { return "Paste a complete web link to get started." }
         do {
-            _ = try Parser(rules: settings.rules, linkRules: proposed(in: settings))
+            _ = try Parser(
+                rules: settings.rules, linkRules: proposed(in: settings), showLinkIcons: settings.showLinkIcons)
             if try Parser(rules: [], linkRules: [candidate]).parse(example) == nil {
                 return "This pattern doesn’t match the example link yet."
             }
@@ -103,7 +107,7 @@ public struct LinkBuilderDraft {
     }
 
     private func existing(in settings: Settings) -> Reference? {
-        (try? Parser(rules: settings.rules, linkRules: settings.linkRules))?.parse(example)
+        (try? Parser(settings: settings))?.parse(example)
     }
 
     private func proposed(in settings: Settings) -> [LinkRule] {

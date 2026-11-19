@@ -129,7 +129,7 @@ public struct LinkSuggestion: Equatable, Sendable {
         return rule
     }
 
-    private static func isIssueKey(_ value: String) -> Bool {
+    static func isIssueKey(_ value: String) -> Bool {
         let pieces = value.split(separator: "-", omittingEmptySubsequences: false)
         guard pieces.count == 2, let first = pieces[0].utf8.first,
             (65...90).contains(first) || (97...122).contains(first), !pieces[1].isEmpty

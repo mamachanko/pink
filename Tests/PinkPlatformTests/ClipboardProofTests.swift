@@ -5,6 +5,76 @@ import XCTest
 @testable import PinkPlatform
 
 final class ClipboardProofTests: XCTestCase {
+    @MainActor func testDefaultIconsKeepUTF16LinkRangesTargetsAndRestoreAcrossPreferenceChanges() async throws {
+        var settings = Settings()
+        settings.linkRules = [LinkRule.templates[0]]
+        let sha = "b4b5edb2fea0da48684c39f517902ca6851fe523"
+        let fixtures = [
+            ("https://github.com/mamachanko/pink/pull/34", "🔀 mamachanko/pink#34", "mamachanko/pink#34"),
+            (
+                "https://github.com/mamachanko/pink/blob/\(sha)/App.swift#L2-L4",
+                "📄 mamachanko/pink · b4b5edb2/App.swift:2–4", "mamachanko/pink · b4b5edb2/App.swift:2–4"
+            ),
+            (
+                "https://github.com/mamachanko/pink/actions/workflows/ci.yml?query=branch%3Amain",
+                "⚙️ mamachanko/pink · ci.yml", "mamachanko/pink · ci.yml"
+            ),
+            (
+                "https://github.com/mamachanko/pink/actions/runs/44518099853/job/135539289334#step:2:1",
+                "🛠️ mamachanko/pink · job 135539289334", "mamachanko/pink · job 135539289334"
+            ),
+            (
+                "https://github.com/mamachanko/pink/commit/\(sha)?diff=split", "🔖 mamachanko/pink@b4b5edb2",
+                "mamachanko/pink@b4b5edb2"
+            ),
+            ("https://github.com/acme/widget/releases/tag/v1.0", "🏷️ acme/widget@v1.0", "acme/widget@v1.0"),
+            ("https://jira.example/browse/ACME-1", "🎫 ACME-1", "ACME-1"),
+        ]
+        let original = "👩🏽‍💻 Review\n" + fixtures.map { $0.0 }.joined(separator: "\n")
+        let source = Payload([Types.text: Data(original.utf8)])
+        let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
+        defer { board.releaseGlobally() }
+        let adapter = NativeBoard(board)
+        let monitor = ClipboardMonitor(
+            board: adapter, builder: NativeRepresentations(), permission: AllowedPermission(),
+            scheduler: ManualScheduler(), parser: try Parser(settings: settings))
+        monitor.enable()
+        XCTAssertTrue(adapter.write(source))
+        monitor.tick()
+        XCTAssertEqual(board.string(forType: .string), original)
+        XCTAssertEqual(board.pasteboardItems?.count, 1)
+        let rich = try NSAttributedString(
+            data: XCTUnwrap(board.data(forType: .rtf)),
+            options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+        XCTAssertEqual(rich.string, "👩🏽‍💻 Review\n" + fixtures.map { $0.1 }.joined(separator: "\n"))
+        var targets: [String] = []
+        var labels: [String] = []
+        rich.enumerateAttribute(.link, in: NSRange(location: 0, length: rich.length)) { value, range, _ in
+            guard let value else { return }
+            targets.append(String(describing: value))
+            labels.append((rich.string as NSString).substring(with: range))
+        }
+        XCTAssertEqual(targets, fixtures.map { $0.0 })
+        XCTAssertEqual(labels, fixtures.map { $0.1 })
+        let generation = board.changeCount
+        settings.showLinkIcons = false
+        monitor.parser = try Parser(settings: settings)
+        XCTAssertEqual(board.changeCount, generation)
+        XCTAssertTrue(monitor.canRestore)
+        monitor.restore()
+        XCTAssertEqual(adapter.read(), source)
+        XCTAssertTrue(adapter.write(source))
+        monitor.tick()
+        let plainLabels = try NSAttributedString(
+            data: XCTUnwrap(board.data(forType: .rtf)),
+            options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+        XCTAssertEqual(plainLabels.string, "👩🏽‍💻 Review\n" + fixtures.map { $0.2 }.joined(separator: "\n"))
+        XCTAssertEqual(board.string(forType: .string), original)
+        monitor.restore()
+        XCTAssertEqual(adapter.read(), source)
+        monitor.pause()
+    }
+
     @MainActor func testFilePermalinksAndLinesHaveExactNativeTargetsAndRestore() async throws {
         let sha = "0123456789abcdef0123456789abcdef01234567"
         var settings = Settings()
@@ -13,15 +83,15 @@ final class ClipboardProofTests: XCTestCase {
         for (url, label) in [
             (
                 "https://github.com/acme/widget/blob/\(sha)/App.swift?plain=1#L2-L4",
-                "acme/widget · 0123456789ab/App.swift:2–4"
+                "acme/widget · 01234567/App.swift:2–4"
             ),
             (
                 "https://github.example:8443/code/acme/widget/blob/\(sha)/App.swift?x=%2F#L2-L4",
-                "acme/widget · 0123456789ab/App.swift:2–4"
+                "acme/widget · 01234567/App.swift:2–4"
             ),
             (
                 "https://gitlab.com/team/sub/widget/-/blob/\(sha)/App.swift?ref_type=heads#L2-4",
-                "team/sub/widget · 0123456789ab/App.swift:2–4"
+                "team/sub/widget · 01234567/App.swift:2–4"
             ),
         ] {
             let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
