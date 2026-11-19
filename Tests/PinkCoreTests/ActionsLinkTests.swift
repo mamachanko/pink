@@ -162,6 +162,20 @@ final class ActionsLinkTests: XCTestCase {
         XCTAssertEqual(try Parser(settings: settings).parse("https://docs.example/" + revision)?.label, revision)
     }
 
+    func testEmojiProseKeepsEveryOriginalSpanAndTarget() throws {
+        let first = "https://github.com/acme/widget/pull/34"
+        let second = "https://github.com/acme/widget/actions/runs/123/job/456#step:2:1"
+        let original = "👩🏽 Review\n" + first + "\n" + second
+        let result = try XCTUnwrap(Parser(settings: Settings()).parseText(original))
+        XCTAssertEqual(result.original, original)
+        XCTAssertEqual(result.displayText, "👩🏽 Review\n🔀 acme/widget#34\n🛠️ acme/widget · job 456")
+        XCTAssertEqual(
+            result.parts.compactMap { part -> String? in
+                if case .reference(let reference) = part { return reference.original }
+                return nil
+            }, [first, second])
+    }
+
     func testBuilderPreviewUsesTheSavedPresentationSetting() throws {
         var settings = Settings()
         var draft = LinkBuilderDraft(example: "https://jira.example/browse/ACME-1", settings: settings)

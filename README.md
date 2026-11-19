@@ -185,6 +185,10 @@ Known links have icons by default: 🔀 pull/merge requests, 📋 issues, 📦 r
 
 Turn icons off under **Settings → General → Link labels → Show link icons**. This affects future copies and live previews; existing clipboard items keep Restore available. Custom wording and deliberately authored leading emoji are retained. Full revision tokens in recognized file/commit labels also shorten to eight characters when an older custom style wins. Generic custom links get no automatic icon; a configured Jira-style `/browse/KEY-123` link gets the ticket icon. Queries, fragments and plain-text paste stay exact in either mode.
 
+<p align="center">
+  <a href="docs/images/general.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/general.png"><img src="docs/images/general.png" width="440" alt="Pink’s General settings with Show link icons enabled, automatic formatting, optional formatted-URL rewriting, login and update controls."></picture></a>
+</p>
+
 ### Custom link formats and preview
 
 Settings follows your Mac’s light or dark appearance. It uses a rose accent for primary actions, native switches, and bordered options buttons. Use the **Link formats / General** selector at the top to switch sections.

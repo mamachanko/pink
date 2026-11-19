@@ -1,14 +1,16 @@
 Captured from Pink's real UI on macOS Version 15.7.9 (Build 24G830). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
 
-Capture workflow: https://github.com/mamachanko/pink/actions/runs/44348759753
-Capture source PR head: f8e5640b150006861d31a53eef1ef45c15a99e3f
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/44543792877 (run 162)
+Capture source PR head: c3482c30b0e96c96f49f614df8978b7d58fe586a
 Native architecture: x86_64 (Intel); Xcode 26.2.
 Appearances: aqua and darkAqua, selected for the isolated documentation app without changing system preferences.
-Visually reviewed on 2026-11-18. All PNGs are unmodified native captures. Settings lists all included GitHub and GitLab formats and shows brighter rose primary actions, native switches, neutral icons, bordered More/row menus and a section selector on one continuous background. The builder receives only a reserved-host Jira example and has a neutral preview, selected-part checkmark and brighter rose primary action. No supplied pattern, live update check, preference writes, login registration or general clipboard access. The menu uses a real neutral backdrop and the native system menu appearance. Development version 0.0.0.
+Visually reviewed on 2026-11-19. All eight PNGs are unmodified native captures. Settings lists GitHub commits and Actions and GitLab commits alongside existing formats, with brighter rose primary actions, native switches, bordered options and a continuous background. General is reached through the app's native section picker and shows Show link icons enabled. The builder receives only a reserved-host Jira example, selects the issue key and previews a ticket-icon link. No supplied pattern, live update check, preference writes, login registration or general clipboard access. The menu uses a real neutral backdrop and native system appearance. Development version 0.0.0.
 
-f91a513af9196176289bacc9d4780b4154d4326596581681fde79688943479d2  menu-bar.png
-b2c418dc79d6eb936b662f6d2ea44fe1696e37f29a2124480fcf38a00ecac80e  settings.png
-bc1e5756ef8d2251ce21a8940a1fbcbc3ea73502b5bae9c40ab59ce9734881be  link-formats.png
-bd15658b9689b0312ab2cb0a1de8ebb09957c703769809ada3c9312dc1db03e0  dark/menu-bar.png
-14ac079217c20d0c54e3b892677a735a5654fc61f26221dacc4871e367e658a5  dark/settings.png
-10d73d5b25bb93421b4b41e96a667a69bce0a07cb94ee4554e9d220977ac3db5  dark/link-formats.png
+4cb09c3d816e6c8421cb21f52a8b27bd3e565185e515c44f2c07ff5193191c2d  menu-bar.png
+0e32b6dbf4d21f98d7378101271baf2c4e2edf9e6bce0e77ef2a5fd31e98a3d7  settings.png
+5a43699fcc14ec92d6f3039cd92e4d95708ccb09ae1ce1df78b45bc57c18d65f  general.png
+5c18f9445d89656d2d2efc6c20bd7bbdca4ced1348330a3182d4fdd1a387ecf8  link-formats.png
+5a300d531976013d8ca571b9e149120632bcf244e1551de674931c7179e294b6  dark/menu-bar.png
+553ca0ebaa9d521f609639e034065bd40055cc0335d671010bc1fb7e81633db1  dark/settings.png
+b29e8d8effd5a09edd5749d94c0c3dfbb93a4676e428b4ba0f22b1438c7ddb7d  dark/general.png
+eb4a827d54275b0f4a40400ca622b4137326e54449ebe2de550d1ed2b84b2f4d  dark/link-formats.png
