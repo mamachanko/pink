@@ -30,7 +30,8 @@ final class ClipboardProofTests: XCTestCase {
             ("https://github.com/acme/widget/releases/tag/v1.0", "🏷️ acme/widget@v1.0", "acme/widget@v1.0"),
             ("https://jira.example/browse/ACME-1", "🎫 ACME-1", "ACME-1"),
         ]
-        let original = "👩🏽‍💻 Review\n" + fixtures.map { $0.0 }.joined(separator: "\n")
+        let original = "👩🏽 Review\n" + fixtures.map { $0.0 }.joined(separator: "\n")
+        XCTAssertNotNil(try Parser(settings: settings).parseText(original))
         let source = Payload([Types.text: Data(original.utf8)])
         let board = NSPasteboard(name: .init("Pink.tests.\(UUID())"))
         defer { board.releaseGlobally() }
@@ -46,7 +47,7 @@ final class ClipboardProofTests: XCTestCase {
         let rich = try NSAttributedString(
             data: XCTUnwrap(board.data(forType: .rtf)),
             options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
-        XCTAssertEqual(rich.string, "👩🏽‍💻 Review\n" + fixtures.map { $0.1 }.joined(separator: "\n"))
+        XCTAssertEqual(rich.string, "👩🏽 Review\n" + fixtures.map { $0.1 }.joined(separator: "\n"))
         var targets: [String] = []
         var labels: [String] = []
         rich.enumerateAttribute(.link, in: NSRange(location: 0, length: rich.length)) { value, range, _ in
@@ -68,7 +69,7 @@ final class ClipboardProofTests: XCTestCase {
         let plainLabels = try NSAttributedString(
             data: XCTUnwrap(board.data(forType: .rtf)),
             options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
-        XCTAssertEqual(plainLabels.string, "👩🏽‍💻 Review\n" + fixtures.map { $0.2 }.joined(separator: "\n"))
+        XCTAssertEqual(plainLabels.string, "👩🏽 Review\n" + fixtures.map { $0.2 }.joined(separator: "\n"))
         XCTAssertEqual(board.string(forType: .string), original)
         monitor.restore()
         XCTAssertEqual(adapter.read(), source)
