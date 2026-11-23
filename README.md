@@ -86,7 +86,7 @@ Pink works with single links, repeated links and multiline prose. It stays in yo
   <tr><th>In the menu bar</th><th>Your link formats</th></tr>
   <tr>
     <td align="center" valign="top"><a href="docs/images/menu-bar.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/menu-bar.png"><img src="docs/images/menu-bar.png" width="261" alt="Pink’s menu with formatting, restore, settings and update actions."></picture></a></td>
-    <td align="center" valign="top"><a href="docs/images/settings.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink’s unified link format collection with GitHub and GitLab included-format summaries, Jira, Add format, a visible More menu, bordered row options and a shared preview."></picture></a></td>
+    <td align="center" valign="top"><a href="docs/images/settings.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings.png"><img src="docs/images/settings.png" width="440" alt="Pink’s unified link format collection with GitHub and GitLab included-format summaries, Jira, Add format, a visible More menu, bordered row options, a shared preview and Restore default link formats."></picture></a></td>
   </tr>
 </table>
 

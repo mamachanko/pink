@@ -6,11 +6,17 @@ Native architecture: x86_64 (Intel); Xcode 26.2.
 Appearances: aqua and darkAqua, selected for the isolated documentation app without changing system preferences.
 Visually reviewed on 2026-11-19. All eight PNGs are unmodified native captures. Settings lists GitHub commits and Actions and GitLab commits alongside existing formats, with brighter rose primary actions, native switches, bordered options and a continuous background. General is reached through the app's native section picker and shows Show link icons enabled. The builder receives only a reserved-host Jira example, selects the issue key and previews a ticket-icon link. No supplied pattern, live update check, preference writes, login registration or general clipboard access. The menu uses a real neutral backdrop and native system appearance. Development version 0.0.0.
 
+The light and dark settings.png captures below were refreshed to show Restore default link formats.
+Captured from Pink's real UI on macOS Version 15.7.9 (Build 24G830). Demo settings; named pasteboard; no preference migration or writes, permission requests, or login registration.
+Capture workflow: https://github.com/mamachanko/pink/actions/runs/45197650669 (run 172)
+Capture source PR head: 41eec639c29fd48e4f68b9dd8c714e8f95f1d6e4
+Native architecture: x86_64 (Intel), Xcode 26.2. Visually reviewed in light and dark appearance on 2026-11-23.
+
 4cb09c3d816e6c8421cb21f52a8b27bd3e565185e515c44f2c07ff5193191c2d  menu-bar.png
-0e32b6dbf4d21f98d7378101271baf2c4e2edf9e6bce0e77ef2a5fd31e98a3d7  settings.png
+e7060a300969574870f84e630187b46e5121e7f28bfacafd887d6bdb6e0b743f  settings.png
 5a43699fcc14ec92d6f3039cd92e4d95708ccb09ae1ce1df78b45bc57c18d65f  general.png
 5c18f9445d89656d2d2efc6c20bd7bbdca4ced1348330a3182d4fdd1a387ecf8  link-formats.png
 5a300d531976013d8ca571b9e149120632bcf244e1551de674931c7179e294b6  dark/menu-bar.png
-553ca0ebaa9d521f609639e034065bd40055cc0335d671010bc1fb7e81633db1  dark/settings.png
+0d9837aef31bd1ab15d89adcd836784086c6fcca47ee4d3986df064aa832acf8  dark/settings.png
 b29e8d8effd5a09edd5749d94c0c3dfbb93a4676e428b4ba0f22b1438c7ddb7d  dark/general.png
 eb4a827d54275b0f4a40400ca622b4137326e54449ebe2de550d1ed2b84b2f4d  dark/link-formats.png

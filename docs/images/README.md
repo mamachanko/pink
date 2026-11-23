@@ -3,7 +3,7 @@
 The README shows four real Pink views:
 
 - `menu-bar.png`: the menu-bar icon and formatting, settings and update actions.
-- `settings.png`: the unified Link formats collection, rose Add format action and included website formats, visible More menu, bordered row options and shared preview.
+- `settings.png`: the unified Link formats collection, rose Add format action and included website formats, visible More menu, bordered row options, shared preview and Restore default link formats.
 - `general.png`: the actual General section, selected through the app’s native section picker, with Show link icons enabled.
 - `link-formats.png`: the paste-first builder with a reserved-host Jira example. The issue key is selected automatically, the ticket-icon paste preview is visible, and the primary action is Use for Jira links. The selected part also has a checkmark. No pattern is supplied to the capture view.
 
@@ -23,4 +23,4 @@ The README uses matching light and dark image sources. The dark capture sets onl
 
 CI sets `PINK_CAPTURE_TEXT_EXPORT=1` to emit checksum-tagged base64 copies of the five fixed synthetic demo outputs (`menu-bar.png`, `settings.png`, `general.png`, `link-formats.png` and `capture.txt`) per appearance. This lets review tools inspect the original PNG bytes when artifact downloads are unavailable. Export is bounded to 1 MiB per file and never reads the general clipboard or user examples. Normal local captures omit this export.
 
-The committed images were captured on macOS 15.7.9 (24G830), Intel, with Xcode 26.2 in [CI run 162](https://github.com/mamachanko/pink/actions/runs/44543792877) at source PR head `c3482c30b0e96c96f49f614df8978b7d58fe586a`, then visually reviewed in light and dark appearance on 2026-11-19. See `capture.txt` for checksums and provenance.
+The original images were captured on macOS 15.7.9 (24G830), Intel, with Xcode 26.2 in [CI run 162](https://github.com/mamachanko/pink/actions/runs/44543792877) at source PR head `c3482c30b0e96c96f49f614df8978b7d58fe586a`, then visually reviewed in light and dark appearance on 2026-11-19. See `capture.txt` for later captures and current checksums.
