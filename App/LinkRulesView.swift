@@ -41,7 +41,9 @@ struct LinkRulesView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Remove all custom websites and patterns and enable the built-in GitHub and GitLab formats. Automatic formatting, consent and link icon preferences stay as they are. This cannot be undone.")
+            Text(
+                "Remove all custom websites and patterns and enable the built-in GitHub and GitLab formats. Automatic formatting, consent and link icon preferences stay as they are. This cannot be undone."
+            )
         }
         .sheet(item: $editor) { selection in
             switch selection {
