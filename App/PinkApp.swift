@@ -287,7 +287,7 @@ struct SettingsView: View {
         ) {
             Button("Reset Pink settings", role: .destructive) {
                 do { try preferences.reset() } catch {
-                    error = "Your previous settings are still active. Try again."
+                    self.error = "Your previous settings are still active. Try again."
                 }
             }
             Button("Cancel", role: .cancel) {}
