@@ -10,6 +10,7 @@ struct LinkRulesView: View {
     @State private var example = ""
     @State private var removing: FormatEditor?
     @State private var error = ""
+    @State private var restoringDefaults = false
     @State private var added: AddedFormat?
 
     var body: some View {
@@ -22,10 +23,25 @@ struct LinkRulesView: View {
                     showLinkIcons: settings.showLinkIcons,
                     createFormat: { editor = .builder($0) })
             }
+            Section("Defaults") {
+                Button("Restore default link formats…", role: .destructive) { restoringDefaults = true }
+                Text("Replace custom websites and patterns with the built-in GitHub and GitLab formats.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .onChange(of: settings.linkRules) { _, rules in
             if let added, rules != added.applied { self.added = nil }
+        }
+        .confirmationDialog(
+            "Restore default link formats?", isPresented: $restoringDefaults, titleVisibility: .visible
+        ) {
+            Button("Restore default link formats", role: .destructive) {
+                change { $0.restoreDefaultLinkFormats() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Remove all custom websites and patterns and enable the built-in GitHub and GitLab formats. Automatic formatting, consent and link icon preferences stay as they are. This cannot be undone.")
         }
         .sheet(item: $editor) { selection in
             switch selection {

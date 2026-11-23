@@ -10,6 +10,12 @@ public struct Settings: Codable, Equatable, Sendable {
     public var linkRules: [LinkRule] = []
     public init() {}
 
+    /// Restore matching rules without changing consent or presentation preferences.
+    public mutating func restoreDefaultLinkFormats() {
+        rules = HostRule.defaults
+        linkRules = []
+    }
+
     private enum CodingKeys: String, CodingKey {
         case schema, consent, automatic, rules, linkRules, rewriteFormattedURLs, showLinkIcons
     }
