@@ -3,6 +3,39 @@ import XCTest
 @testable import PinkCore
 
 final class SettingsSessionTests: XCTestCase {
+    @MainActor func testRestoringFormatsPreservesPreferencesAndPublishesAfterSaving() async throws {
+        var initial = Settings()
+        initial.consent = true
+        initial.automatic = true
+        initial.rewriteFormattedURLs = true
+        initial.showLinkIcons = false
+        initial.rules = [HostRule(service: .gitlab, host: "git.example")]
+        initial.linkRules = [LinkRule.templates[0]]
+        var canSave = false
+        var saved: Settings?
+        enum SaveError: Error { case unavailable }
+        let session = try SettingsSession(initial: initial) { value in
+            if !canSave { throw SaveError.unavailable }
+            saved = value
+        }
+        var notifications = 0
+        session.onChange = { _, _ in notifications += 1 }
+        XCTAssertThrowsError(try session.edit { $0.restoreDefaultLinkFormats() })
+        XCTAssertEqual(session.value, initial)
+        XCTAssertEqual(notifications, 0)
+        canSave = true
+        try session.edit { $0.restoreDefaultLinkFormats() }
+        var expected = initial
+        expected.rules = HostRule.defaults
+        expected.linkRules = []
+        XCTAssertEqual(session.value, expected)
+        XCTAssertEqual(saved, expected)
+        XCTAssertEqual(notifications, 1)
+        XCTAssertEqual(
+            try Parser(settings: session.value).parse("https://github.com/acme/widget/pull/34")?.label,
+            "acme/widget#34")
+    }
+
     @MainActor func testEditsFromDifferentSurfacesKeepLatestValues() async throws {
         var initial = Settings()
         initial.consent = true

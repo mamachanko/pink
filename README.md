@@ -189,6 +189,10 @@ Turn icons off under **Settings → General → Link labels → Show link icons*
   <a href="docs/images/general.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/general.png"><img src="docs/images/general.png" width="440" alt="Pink’s General settings with Show link icons enabled, automatic formatting, optional formatted-URL rewriting, login and update controls."></picture></a>
 </p>
 
+### Restore default link formats
+
+Under **Settings → Link formats → Defaults**, choose **Restore default link formats…** and confirm to remove custom websites and patterns and re-enable the built-in GitHub and GitLab formats. This cannot be undone. Consent, automatic formatting, formatted-URL rewriting and the link icon preference are preserved. Existing clipboard content is unchanged; copy a link again to use the restored formats.
+
 ### Custom link formats and preview
 
 Settings follows your Mac’s light or dark appearance. It uses a rose accent for primary actions, native switches, and bordered options buttons. Use the **Link formats / General** selector at the top to switch sections.
