@@ -238,6 +238,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var preferences: SettingsModel
     @State private var error = ""
+    @State private var resetting = false
     @State private var loginStatus = SMAppService.mainApp.status
     @State private var section = SettingsSection.formats
     private enum SettingsSection: Hashable { case formats, general }
@@ -280,6 +281,20 @@ struct SettingsView: View {
             Button("OK") { error = "" }
         } message: {
             Text(error)
+        }
+        .confirmationDialog(
+            "Reset Pink settings?", isPresented: $resetting, titleVisibility: .visible
+        ) {
+            Button("Reset Pink settings", role: .destructive) {
+                do { try preferences.reset() } catch {
+                    error = "Your previous settings are still active. Try again."
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(
+                "Remove custom websites and patterns, restore default link labels, and turn off automatic formatting and formatted-URL rewriting. You’ll need to enable automatic formatting again in Pink’s menu. Login Items and update settings stay as they are. This cannot be undone."
+            )
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             loginStatus = SMAppService.mainApp.status
@@ -364,6 +379,11 @@ struct SettingsView: View {
                 Text("Start with your Mac")
             }
             UpdatesSettings(updates: updates)
+            Section("Reset") {
+                Button("Reset Pink settings…", role: .destructive) { resetting = true }
+                Text("Restore Pink’s formatting preferences and link formats to factory defaults.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("Private by design") {
                 Label("Your clipboard stays on your Mac.", systemImage: "lock.shield")
                 Text(

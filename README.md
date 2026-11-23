@@ -189,6 +189,10 @@ Turn icons off under **Settings → General → Link labels → Show link icons*
   <a href="docs/images/general.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/general.png"><img src="docs/images/general.png" width="440" alt="Pink’s General settings with Show link icons enabled, automatic formatting, optional formatted-URL rewriting, login and update controls."></picture></a>
 </p>
 
+### Reset Pink settings
+
+Choose **Settings → General → Reset → Reset Pink settings…** and confirm to restore Pink’s saved formatting configuration to factory defaults. This removes custom websites and patterns, re-enables the built-in GitHub and GitLab formats, turns link icons on, and turns automatic formatting and formatted-URL rewriting off. You must enable automatic formatting again from Pink’s menu to give consent. Login Items, macOS permissions and update settings are managed separately and are unchanged. Reset cannot be undone and does not rewrite the clipboard or previously pasted links.
+
 ### Custom link formats and preview
 
 Settings follows your Mac’s light or dark appearance. It uses a rose accent for primary actions, native switches, and bordered options buttons. Use the **Link formats / General** selector at the top to switch sections.

@@ -31,6 +31,28 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: SettingsStore.key), "invalid")
     }
 
+    @MainActor func testFactoryResetPersistsOverInvalidSettingsAndBlocksLegacyReimport() async throws {
+        let name = "Pink.tests.\(UUID())"
+        let legacyName = "Pink.tests.legacy.\(UUID())"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
+        defer {
+            defaults.removePersistentDomain(forName: name)
+            defaults.removePersistentDomain(forName: legacyName)
+        }
+        var legacy = Settings()
+        legacy.consent = true
+        legacy.automatic = true
+        defaults.setPersistentDomain([SettingsStore.key: try JSONEncoder().encode(legacy)], forName: legacyName)
+        defaults.set(Data("{}".utf8), forKey: SettingsStore.key)
+        let store = SettingsStore(defaults: defaults, legacyDomain: legacyName)
+        XCTAssertThrowsError(try store.load())
+        // Startup recovers in memory, but the invalid saved data still needs replacing.
+        let session = try SettingsSession(initial: Settings(), persist: store.save)
+        try session.reset()
+        XCTAssertEqual(try store.load(), Settings())
+        XCTAssertEqual(try Settings.decode(XCTUnwrap(defaults.data(forKey: SettingsStore.key))), Settings())
+    }
+
     @MainActor func testInvalidLegacySettingsAreNotImported() async throws {
         let name = "Pink.tests.\(UUID())"
         let legacyName = "Pink.tests.legacy.\(UUID())"

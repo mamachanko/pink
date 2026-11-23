@@ -16,6 +16,10 @@ import SwiftUI
         }
     }
 
+    func reset() throws {
+        try session.reset()
+    }
+
     func edit(_ change: (inout PinkCore.Settings) throws -> Void) throws {
         try session.edit(change)
     }
