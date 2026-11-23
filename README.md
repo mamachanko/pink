@@ -148,6 +148,10 @@ For example, a clickable `https://github.com/acme/widget/pull/123` can become [�
 
 This option is off by default. It can simplify rich formatting and accepts only a conservative set of HTML fragments. Images, attachments, unknown clipboard types and conflicting representations remain ineligible. It never opens or fetches copied HTML resources.
 
+### Reset Pink settings
+
+Choose **Settings → General → Reset → Reset Pink settings…** and confirm to restore Pink’s saved formatting configuration to factory defaults. This removes custom websites and patterns, re-enables the built-in GitHub and GitLab formats, turns link icons on, and turns automatic formatting and formatted-URL rewriting off. You must enable automatic formatting again from Pink’s menu to give consent. Login Items, macOS permissions and update settings are managed separately and are unchanged. Reset cannot be undone and does not rewrite the clipboard or previously pasted links.
+
 ### Updating Pink
 
 Open **Settings → General → Check for Updates…**, or use the same action in the menu. Pink reports when you’re up to date and lets you retry if the check fails. Checks contact GitHub only when you ask; they never send clipboard contents.
@@ -188,10 +192,6 @@ Turn icons off under **Settings → General → Link labels → Show link icons*
 <p align="center">
   <a href="docs/images/general.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/general.png"><img src="docs/images/general.png" width="440" alt="Pink’s General settings with Show link icons enabled, automatic formatting, optional formatted-URL rewriting, login and update controls."></picture></a>
 </p>
-
-### Reset Pink settings
-
-Choose **Settings → General → Reset → Reset Pink settings…** and confirm to restore Pink’s saved formatting configuration to factory defaults. This removes custom websites and patterns, re-enables the built-in GitHub and GitLab formats, turns link icons on, and turns automatic formatting and formatted-URL rewriting off. You must enable automatic formatting again from Pink’s menu to give consent. Login Items, macOS permissions and update settings are managed separately and are unchanged. Reset cannot be undone and does not rewrite the clipboard or previously pasted links.
 
 ### Custom link formats and preview
 
