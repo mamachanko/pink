@@ -24,6 +24,17 @@ import Foundation
         onChange?(previous, next)
     }
 
+    /// Persist a factory snapshot, even when startup recovered to defaults after a load error.
+    /// Keeping a current snapshot prevents the legacy domain from being imported again.
+    public func reset() throws {
+        let next = Settings()
+        if next == value {
+            try persist(next)
+        } else {
+            try update(next)
+        }
+    }
+
     /// Derive an edit from the latest state, rather than a window's earlier snapshot.
     public func edit(_ change: (inout Settings) throws -> Void) throws {
         var next = value

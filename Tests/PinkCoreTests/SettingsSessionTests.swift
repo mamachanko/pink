@@ -129,4 +129,33 @@ final class SettingsSessionTests: XCTestCase {
         XCTAssertEqual(saves, 0)
         XCTAssertEqual(notifications, 0)
     }
+
+    @MainActor func testResetPublishesDefaultsOnlyAfterPersistenceSucceeds() async throws {
+        var initial = Settings()
+        initial.consent = true
+        initial.automatic = true
+        initial.showLinkIcons = false
+        initial.rewriteFormattedURLs = true
+        initial.rules = [HostRule(service: .gitlab, host: "git.example")]
+        initial.linkRules = [LinkRule.templates[0]]
+        enum SaveError: Error { case unavailable }
+        var canSave = false
+        var saved: Settings?
+        let session = try SettingsSession(initial: initial) { value in
+            if !canSave { throw SaveError.unavailable }
+            saved = value
+        }
+        var observed: [(Settings, Settings)] = []
+        session.onChange = { observed.append(($0, $1)) }
+        XCTAssertThrowsError(try session.reset())
+        XCTAssertEqual(session.value, initial)
+        XCTAssertTrue(observed.isEmpty)
+        canSave = true
+        try session.reset()
+        XCTAssertEqual(session.value, Settings())
+        XCTAssertEqual(saved, Settings())
+        XCTAssertEqual(observed.count, 1)
+        XCTAssertEqual(observed.first?.0, initial)
+        XCTAssertEqual(observed.first?.1, Settings())
+    }
 }
